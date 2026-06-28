@@ -1,0 +1,30 @@
+{
+  "name": "liftoff/domain",
+  "version": "0.0.1",
+  "description": "The domain model of Liftoff.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "lint": "oxlint --fix",
+    "format": "oxfmt",
+    "test:unit": "jest",
+    "build": "tsc --project tsconfig.build.json"
+  },
+  "devDependencies": {
+    "@jest/globals": "catalog:",
+    "jest": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
+    "ts-jest": "catalog:",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@11.9.0"
+}

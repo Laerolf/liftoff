@@ -1,0 +1,12 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "tsconfig.base.json": "tsconfig.*.base.json",
+    "tsconfig.json": "tsconfig.*.json, env.d.ts, typed-router.d.ts",
+    "jest.config.*": "jsconfig*, vitest.config.*, cypress.config.*, playwright.config.*",
+    "package.json": "package-lock.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, oxlint*, oxfmt*, .prettier*, prettier*, .editorconfig"
+  },
+  "oxc.fmt.configPath": "oxfmt.config.ts",
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true
+}

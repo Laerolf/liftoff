@@ -1,0 +1,23 @@
+{
+  "name": "liftoff",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Mission control for your GitHub Actions.",
+  "type": "module",
+  "scripts": {
+    "lint": "pnpm -r lint",
+    "format": "pnpm -r format",
+    "test:unit": "pnpm -r test:unit",
+    "build": "pnpm -r build"
+  },
+  "devDependencies": {
+    "@jest/globals": "catalog:",
+    "jest": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
+    "ts-jest": "catalog:",
+    "typescript": "catalog:"
+  },
+  "packageManager": "pnpm@11.9.0"
+}
