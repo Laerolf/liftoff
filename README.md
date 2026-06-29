@@ -36,3 +36,7 @@ pnpm format
 ```bash
 pnpm build
 ```
+
+## Project management
+
+- [Liftoff](https://github.com/users/Laerolf/projects/5/views/1?layout=board)

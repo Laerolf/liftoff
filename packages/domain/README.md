@@ -8,9 +8,13 @@ The domain model of Liftoff.
 erDiagram
     Mission {
         string id
+        string correlationId
+        string workflowBranch
+        string environment
+        string services
         string director
         MissionStatus status
-        Date launchDate
+        Date launchedAt
     }
 
     Phase {

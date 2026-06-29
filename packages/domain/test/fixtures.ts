@@ -22,6 +22,9 @@ export const EXAMPLE_PHASE_VALUES = {
 }
 
 export const EXAMPLE_MISSION_VALUES = {
+  services: ['app-a', 'app-b'],
+  environment: 'develop',
+  branch: 'protoype/hell-on-earth',
   status: MissionStatus.Launching,
   phases: [new Phase(PhaseStatus.Waiting, PhaseExecution.Parallel, EXAMPLE_PHASE_VALUES.steps)]
 }
