@@ -376,4 +376,45 @@ describe('Mission', () => {
       expect(() => Mission.from(flightPlan, null)).toThrow(expectedError)
     })
   })
+
+  describe('launch', () => {
+    test('can be launched', () => {
+      // Given
+      const {
+        director: { name: directorName }
+      } = EXAMPLE_VALUES
+
+      const { branch, environment, services, phases } = EXAMPLE_MISSION_VALUES
+
+      const mission = Mission.fromScratch(branch, environment, services, directorName, phases)
+
+      // When
+      const launchedMission = mission.launch()
+
+      // Then
+      expect(launchedMission.status).toBe(MissionStatus.InOrbit)
+    })
+
+    test('can not be launched twice', () => {
+      // Given
+      const {
+        director: { name: directorName }
+      } = EXAMPLE_VALUES
+
+      const { branch, environment, services, phases } = EXAMPLE_MISSION_VALUES
+
+      const mission = Mission.fromScratch(
+        branch,
+        environment,
+        services,
+        directorName,
+        phases
+      ).launch()
+
+      const expectedError = new DomainError('The Mission has already been launched.')
+
+      // When + Then
+      expect(() => mission.launch()).toThrow(expectedError)
+    })
+  })
 })

@@ -44,7 +44,7 @@ export default class Mission {
   /**
    *  The status of this {@link Mission}.
    */
-  readonly status: MissionStatus
+  private _status: MissionStatus
   /**
    * The date of this {@link Mission}'s launch.
    */
@@ -124,7 +124,7 @@ export default class Mission {
     this.services = services
     this.director = director
     this.phases = phases
-    this.status = status
+    this._status = status
     this.launchedAt = launchedAt
   }
 
@@ -225,5 +225,23 @@ export default class Mission {
       MissionStatus.Launching,
       null
     )
+  }
+
+  get status(): MissionStatus {
+    return this._status
+  }
+
+  /**
+   * Launches a {@link Mission}.
+   * @throws {DomainError}
+   */
+  launch(): Mission {
+    if (this.status !== MissionStatus.Launching) {
+      throw new DomainError('The Mission has already been launched.')
+    }
+
+    this._status = MissionStatus.InOrbit
+
+    return this
   }
 }
