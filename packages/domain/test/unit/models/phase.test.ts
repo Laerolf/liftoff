@@ -7,60 +7,73 @@ import { Step } from '@/models/step'
 import { DomainError } from '@/shared/errors'
 
 describe('Phase', () => {
-  test('can be created', () => {
-    // Given
-    const { status, execution, steps } = EXAMPLE_PHASE_VALUES
+  describe('restore', () => {
+    test('can be restored', () => {
+      // Given
+      const { status, execution, steps } = EXAMPLE_PHASE_VALUES
 
-    // When + Then
-    expect(() => new Phase(status, execution, steps)).not.toThrow()
+      // When + Then
+      expect(() => Phase.restore(status, execution, steps)).not.toThrow()
+    })
+
+    test('needs a valid status', () => {
+      // Given
+      const { execution, steps } = EXAMPLE_PHASE_VALUES
+
+      const expectedError = new DomainError('A Phase needs a valid status!')
+
+      // When + Then
+      // @ts-expect-error A Phase needs a status.
+      expect(() => Phase.restore(null, execution, steps)).toThrow(expectedError)
+      // @ts-expect-error A Phase needs a status.
+      expect(() => Phase.restore('test', execution, steps)).toThrow(expectedError)
+    })
+
+    test('needs an execution method', () => {
+      // Given
+      const { status, steps } = EXAMPLE_PHASE_VALUES
+
+      const expectedError = new DomainError('A Phase needs an execution method!')
+
+      // When + Then
+      // @ts-expect-error A Phase needs an execution method.
+      expect(() => Phase.restore(status, null, steps)).toThrow(expectedError)
+    })
+
+    test('needs valid steps', () => {
+      // Given
+      const { status, execution } = EXAMPLE_PHASE_VALUES
+
+      const expectedError = new DomainError('A Phase needs valid steps!')
+
+      // When + Then
+      // @ts-expect-error A Phase needs valid steps.
+      expect(() => Phase.restore(status, execution, null)).toThrow(expectedError)
+      // @ts-expect-error A Phase needs valid steps.
+      expect(() => Phase.restore(status, execution, 'test')).toThrow(expectedError)
+      expect(() => Phase.restore(status, execution, [])).toThrow(expectedError)
+    })
   })
 
-  test('needs a valid status', () => {
-    // Given
-    const { execution, steps } = EXAMPLE_PHASE_VALUES
+  describe('restore', () => {
+    test('can be created', () => {
+      // Given
+      const { execution, steps } = EXAMPLE_PHASE_VALUES
 
-    const expectedError = new DomainError('A Phase needs a valid status!')
+      // When
+      const phase = Phase.create(execution, steps)
 
-    // When + Then
-    // @ts-expect-error A Phase needs a status.
-    expect(() => new Phase(null, execution, steps)).toThrow(expectedError)
-    // @ts-expect-error A Phase needs a status.
-    expect(() => new Phase('test', execution, steps)).toThrow(expectedError)
-  })
-
-  test('needs an execution method', () => {
-    // Given
-    const { status, steps } = EXAMPLE_PHASE_VALUES
-
-    const expectedError = new DomainError('A Phase needs an execution method!')
-
-    // When + Then
-    // @ts-expect-error A Phase needs an execution method.
-    expect(() => new Phase(status, null, steps)).toThrow(expectedError)
-  })
-
-  test('needs valid steps', () => {
-    // Given
-    const { status, execution } = EXAMPLE_PHASE_VALUES
-
-    const expectedError = new DomainError('A Phase needs valid steps!')
-
-    // When + Then
-    // @ts-expect-error A Phase needs valid steps.
-    expect(() => new Phase(status, execution, null)).toThrow(expectedError)
-    // @ts-expect-error A Phase needs valid steps.
-    expect(() => new Phase(status, execution, 'test')).toThrow(expectedError)
-    expect(() => new Phase(status, execution, [])).toThrow(expectedError)
+      // Then
+      expect(phase.status).toBe(PhaseStatus.Waiting)
+    })
   })
 
   describe('isValid', () => {
     test('can be valid', () => {
       // Given
-      const { repository, workflowId, outcome } = EXAMPLE_STEP_VALUES
+      const { repository, workflowId } = EXAMPLE_STEP_VALUES
 
-      const phase = new Phase(PhaseStatus.Waiting, PhaseExecution.Parallel, [
-        new Step(repository, workflowId, outcome)
-      ])
+      const phase = Phase.create(PhaseExecution.Parallel, [Step.create(repository, workflowId)])
 
       // When + Then
       expect(Phase.isValid(phase)).toBeTruthy()

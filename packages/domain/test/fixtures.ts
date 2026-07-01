@@ -19,13 +19,7 @@ export const EXAMPLE_STEP_VALUES = {
 export const EXAMPLE_PHASE_VALUES = {
   status: PhaseStatus.Waiting,
   execution: PhaseExecution.Parallel,
-  steps: [
-    new Step(
-      EXAMPLE_STEP_VALUES.repository,
-      EXAMPLE_STEP_VALUES.workflowId,
-      EXAMPLE_STEP_VALUES.outcome
-    )
-  ]
+  steps: [Step.create(EXAMPLE_STEP_VALUES.repository, EXAMPLE_STEP_VALUES.workflowId)]
 }
 
 export const EXAMPLE_FLIGHT_PLAN_VALUES = {
@@ -33,7 +27,7 @@ export const EXAMPLE_FLIGHT_PLAN_VALUES = {
   services: ['app-a', 'app-b'],
   environment: 'develop',
   branch: 'protoype/hell-on-earth',
-  phases: [new Phase(PhaseStatus.Waiting, PhaseExecution.Parallel, EXAMPLE_PHASE_VALUES.steps)]
+  phases: [Phase.create(PhaseExecution.Parallel, EXAMPLE_PHASE_VALUES.steps)]
 }
 
 export const EXAMPLE_MISSION_VALUES = {

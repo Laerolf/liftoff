@@ -29,12 +29,12 @@ export default class Phase {
    * @param steps - The steps of the {@link Phase} to create.
    * @throws {DomainError}
    */
-  constructor(status: PhaseStatus, execution: PhaseExecution, steps: Step[]) {
+  private constructor(status: PhaseStatus, execution: PhaseExecution, steps: Step[]) {
     if (!isPhaseStatus(status)) {
       throw new DomainError('A Phase needs a valid status!')
     }
 
-    if (!execution) {
+    if (!isPhaseExecution(execution)) {
       throw new DomainError('A Phase needs an execution method!')
     }
 
@@ -45,6 +45,27 @@ export default class Phase {
     this.status = status
     this.execution = execution
     this.steps = steps
+  }
+
+  /**
+   * Restores a {@link Phase}.
+   * @param status - The status of the {@link Phase} to create.
+   * @param execution - The execution of the {@link Phase} to create.
+   * @param steps - The steps of the {@link Phase} to create.
+   * @throws {DomainError}
+   */
+  static restore(status: PhaseStatus, execution: PhaseExecution, steps: Step[]): Phase {
+    return new Phase(status, execution, steps)
+  }
+
+  /**
+   * Creates a new {@link Phase}.
+   * @param execution - The execution of the {@link Phase} to create.
+   * @param steps - The steps of the {@link Phase} to create.
+   * @throws {DomainError}
+   */
+  static create(execution: PhaseExecution, steps: Step[]): Phase {
+    return new Phase(PhaseStatus.Waiting, execution, steps)
   }
 
   /**

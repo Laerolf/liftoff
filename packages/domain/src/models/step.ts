@@ -32,7 +32,7 @@ export class Step {
    * @param workflowOutcome - The GitHub Workflow outcome of the {@link Step} to create.
    * @param workflowInputs - The GitHub Workflow inputs of the {@link Step} to create.
    */
-  constructor(
+  private constructor(
     repository: string,
     workflowId: string,
     workflowOutcome: StepStatus,
@@ -58,6 +58,36 @@ export class Step {
     this.workflowId = workflowId
     this.workflowOutcome = workflowOutcome
     this.workflowInputs = workflowInputs || {}
+  }
+
+  /**
+   * Restores a {@link Step}.
+   * @param repository - The GitHub repository of the {@link Step} to create.
+   * @param workflowId - The GitHub Workflow ID of the {@link Step} to create.
+   * @param workflowOutcome - The GitHub Workflow outcome of the {@link Step} to create.
+   * @param workflowInputs - The GitHub Workflow inputs of the {@link Step} to create.
+   */
+  static restore(
+    repository: string,
+    workflowId: string,
+    workflowOutcome: StepStatus,
+    workflowInputs?: Record<string, string>
+  ): Step {
+    return new Step(repository, workflowId, workflowOutcome, workflowInputs)
+  }
+
+  /**
+   * Creates a new {@link Step}.
+   * @param repository - The GitHub repository of the {@link Step} to create.
+   * @param workflowId - The GitHub Workflow ID of the {@link Step} to create.
+   * @param workflowInputs - The GitHub Workflow inputs of the {@link Step} to create.
+   */
+  static create(
+    repository: string,
+    workflowId: string,
+    workflowInputs?: Record<string, string>
+  ): Step {
+    return new Step(repository, workflowId, StepStatus.Waiting, workflowInputs)
   }
 
   /**

@@ -9,7 +9,7 @@ import { DomainError } from '@/shared/errors'
 
 describe('Mission', () => {
   describe('restore', () => {
-    test('can be created', () => {
+    test('can be restored', () => {
       // Given
       const {
         date,
@@ -300,17 +300,7 @@ describe('Mission', () => {
 
       const { branch, environment, services, phases, name } = EXAMPLE_FLIGHT_PLAN_VALUES
 
-      const flightPlanId = uuidv7()
-
-      const flightPlan = new FlightPlan(
-        flightPlanId,
-        name,
-        branch,
-        environment,
-        services,
-        phases,
-        {}
-      )
+      const flightPlan = FlightPlan.create(name, branch, environment, services, phases, {})
 
       // When
       const mission = Mission.from(flightPlan, directorName)
@@ -318,7 +308,7 @@ describe('Mission', () => {
       // Then
       expect(mission.id).toBeDefined()
       expect(mission.correlationId).toBeDefined()
-      expect(mission.flightPlanId).toBe(flightPlanId)
+      expect(mission.flightPlanId).toBe(flightPlan.id)
       expect(mission.workflowBranch).toBe(branch)
       expect(mission.environment).toBe(environment)
       expect(mission.services).toStrictEqual(services)
@@ -357,17 +347,7 @@ describe('Mission', () => {
       // Given
       const { branch, environment, services, phases, name } = EXAMPLE_FLIGHT_PLAN_VALUES
 
-      const flightPlanId = uuidv7()
-
-      const flightPlan = new FlightPlan(
-        flightPlanId,
-        name,
-        branch,
-        environment,
-        services,
-        phases,
-        {}
-      )
+      const flightPlan = FlightPlan.create(name, branch, environment, services, phases, {})
 
       const expectedError = new DomainError('The provided director is not valid!')
 

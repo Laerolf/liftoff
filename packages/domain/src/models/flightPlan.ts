@@ -1,3 +1,5 @@
+import { v7 as uuidv7 } from 'uuid'
+
 import { DomainError } from '../shared/errors'
 
 import Phase from './phase'
@@ -46,7 +48,7 @@ export default class FlightPlan {
    * @params exposedWorkflowInputs - The exposed GitHub Workflow inputs of the {@link FlightPlan} to create.
    * @throws {DomainError}
    */
-  constructor(
+  private constructor(
     id: string,
     name: string,
     workflowBranch: string,
@@ -90,6 +92,66 @@ export default class FlightPlan {
     this.services = services
     this.phases = phases
     this.exposedWorkflowInputs = exposedWorkflowInputs || {}
+  }
+
+  /**
+   * Restores a {@link FlightPlan}.
+   * @param id - The ID of the {@link FlightPlan} to create.
+   * @param name - The name of the {@link FlightPlan} to create.
+   * @param workflowBranch - The branch name of the workflow that will be run by the {@link FlightPlan} to create.
+   * @param environment - The environment that the {@link FlightPlan} to create targets.
+   * @param services - The names of what the {@link FlightPlan} to create targets.
+   * @param phases - The phases of the {@link FlightPlan} to create.
+   * @params exposedWorkflowInputs - The exposed GitHub Workflow inputs of the {@link FlightPlan} to create.
+   * @throws {DomainError}
+   */
+  static restore(
+    id: string,
+    name: string,
+    workflowBranch: string,
+    environment: string,
+    services: string[],
+    phases: Phase[],
+    exposedWorkflowInputs?: Record<string, string>
+  ): FlightPlan {
+    return new FlightPlan(
+      id,
+      name,
+      workflowBranch,
+      environment,
+      services,
+      phases,
+      exposedWorkflowInputs
+    )
+  }
+
+  /**
+   * Creates a new {@link FlightPlan}.
+   * @param name - The name of the {@link FlightPlan} to create.
+   * @param workflowBranch - The branch name of the workflow that will be run by the {@link FlightPlan} to create.
+   * @param environment - The environment that the {@link FlightPlan} to create targets.
+   * @param services - The names of what the {@link FlightPlan} to create targets.
+   * @param phases - The phases of the {@link FlightPlan} to create.
+   * @params exposedWorkflowInputs - The exposed GitHub Workflow inputs of the {@link FlightPlan} to create.
+   * @throws {DomainError}
+   */
+  static create(
+    name: string,
+    workflowBranch: string,
+    environment: string,
+    services: string[],
+    phases: Phase[],
+    exposedWorkflowInputs?: Record<string, string>
+  ): FlightPlan {
+    return new FlightPlan(
+      uuidv7(),
+      name,
+      workflowBranch,
+      environment,
+      services,
+      phases,
+      exposedWorkflowInputs
+    )
   }
 
   /**
