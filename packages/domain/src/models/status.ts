@@ -45,3 +45,29 @@ export enum PhaseStatus {
    */
   Skipped = 'SKIPPED'
 }
+
+/**
+ * Represents a status of a Step.
+ */
+export enum StepStatus {
+  /**
+   * The Step is waiting to be run.
+   */
+  Waiting = 'WAITING',
+  /**
+   * The Step is running.
+   */
+  Running = 'RUNNING',
+  /**
+   * The Step has been comppleted.
+   */
+  Completed = 'COMPLETED',
+  /**
+   * The Step has failed.
+   */
+  Failed = 'FAILED',
+  /**
+   * The Step was skipped.
+   */
+  Skipped = 'SKIPPED'
+}
