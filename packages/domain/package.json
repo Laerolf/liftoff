@@ -17,6 +17,9 @@
     "test:unit": "jest",
     "build": "tsc --project tsconfig.build.json"
   },
+  "dependencies": {
+    "uuid": "catalog:"
+  },
   "devDependencies": {
     "@jest/globals": "catalog:",
     "jest": "catalog:",

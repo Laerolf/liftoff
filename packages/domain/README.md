@@ -6,11 +6,24 @@ The domain model of Liftoff.
 
 ```mermaid
 erDiagram
+    FlightPlan {
+        string id
+        string name
+        string workflowBranch
+        string environment
+        string[] services
+        map exposedWorkflowInputs
+    }
+
     Mission {
         string id
+        string correlationId
+        string workflowBranch
+        string environment
+        string[] services
         string director
         MissionStatus status
-        Date launchDate
+        Date launchedAt
     }
 
     Phase {
@@ -21,10 +34,11 @@ erDiagram
     Step {
         string repository
         string workflowId
-        string[] workflowInputs
+        map workflowInputs
         string workflowOutcome
     }
 
+    FlightPlan ||--o{ Mission : " "
     Mission ||--o{ Phase : " "
     Phase ||--o{ Step : " "
 ```
