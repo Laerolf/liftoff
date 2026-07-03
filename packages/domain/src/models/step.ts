@@ -1,3 +1,5 @@
+import { v7 as uuidv7 } from 'uuid'
+
 import { DomainElement } from '@/shared/domainElement'
 import { isValidDate } from '@/utils/date'
 import { isStepStatus } from '@/utils/status'
@@ -10,6 +12,10 @@ import { StepStatus } from './status'
  * Represents a Step in a Mission Phase, a single workflow dispatch to a specifc GitHub repository.
  */
 export class Step implements DomainElement {
+  /**
+   * The ID of this {@link Step}.
+   */
+  readonly id: string
   /**
    * The GitHub repository of this {@link Step}.
    */
@@ -37,6 +43,7 @@ export class Step implements DomainElement {
 
   /**
    * Creates a new {@link Step}.
+   * @param id - The ID of the {@link Step} to create.
    * @param repository - The GitHub repository of the {@link Step} to create.
    * @param workflowId - The GitHub Workflow ID of the {@link Step} to create.
    * @param createdAt - The moment the {@link Step} to create was created.
@@ -45,6 +52,7 @@ export class Step implements DomainElement {
    * @param workflowInputs - The GitHub Workflow inputs of the {@link Step} to create.
    */
   private constructor(
+    id: string,
     repository: string,
     workflowId: string,
     createdAt: Date,
@@ -52,6 +60,10 @@ export class Step implements DomainElement {
     workflowOutcome: StepStatus,
     workflowInputs?: Record<string, string>
   ) {
+    if (!id) {
+      throw new DomainError('A Step needs an ID!')
+    }
+
     if (!repository) {
       throw new DomainError('A Step needs a repository!')
     }
@@ -76,6 +88,7 @@ export class Step implements DomainElement {
       throw new DomainError('A Step needs a valid outcome!')
     }
 
+    this.id = id
     this.repository = repository
     this.workflowId = workflowId
     this._createdAt = createdAt
@@ -86,6 +99,7 @@ export class Step implements DomainElement {
 
   /**
    * Restores a {@link Step}.
+   * @param id - The ID of the {@link Phase} to create.
    * @param repository - The GitHub repository of the {@link Step} to create.
    * @param workflowId - The GitHub Workflow ID of the {@link Step} to create.
    * @param createdAt - The moment the {@link Step} to create was created.
@@ -94,6 +108,7 @@ export class Step implements DomainElement {
    * @param workflowInputs - The GitHub Workflow inputs of the {@link Step} to create.
    */
   static restore(
+    id: string,
     repository: string,
     workflowId: string,
     createdAt: Date,
@@ -102,6 +117,7 @@ export class Step implements DomainElement {
     workflowInputs?: Record<string, string>
   ): Step {
     return new Step(
+      id,
       repository,
       workflowId,
       createdAt,
@@ -122,7 +138,15 @@ export class Step implements DomainElement {
     workflowId: string,
     workflowInputs?: Record<string, string>
   ): Step {
-    return new Step(repository, workflowId, new Date(), null, StepStatus.Waiting, workflowInputs)
+    return new Step(
+      uuidv7(),
+      repository,
+      workflowId,
+      new Date(),
+      null,
+      StepStatus.Waiting,
+      workflowInputs
+    )
   }
 
   /**
@@ -137,6 +161,7 @@ export class Step implements DomainElement {
     const candidate = value as Record<string, unknown>
 
     return (
+      typeof candidate.id === 'string' &&
       typeof candidate.repository === 'string' &&
       typeof candidate.workflowId === 'string' &&
       isValidDate(candidate.createdAt) &&

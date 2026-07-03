@@ -1,3 +1,5 @@
+import { v7 as uuidv7 } from 'uuid'
+
 import { DomainElement } from '@/shared/domainElement'
 import { isValidDate } from '@/utils/date'
 import { isPhaseStatus } from '@/utils/status'
@@ -11,6 +13,10 @@ import { Step } from './step'
  * Represents a stage in a Mission.
  */
 export default class Phase implements DomainElement {
+  /**
+   * The ID of this {@link Phase}.
+   */
+  readonly id: string
   /**
    * The status of this {@link Phase}.
    */
@@ -34,6 +40,7 @@ export default class Phase implements DomainElement {
 
   /**
    * Creates a new {@link Phase}.
+   * @param id - The ID of the {@link Phase} to create.
    * @param status - The status of the {@link Phase} to create.
    * @param execution - The execution of the {@link Phase} to create.
    * @param steps - The steps of the {@link Phase} to create.
@@ -42,12 +49,17 @@ export default class Phase implements DomainElement {
    * @throws {DomainError}
    */
   private constructor(
+    id: string,
     status: PhaseStatus,
     execution: PhaseExecution,
     steps: Step[],
     createdAt: Date,
     lastUpdatedAt: Date | null
   ) {
+    if (!id) {
+      throw new DomainError('A Phase needs an ID!')
+    }
+
     if (!isPhaseStatus(status)) {
       throw new DomainError('A Phase needs a valid status!')
     }
@@ -68,6 +80,7 @@ export default class Phase implements DomainElement {
       throw new DomainError('A Phase needs a valid last update date!')
     }
 
+    this.id = id
     this.status = status
     this.execution = execution
     this.steps = steps
@@ -77,6 +90,7 @@ export default class Phase implements DomainElement {
 
   /**
    * Restores a {@link Phase}.
+   * @param id - The ID of the {@link Phase} to create.
    * @param status - The status of the {@link Phase} to create.
    * @param execution - The execution of the {@link Phase} to create.
    * @param steps - The steps of the {@link Phase} to create.
@@ -85,13 +99,14 @@ export default class Phase implements DomainElement {
    * @throws {DomainError}
    */
   static restore(
+    id: string,
     status: PhaseStatus,
     execution: PhaseExecution,
     steps: Step[],
     createdAt: Date,
     lastUpdatedAt: Date | null
   ): Phase {
-    return new Phase(status, execution, steps, createdAt, lastUpdatedAt)
+    return new Phase(id, status, execution, steps, createdAt, lastUpdatedAt)
   }
 
   /**
@@ -101,7 +116,7 @@ export default class Phase implements DomainElement {
    * @throws {DomainError}
    */
   static create(execution: PhaseExecution, steps: Step[]): Phase {
-    return new Phase(PhaseStatus.Waiting, execution, steps, new Date(), null)
+    return new Phase(uuidv7(), PhaseStatus.Waiting, execution, steps, new Date(), null)
   }
 
   /**
@@ -116,6 +131,7 @@ export default class Phase implements DomainElement {
     const candidate = value as Record<string, unknown>
 
     return (
+      typeof candidate.id === 'string' &&
       isPhaseStatus(candidate.status) &&
       isPhaseExecution(candidate.execution) &&
       Array.isArray(candidate.steps) &&
