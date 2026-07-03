@@ -62,6 +62,10 @@ export default class Mission implements DomainElement {
    * The moment this {@link Mission} was last updated.
    */
   private _lastUpdatedAt: Date | null
+  /**
+   * The date this {@link Mission} was completed.
+   */
+  readonly completedAt: Date | null
 
   /**
    * Creates a new {@link Mission}.
@@ -77,6 +81,7 @@ export default class Mission implements DomainElement {
    * @param phases - The phases of the {@link Mission} to create.
    * @param status - The status of the {@link Mission} to create.
    * @param launchedAt - The date of the {@link Mission}'s launch to create.
+   * @param completedAt - The date this {@link Mission} to create was completed.
    * @throws {DomainError}
    */
   private constructor(
@@ -91,7 +96,8 @@ export default class Mission implements DomainElement {
     director: string,
     phases: Phase[],
     status: MissionStatus,
-    launchedAt: Date | null
+    launchedAt: Date | null,
+    completedAt: Date | null
   ) {
     if (!id) {
       throw new DomainError('A Mission needs an ID!')
@@ -125,6 +131,10 @@ export default class Mission implements DomainElement {
       throw new DomainError('A Mission needs a director!')
     }
 
+    if (!phases || !Array.isArray(phases) || phases.length <= 0) {
+      throw new DomainError('A Mission needs valid phases!')
+    }
+
     if (!isMissionStatus(status)) {
       throw new DomainError('A Mission needs a valid status!')
     }
@@ -133,8 +143,8 @@ export default class Mission implements DomainElement {
       throw new DomainError('A Mission needs a valid launch date!')
     }
 
-    if (!phases || !Array.isArray(phases) || phases.length <= 0) {
-      throw new DomainError('A Mission needs valid phases!')
+    if (completedAt && !isValidDate(completedAt)) {
+      throw new DomainError('A Mission needs a valid completion date!')
     }
 
     this.id = id
@@ -148,7 +158,8 @@ export default class Mission implements DomainElement {
     this.director = director
     this.phases = phases
     this._status = status
-    this.launchedAt = launchedAt
+    this.launchedAt = launchedAt || null
+    this.completedAt = completedAt || null
   }
 
   /**
@@ -165,6 +176,7 @@ export default class Mission implements DomainElement {
    * @param status - The status of the {@link Mission} to create.
    * @param phases - The phases of the {@link Mission} to create.
    * @param launchedAt - The date of the {@link Mission}'s launch to create.
+   * @param completedAt - The date this {@link Mission} to create was completed.
    * @throws {DomainError}
    */
   static restore(
@@ -179,7 +191,8 @@ export default class Mission implements DomainElement {
     director: string,
     phases: Phase[],
     status: MissionStatus,
-    launchedAt: Date | null
+    launchedAt: Date | null,
+    completedAt: Date | null
   ): Mission {
     return new Mission(
       id,
@@ -193,7 +206,8 @@ export default class Mission implements DomainElement {
       director,
       phases,
       status,
-      launchedAt
+      launchedAt,
+      completedAt
     )
   }
 
@@ -225,6 +239,7 @@ export default class Mission implements DomainElement {
       director,
       phases,
       MissionStatus.Launching,
+      null,
       null
     )
   }
@@ -256,6 +271,7 @@ export default class Mission implements DomainElement {
       director,
       flightPlan.phases,
       MissionStatus.Launching,
+      null,
       null
     )
   }

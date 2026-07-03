@@ -15,6 +15,7 @@ describe('Step', () => {
       let id = uuidv7()
       const creationDate = new Date()
       const lastUpdateDate = new Date()
+      const completionDate = new Date()
 
       // When
       const step = Step.restore(
@@ -23,6 +24,7 @@ describe('Step', () => {
         workflowId,
         creationDate,
         lastUpdateDate,
+        completionDate,
         outcome,
         {}
       )
@@ -33,6 +35,7 @@ describe('Step', () => {
       expect(step.workflowId).toBe(workflowId)
       expect(step.createdAt).toBe(creationDate)
       expect(step.lastUpdatedAt).toBe(lastUpdateDate)
+      expect(step.completedAt).toBe(completionDate)
       expect(step.workflowOutcome).toBe(outcome)
       expect(step.workflowInputs).toStrictEqual({})
     })
@@ -44,10 +47,10 @@ describe('Step', () => {
       const expectedError = new DomainError('A Step needs an ID!')
 
       // When + Then
-      // @ts-expect-error A Step needs an ID.
-      expect(() => Step.restore(null, repository, workflowId, new Date(), null, outcome)).toThrow(
-        expectedError
-      )
+      expect(() =>
+        // @ts-expect-error A Step needs an ID.
+        Step.restore(null, repository, workflowId, new Date(), null, null, outcome)
+      ).toThrow(expectedError)
     })
 
     test('needs a repository', () => {
@@ -57,10 +60,10 @@ describe('Step', () => {
       const expectedError = new DomainError('A Step needs a repository!')
 
       // When + Then
-      // @ts-expect-error A Step needs a repository.
-      expect(() => Step.restore(uuidv7(), null, workflowId, new Date(), null, outcome)).toThrow(
-        expectedError
-      )
+      expect(() =>
+        // @ts-expect-error A Step needs a repository.
+        Step.restore(uuidv7(), null, workflowId, new Date(), null, null, outcome)
+      ).toThrow(expectedError)
     })
 
     test('needs a workflow ID', () => {
@@ -70,10 +73,10 @@ describe('Step', () => {
       const expectedError = new DomainError('A Step needs a workflow ID!')
 
       // When + Then
-      // @ts-expect-error A Step needs a workflow ID.
-      expect(() => Step.restore(uuidv7(), repository, null, new Date(), null, outcome)).toThrow(
-        expectedError
-      )
+      expect(() =>
+        // @ts-expect-error A Step needs a workflow ID.
+        Step.restore(uuidv7(), repository, null, new Date(), null, null, outcome)
+      ).toThrow(expectedError)
     })
 
     test('needs a valid creation date', () => {
@@ -83,14 +86,14 @@ describe('Step', () => {
       const expectedError = new DomainError('A Step needs a valid creation date!')
 
       // When + Then
-      // @ts-expect-error A Step needs a valid creation date.
-      expect(() => Step.restore(uuidv7(), repository, workflowId, null, null, outcome)).toThrow(
-        expectedError
-      )
-      // @ts-expect-error A Step needs a valid creation date.
-      expect(() => Step.restore(uuidv7(), repository, workflowId, 'test', null, outcome)).toThrow(
-        expectedError
-      )
+      expect(() =>
+        // @ts-expect-error A Step needs a valid creation date.
+        Step.restore(uuidv7(), repository, workflowId, null, null, null, outcome)
+      ).toThrow(expectedError)
+      expect(() =>
+        // @ts-expect-error A Step needs a valid creation date.
+        Step.restore(uuidv7(), repository, workflowId, 'test', null, null, outcome)
+      ).toThrow(expectedError)
     })
 
     test('needs a valid last update date', () => {
@@ -102,7 +105,20 @@ describe('Step', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs a valid last update date.
-        Step.restore(uuidv7(), repository, workflowId, new Date(), 'test', outcome)
+        Step.restore(uuidv7(), repository, workflowId, new Date(), 'test', null, outcome)
+      ).toThrow(expectedError)
+    })
+
+    test('needs a valid completion date', () => {
+      // Given
+      const { repository, workflowId, outcome } = EXAMPLE_STEP_VALUES
+
+      const expectedError = new DomainError('A Step needs a valid completion date!')
+
+      // When + Then
+      expect(() =>
+        // @ts-expect-error A Step needs a valid completion date.
+        Step.restore(uuidv7(), repository, workflowId, new Date(), null, 'test', outcome)
       ).toThrow(expectedError)
     })
 
@@ -113,13 +129,13 @@ describe('Step', () => {
       const expectedError = new DomainError('A Step needs a valid outcome!')
 
       // When + Then
-      // @ts-expect-error A Step needs a valid outcome.
-      expect(() => Step.restore(uuidv7(), repository, workflowId, new Date(), null, null)).toThrow(
-        expectedError
-      )
       expect(() =>
         // @ts-expect-error A Step needs a valid outcome.
-        Step.restore(uuidv7(), repository, workflowId, new Date(), null, 'test')
+        Step.restore(uuidv7(), repository, workflowId, new Date(), null, null, null)
+      ).toThrow(expectedError)
+      expect(() =>
+        // @ts-expect-error A Step needs a valid outcome.
+        Step.restore(uuidv7(), repository, workflowId, new Date(), null, null, 'test')
       ).toThrow(expectedError)
     })
 
@@ -132,11 +148,11 @@ describe('Step', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs valid workflow inputs.
-        Step.restore(uuidv7(), repository, workflowId, new Date(), null, outcome, 'test')
+        Step.restore(uuidv7(), repository, workflowId, new Date(), null, null, outcome, 'test')
       ).toThrow(expectedError)
       expect(() =>
         // @ts-expect-error A Step needs valid workflow inputs.
-        Step.restore(uuidv7(), repository, workflowId, new Date(), null, outcome, null)
+        Step.restore(uuidv7(), repository, workflowId, new Date(), null, null, outcome, null)
       ).not.toThrow()
     })
   })
@@ -154,6 +170,7 @@ describe('Step', () => {
       expect(step.workflowOutcome).toBe(StepStatus.Waiting)
       expect(step.createdAt).toBeDefined()
       expect(step.lastUpdatedAt).toBeNull()
+      expect(step.completedAt).toBeNull()
     })
   })
 
@@ -178,7 +195,24 @@ describe('Step', () => {
           workflowOutcome: 'WAITING',
           workflowInputs: {},
           createdAt: new Date(),
-          lastUpdatedAt: 'test'
+          lastUpdatedAt: 'test',
+          completedAt: null
+        })
+      ).toBeFalsy()
+    })
+
+    test('needs a valid completion date', () => {
+      // When + Then
+      expect(
+        Step.isValid({
+          id: uuidv7(),
+          repository: 'test',
+          workflowId: '6666',
+          workflowOutcome: 'WAITING',
+          workflowInputs: {},
+          createdAt: new Date(),
+          lastUpdatedAt: null,
+          completedAt: 'test'
         })
       ).toBeFalsy()
     })

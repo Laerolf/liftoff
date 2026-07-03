@@ -40,6 +40,10 @@ export class Step implements DomainElement {
    * The moment this {@link Step} was last updated.
    */
   private _lastUpdatedAt: Date | null
+  /**
+   * The date this {@link Step} was completed.
+   */
+  readonly completedAt: Date | null
 
   /**
    * Creates a new {@link Step}.
@@ -48,6 +52,7 @@ export class Step implements DomainElement {
    * @param workflowId - The GitHub Workflow ID of the {@link Step} to create.
    * @param createdAt - The moment the {@link Step} to create was created.
    * @param lastUpdatedAt - The moment the {@link Step} to create was last updated.
+   * @param completedAt - The date this {@link Step} to create was completed.
    * @param workflowOutcome - The GitHub Workflow outcome of the {@link Step} to create.
    * @param workflowInputs - The GitHub Workflow inputs of the {@link Step} to create.
    */
@@ -57,6 +62,7 @@ export class Step implements DomainElement {
     workflowId: string,
     createdAt: Date,
     lastUpdatedAt: Date | null,
+    completedAt: Date | null,
     workflowOutcome: StepStatus,
     workflowInputs?: Record<string, string>
   ) {
@@ -80,6 +86,10 @@ export class Step implements DomainElement {
       throw new DomainError('A Step needs a valid last update date!')
     }
 
+    if (completedAt && !isValidDate(completedAt)) {
+      throw new DomainError('A Step needs a valid completion date!')
+    }
+
     if (workflowInputs && typeof workflowInputs != 'object') {
       throw new DomainError('A Step needs valid workflow inputs!')
     }
@@ -93,6 +103,7 @@ export class Step implements DomainElement {
     this.workflowId = workflowId
     this._createdAt = createdAt
     this._lastUpdatedAt = lastUpdatedAt || null
+    this.completedAt = completedAt || null
     this.workflowOutcome = workflowOutcome
     this.workflowInputs = workflowInputs || {}
   }
@@ -104,6 +115,7 @@ export class Step implements DomainElement {
    * @param workflowId - The GitHub Workflow ID of the {@link Step} to create.
    * @param createdAt - The moment the {@link Step} to create was created.
    * @param lastUpdatedAt - The moment the {@link Step} to create was last updated.
+   * @param completedAt - The date this {@link Step} to create was completed.
    * @param workflowOutcome - The GitHub Workflow outcome of the {@link Step} to create.
    * @param workflowInputs - The GitHub Workflow inputs of the {@link Step} to create.
    */
@@ -113,6 +125,7 @@ export class Step implements DomainElement {
     workflowId: string,
     createdAt: Date,
     lastUpdatedAt: Date | null,
+    completedAt: Date | null,
     workflowOutcome: StepStatus,
     workflowInputs?: Record<string, string>
   ): Step {
@@ -122,6 +135,7 @@ export class Step implements DomainElement {
       workflowId,
       createdAt,
       lastUpdatedAt,
+      completedAt,
       workflowOutcome,
       workflowInputs
     )
@@ -143,6 +157,7 @@ export class Step implements DomainElement {
       repository,
       workflowId,
       new Date(),
+      null,
       null,
       StepStatus.Waiting,
       workflowInputs
@@ -166,6 +181,7 @@ export class Step implements DomainElement {
       typeof candidate.workflowId === 'string' &&
       isValidDate(candidate.createdAt) &&
       (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
+      (!candidate.completedAt || isValidDate(candidate.completedAt)) &&
       isStepStatus(candidate.workflowOutcome) &&
       (typeof candidate.workflowInputs === 'object' || candidate.workflowInputs === null)
     )

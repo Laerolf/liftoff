@@ -37,6 +37,10 @@ export default class Phase implements DomainElement {
    * The moment this {@link Phase} was last updated.
    */
   private _lastUpdatedAt: Date | null
+  /**
+   * The date this {@link Phase} was completed.
+   */
+  readonly completedAt: Date | null
 
   /**
    * Creates a new {@link Phase}.
@@ -46,6 +50,7 @@ export default class Phase implements DomainElement {
    * @param steps - The steps of the {@link Phase} to create.
    * @param createdAt - The moment the {@link Phase} to create was created.
    * @param lastUpdatedAt - The moment the {@link Phase} to create was last updated.
+   * @param completedAt - The date this {@link Phase} to create was completed.
    * @throws {DomainError}
    */
   private constructor(
@@ -54,7 +59,8 @@ export default class Phase implements DomainElement {
     execution: PhaseExecution,
     steps: Step[],
     createdAt: Date,
-    lastUpdatedAt: Date | null
+    lastUpdatedAt: Date | null,
+    completedAt: Date | null
   ) {
     if (!id) {
       throw new DomainError('A Phase needs an ID!')
@@ -80,12 +86,17 @@ export default class Phase implements DomainElement {
       throw new DomainError('A Phase needs a valid last update date!')
     }
 
+    if (completedAt && !isValidDate(completedAt)) {
+      throw new DomainError('A Phase needs a valid completion date!')
+    }
+
     this.id = id
     this.status = status
     this.execution = execution
     this.steps = steps
     this._createdAt = createdAt
     this._lastUpdatedAt = lastUpdatedAt
+    this.completedAt = completedAt
   }
 
   /**
@@ -96,6 +107,7 @@ export default class Phase implements DomainElement {
    * @param steps - The steps of the {@link Phase} to create.
    * @param createdAt - The moment the {@link Phase} to create was created.
    * @param lastUpdatedAt - The moment the {@link Phase} to create was last updated.
+   * @param completedAt - The date this {@link Phase} to create was completed.
    * @throws {DomainError}
    */
   static restore(
@@ -104,9 +116,10 @@ export default class Phase implements DomainElement {
     execution: PhaseExecution,
     steps: Step[],
     createdAt: Date,
-    lastUpdatedAt: Date | null
+    lastUpdatedAt: Date | null,
+    completedAt: Date | null
   ): Phase {
-    return new Phase(id, status, execution, steps, createdAt, lastUpdatedAt)
+    return new Phase(id, status, execution, steps, createdAt, lastUpdatedAt, completedAt)
   }
 
   /**
@@ -116,7 +129,7 @@ export default class Phase implements DomainElement {
    * @throws {DomainError}
    */
   static create(execution: PhaseExecution, steps: Step[]): Phase {
-    return new Phase(uuidv7(), PhaseStatus.Waiting, execution, steps, new Date(), null)
+    return new Phase(uuidv7(), PhaseStatus.Waiting, execution, steps, new Date(), null, null)
   }
 
   /**
@@ -138,7 +151,8 @@ export default class Phase implements DomainElement {
       !!candidate.steps.length &&
       candidate.steps.every(Step.isValid) &&
       isValidDate(candidate.createdAt) &&
-      (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt))
+      (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
+      (!candidate.completedAt || isValidDate(candidate.completedAt))
     )
   }
 

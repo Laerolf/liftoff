@@ -23,6 +23,7 @@ describe('Mission', () => {
       const flightPlanId = uuidv7()
       const creationDate = new Date()
       const lastUpdateDate = new Date()
+      const completionDate = new Date()
 
       // When
       const mission = Mission.restore(
@@ -37,7 +38,8 @@ describe('Mission', () => {
         directorName,
         phases,
         status,
-        date
+        date,
+        completionDate
       )
 
       // Then
@@ -50,9 +52,10 @@ describe('Mission', () => {
       expect(mission.environment).toBe(environment)
       expect(mission.services).toStrictEqual(services)
       expect(mission.director).toBe(directorName)
+      expect(mission.phases).toStrictEqual(phases)
       expect(mission.status).toBe(status)
       expect(mission.launchedAt).toBe(date)
-      expect(mission.phases).toStrictEqual(phases)
+      expect(mission.completedAt).toBe(completionDate)
     })
 
     test('needs an ID', () => {
@@ -81,7 +84,8 @@ describe('Mission', () => {
           directorName,
           phases,
           status,
-          date
+          date,
+          null
         )
       ).toThrow(expectedError)
     })
@@ -112,7 +116,8 @@ describe('Mission', () => {
           directorName,
           phases,
           status,
-          date
+          date,
+          null
         )
       ).toThrow(expectedError)
     })
@@ -143,7 +148,8 @@ describe('Mission', () => {
           directorName,
           phases,
           status,
-          date
+          date,
+          null
         )
       ).toThrow(expectedError)
       expect(() =>
@@ -160,7 +166,8 @@ describe('Mission', () => {
           directorName,
           phases,
           status,
-          date
+          date,
+          null
         )
       ).toThrow(expectedError)
     })
@@ -191,7 +198,8 @@ describe('Mission', () => {
           directorName,
           phases,
           status,
-          date
+          date,
+          null
         )
       ).toThrow(expectedError)
     })
@@ -222,7 +230,8 @@ describe('Mission', () => {
           phases,
           // @ts-expect-error A Mission needs a valid status.
           null,
-          date
+          date,
+          null
         )
       ).toThrow(expectedError)
       expect(() =>
@@ -239,7 +248,8 @@ describe('Mission', () => {
           phases,
           // @ts-expect-error A Mission needs a valid status.
           'test',
-          date
+          date,
+          null
         )
       ).toThrow(expectedError)
     })
@@ -269,6 +279,38 @@ describe('Mission', () => {
           phases,
           status,
           // @ts-expect-error A Mission needs a valid launch date
+          'test',
+          null
+        )
+      ).toThrow(expectedError)
+    })
+
+    test('needs a valid completion date', () => {
+      // Given
+      const {
+        director: { name: directorName }
+      } = EXAMPLE_VALUES
+
+      const { branch, environment, services, status, phases } = EXAMPLE_MISSION_VALUES
+
+      const expectedError = new DomainError('A Mission needs a valid completion date!')
+
+      // When + Then
+      expect(() =>
+        Mission.restore(
+          uuidv7(),
+          uuidv7(),
+          null,
+          new Date(),
+          null,
+          branch,
+          environment,
+          services,
+          directorName,
+          phases,
+          status,
+          null,
+          // @ts-expect-error A Mission needs a valid completion date
           'test'
         )
       ).toThrow(expectedError)
@@ -300,6 +342,7 @@ describe('Mission', () => {
       expect(mission.status).toBe(MissionStatus.Launching)
       expect(mission.launchedAt).toBeNull()
       expect(mission.phases).toStrictEqual(phases)
+      expect(mission.completedAt).toBeNull()
     })
 
     test('needs a target workflow branch name', () => {
@@ -423,9 +466,10 @@ describe('Mission', () => {
       expect(mission.environment).toBe(environment)
       expect(mission.services).toStrictEqual(services)
       expect(mission.director).toBe(directorName)
+      expect(mission.phases).toStrictEqual(phases)
       expect(mission.status).toBe(MissionStatus.Launching)
       expect(mission.launchedAt).toBeNull()
-      expect(mission.phases).toStrictEqual(phases)
+      expect(mission.completedAt).toBeNull()
     })
 
     test('needs a valid FlightPlan', () => {
