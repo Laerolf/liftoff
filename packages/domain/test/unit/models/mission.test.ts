@@ -21,12 +21,16 @@ describe('Mission', () => {
       const id = uuidv7()
       const correlationId = uuidv7()
       const flightPlanId = uuidv7()
+      const creationDate = new Date()
+      const lastUpdateDate = new Date()
 
       // When
       const mission = Mission.restore(
         id,
         correlationId,
         flightPlanId,
+        creationDate,
+        lastUpdateDate,
         branch,
         environment,
         services,
@@ -40,6 +44,8 @@ describe('Mission', () => {
       expect(mission.id).toBe(id)
       expect(mission.correlationId).toBe(correlationId)
       expect(mission.flightPlanId).toBe(flightPlanId)
+      expect(mission.createdAt).toBe(creationDate)
+      expect(mission.lastUpdatedAt).toBe(lastUpdateDate)
       expect(mission.workflowBranch).toBe(branch)
       expect(mission.environment).toBe(environment)
       expect(mission.services).toStrictEqual(services)
@@ -62,8 +68,21 @@ describe('Mission', () => {
 
       // When + Then
       expect(() =>
-        // @ts-expect-error A Mission needs an ID.
-        Mission.restore(null, branch, environment, services, directorName, status, date, phases)
+        Mission.restore(
+          // @ts-expect-error A Mission needs an ID.
+          null,
+          uuidv7(),
+          null,
+          new Date(),
+          null,
+          branch,
+          environment,
+          services,
+          directorName,
+          phases,
+          status,
+          date
+        )
       ).toThrow(expectedError)
     })
 
@@ -81,10 +100,91 @@ describe('Mission', () => {
       // When + Then
       expect(() =>
         Mission.restore(
-          crypto.randomUUID(),
-          // @ts-expect-error A Mission needs a correlation ID.
+          uuidv7(),
+          // @ts-expect-error A Mission needs an correlation ID.
           null,
           null,
+          new Date(),
+          null,
+          branch,
+          environment,
+          services,
+          directorName,
+          phases,
+          status,
+          date
+        )
+      ).toThrow(expectedError)
+    })
+
+    test('needs a valid creation date', () => {
+      // Given
+      const {
+        director: { name: directorName },
+        date
+      } = EXAMPLE_VALUES
+
+      const { branch, environment, services, status, phases } = EXAMPLE_MISSION_VALUES
+
+      const expectedError = new DomainError('A Mission needs a valid creation date!')
+
+      // When + Then
+      expect(() =>
+        Mission.restore(
+          uuidv7(),
+          uuidv7(),
+          null,
+          // @ts-expect-error A Mission needs a valid creation date.
+          null,
+          null,
+          branch,
+          environment,
+          services,
+          directorName,
+          phases,
+          status,
+          date
+        )
+      ).toThrow(expectedError)
+      expect(() =>
+        Mission.restore(
+          uuidv7(),
+          uuidv7(),
+          null,
+          // @ts-expect-error A Mission needs a valid creation date.
+          'test',
+          null,
+          branch,
+          environment,
+          services,
+          directorName,
+          phases,
+          status,
+          date
+        )
+      ).toThrow(expectedError)
+    })
+
+    test('needs a valid last update date', () => {
+      // Given
+      const {
+        director: { name: directorName },
+        date
+      } = EXAMPLE_VALUES
+
+      const { branch, environment, services, status, phases } = EXAMPLE_MISSION_VALUES
+
+      const expectedError = new DomainError('A Mission needs a valid last update date!')
+
+      // When + Then
+      expect(() =>
+        Mission.restore(
+          uuidv7(),
+          uuidv7(),
+          null,
+          new Date(),
+          // @ts-expect-error A Mission needs a valid last update date.
+          'test',
           branch,
           environment,
           services,
@@ -110,30 +210,34 @@ describe('Mission', () => {
       // When + Then
       expect(() =>
         Mission.restore(
-          crypto.randomUUID(),
-          crypto.randomUUID(),
+          uuidv7(),
+          uuidv7(),
+          null,
+          new Date(),
           null,
           branch,
           environment,
           services,
           directorName,
           phases,
-          // @ts-expect-error A Mission needs a status.
+          // @ts-expect-error A Mission needs a valid status.
           null,
           date
         )
       ).toThrow(expectedError)
       expect(() =>
         Mission.restore(
-          crypto.randomUUID(),
-          crypto.randomUUID(),
+          uuidv7(),
+          uuidv7(),
+          null,
+          new Date(),
           null,
           branch,
           environment,
           services,
           directorName,
           phases,
-          // @ts-expect-error A Mission needs a status.
+          // @ts-expect-error A Mission needs a valid status.
           'test',
           date
         )
@@ -153,8 +257,10 @@ describe('Mission', () => {
       // When + Then
       expect(() =>
         Mission.restore(
-          crypto.randomUUID(),
-          crypto.randomUUID(),
+          uuidv7(),
+          uuidv7(),
+          null,
+          new Date(),
           null,
           branch,
           environment,
@@ -162,7 +268,7 @@ describe('Mission', () => {
           directorName,
           phases,
           status,
-          // @ts-expect-error A Mission needs a valid launch date.
+          // @ts-expect-error A Mission needs a valid launch date
           'test'
         )
       ).toThrow(expectedError)
@@ -185,6 +291,8 @@ describe('Mission', () => {
       expect(mission.id).toBeDefined()
       expect(mission.correlationId).toBeDefined()
       expect(mission.flightPlanId).toBeNull()
+      expect(mission.createdAt).toBeDefined()
+      expect(mission.lastUpdatedAt).toBeNull()
       expect(mission.workflowBranch).toBe(branch)
       expect(mission.environment).toBe(environment)
       expect(mission.services).toStrictEqual(services)
@@ -309,6 +417,8 @@ describe('Mission', () => {
       expect(mission.id).toBeDefined()
       expect(mission.correlationId).toBeDefined()
       expect(mission.flightPlanId).toBe(flightPlan.id)
+      expect(mission.createdAt).toBeDefined()
+      expect(mission.lastUpdatedAt).toBeNull()
       expect(mission.workflowBranch).toBe(branch)
       expect(mission.environment).toBe(environment)
       expect(mission.services).toStrictEqual(services)
@@ -373,6 +483,7 @@ describe('Mission', () => {
 
       // Then
       expect(launchedMission.status).toBe(MissionStatus.InOrbit)
+      expect(launchedMission.lastUpdatedAt).toBeDefined()
     })
 
     test('can not be launched twice', () => {

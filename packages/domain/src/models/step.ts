@@ -1,3 +1,5 @@
+import { DomainElement } from '@/shared/domainElement'
+import { isValidDate } from '@/utils/date'
 import { isStepStatus } from '@/utils/status'
 
 import { DomainError } from '../shared/errors'
@@ -7,7 +9,7 @@ import { StepStatus } from './status'
 /**
  * Represents a Step in a Mission Phase, a single workflow dispatch to a specifc GitHub repository.
  */
-export class Step {
+export class Step implements DomainElement {
   /**
    * The GitHub repository of this {@link Step}.
    */
@@ -24,17 +26,29 @@ export class Step {
    * The GitHub Workflow inputs of this {@link Step}.
    */
   readonly workflowInputs: Record<string, string>
+  /**
+   * The moment this {@link Step} was created.
+   */
+  private _createdAt: Date
+  /**
+   * The moment this {@link Step} was last updated.
+   */
+  private _lastUpdatedAt: Date | null
 
   /**
    * Creates a new {@link Step}.
    * @param repository - The GitHub repository of the {@link Step} to create.
    * @param workflowId - The GitHub Workflow ID of the {@link Step} to create.
+   * @param createdAt - The moment the {@link Step} to create was created.
+   * @param lastUpdatedAt - The moment the {@link Step} to create was last updated.
    * @param workflowOutcome - The GitHub Workflow outcome of the {@link Step} to create.
    * @param workflowInputs - The GitHub Workflow inputs of the {@link Step} to create.
    */
   private constructor(
     repository: string,
     workflowId: string,
+    createdAt: Date,
+    lastUpdatedAt: Date | null,
     workflowOutcome: StepStatus,
     workflowInputs?: Record<string, string>
   ) {
@@ -44,6 +58,14 @@ export class Step {
 
     if (!workflowId) {
       throw new DomainError('A Step needs a workflow ID!')
+    }
+
+    if (!isValidDate(createdAt)) {
+      throw new DomainError('A Step needs a valid creation date!')
+    }
+
+    if (lastUpdatedAt && !isValidDate(lastUpdatedAt)) {
+      throw new DomainError('A Step needs a valid last update date!')
     }
 
     if (workflowInputs && typeof workflowInputs != 'object') {
@@ -56,6 +78,8 @@ export class Step {
 
     this.repository = repository
     this.workflowId = workflowId
+    this._createdAt = createdAt
+    this._lastUpdatedAt = lastUpdatedAt || null
     this.workflowOutcome = workflowOutcome
     this.workflowInputs = workflowInputs || {}
   }
@@ -64,16 +88,27 @@ export class Step {
    * Restores a {@link Step}.
    * @param repository - The GitHub repository of the {@link Step} to create.
    * @param workflowId - The GitHub Workflow ID of the {@link Step} to create.
+   * @param createdAt - The moment the {@link Step} to create was created.
+   * @param lastUpdatedAt - The moment the {@link Step} to create was last updated.
    * @param workflowOutcome - The GitHub Workflow outcome of the {@link Step} to create.
    * @param workflowInputs - The GitHub Workflow inputs of the {@link Step} to create.
    */
   static restore(
     repository: string,
     workflowId: string,
+    createdAt: Date,
+    lastUpdatedAt: Date | null,
     workflowOutcome: StepStatus,
     workflowInputs?: Record<string, string>
   ): Step {
-    return new Step(repository, workflowId, workflowOutcome, workflowInputs)
+    return new Step(
+      repository,
+      workflowId,
+      createdAt,
+      lastUpdatedAt,
+      workflowOutcome,
+      workflowInputs
+    )
   }
 
   /**
@@ -87,7 +122,7 @@ export class Step {
     workflowId: string,
     workflowInputs?: Record<string, string>
   ): Step {
-    return new Step(repository, workflowId, StepStatus.Waiting, workflowInputs)
+    return new Step(repository, workflowId, new Date(), null, StepStatus.Waiting, workflowInputs)
   }
 
   /**
@@ -104,8 +139,24 @@ export class Step {
     return (
       typeof candidate.repository === 'string' &&
       typeof candidate.workflowId === 'string' &&
+      isValidDate(candidate.createdAt) &&
+      (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
       isStepStatus(candidate.workflowOutcome) &&
       (typeof candidate.workflowInputs === 'object' || candidate.workflowInputs === null)
     )
+  }
+
+  /**
+   * The moment this {@link Step} was created.
+   */
+  get createdAt(): Date {
+    return this._createdAt
+  }
+
+  /**
+   * The moment this {@link Step} was last updated.
+   */
+  get lastUpdatedAt(): Date | null {
+    return this._lastUpdatedAt
   }
 }

@@ -1,5 +1,8 @@
 import { v7 as uuidv7 } from 'uuid'
 
+import { DomainElement } from '@/shared/domainElement'
+import { isValidDate } from '@/utils/date'
+
 import { DomainError } from '../shared/errors'
 
 import Phase from './phase'
@@ -7,7 +10,7 @@ import Phase from './phase'
 /**
  * Represents a plan for {@link Mission}.
  */
-export default class FlightPlan {
+export default class FlightPlan implements DomainElement {
   /**
    * The ID of this {@link FlightPlan}.
    */
@@ -36,11 +39,21 @@ export default class FlightPlan {
    * The exposed GitHub Workflow inputs of this {@link FlightPlan}.
    */
   readonly exposedWorkflowInputs: Record<string, string>
+  /**
+   * The moment this {@link FlightPlan} was created.
+   */
+  private _createdAt: Date
+  /**
+   * The moment this {@link FlightPlan} was last updated.
+   */
+  private _lastUpdatedAt: Date | null
 
   /**
    * Creates a new {@link FlightPlan}.
    * @param id - The ID of the {@link FlightPlan} to create.
    * @param name - The name of the {@link FlightPlan} to create.
+   * @param createdAt - The moment the {@link FlightPlan} to create was created.
+   * @param lastUpdatedAt - The moment the {@link FlightPlan} to create was last updated.
    * @param workflowBranch - The branch name of the workflow that will be run by the {@link FlightPlan} to create.
    * @param environment - The environment that the {@link FlightPlan} to create targets.
    * @param services - The names of what the {@link FlightPlan} to create targets.
@@ -51,6 +64,8 @@ export default class FlightPlan {
   private constructor(
     id: string,
     name: string,
+    createdAt: Date,
+    lastUpdatedAt: Date | null,
     workflowBranch: string,
     environment: string,
     services: string[],
@@ -63,6 +78,14 @@ export default class FlightPlan {
 
     if (!name) {
       throw new DomainError('A Flight Plan needs a name!')
+    }
+
+    if (!isValidDate(createdAt)) {
+      throw new DomainError('A Flight Plan needs a valid creation date!')
+    }
+
+    if (lastUpdatedAt && !isValidDate(lastUpdatedAt)) {
+      throw new DomainError('A Flight Plan needs a valid last update date!')
     }
 
     if (!workflowBranch) {
@@ -87,6 +110,8 @@ export default class FlightPlan {
 
     this.id = id
     this.name = name
+    this._createdAt = createdAt
+    this._lastUpdatedAt = lastUpdatedAt || null
     this.workflowBranch = workflowBranch
     this.environment = environment
     this.services = services
@@ -98,6 +123,8 @@ export default class FlightPlan {
    * Restores a {@link FlightPlan}.
    * @param id - The ID of the {@link FlightPlan} to create.
    * @param name - The name of the {@link FlightPlan} to create.
+   * @param createdAt - The moment the {@link FlightPlan} to create was created.
+   * @param lastUpdatedAt - The moment the {@link FlightPlan} to create was last updated.
    * @param workflowBranch - The branch name of the workflow that will be run by the {@link FlightPlan} to create.
    * @param environment - The environment that the {@link FlightPlan} to create targets.
    * @param services - The names of what the {@link FlightPlan} to create targets.
@@ -108,6 +135,8 @@ export default class FlightPlan {
   static restore(
     id: string,
     name: string,
+    createdAt: Date,
+    lastUpdatedAt: Date | null,
     workflowBranch: string,
     environment: string,
     services: string[],
@@ -117,6 +146,8 @@ export default class FlightPlan {
     return new FlightPlan(
       id,
       name,
+      createdAt,
+      lastUpdatedAt,
       workflowBranch,
       environment,
       services,
@@ -146,6 +177,8 @@ export default class FlightPlan {
     return new FlightPlan(
       uuidv7(),
       name,
+      new Date(),
+      null,
       workflowBranch,
       environment,
       services,
@@ -168,6 +201,8 @@ export default class FlightPlan {
     return (
       typeof candidate.id === 'string' &&
       typeof candidate.name === 'string' &&
+      isValidDate(candidate.createdAt) &&
+      (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
       typeof candidate.workflowBranch === 'string' &&
       typeof candidate.environment === 'string' &&
       Array.isArray(candidate.services) &&
@@ -176,5 +211,19 @@ export default class FlightPlan {
       !!candidate.phases.length &&
       candidate.phases.every(Phase.isValid)
     )
+  }
+
+  /**
+   * The moment this {@link FlightPlan} was created.
+   */
+  get createdAt(): Date {
+    return this._createdAt
+  }
+
+  /**
+   * The moment this {@link FlightPlan} was last updated.
+   */
+  get lastUpdatedAt(): Date | null {
+    return this._lastUpdatedAt
   }
 }

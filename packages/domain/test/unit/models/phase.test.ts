@@ -12,8 +12,18 @@ describe('Phase', () => {
       // Given
       const { status, execution, steps } = EXAMPLE_PHASE_VALUES
 
-      // When + Then
-      expect(() => Phase.restore(status, execution, steps)).not.toThrow()
+      const creationDate = new Date()
+      const lastUpdateDate = new Date()
+
+      // When
+      const phase = Phase.restore(status, execution, steps, creationDate, lastUpdateDate)
+
+      // Then
+      expect(phase.status).toBe(status)
+      expect(phase.execution).toBe(execution)
+      expect(phase.steps).toStrictEqual(steps)
+      expect(phase.createdAt).toBe(creationDate)
+      expect(phase.lastUpdatedAt).toStrictEqual(lastUpdateDate)
     })
 
     test('needs a valid status', () => {
@@ -24,9 +34,9 @@ describe('Phase', () => {
 
       // When + Then
       // @ts-expect-error A Phase needs a status.
-      expect(() => Phase.restore(null, execution, steps)).toThrow(expectedError)
+      expect(() => Phase.restore(null, execution, steps, new Date(), null)).toThrow(expectedError)
       // @ts-expect-error A Phase needs a status.
-      expect(() => Phase.restore('test', execution, steps)).toThrow(expectedError)
+      expect(() => Phase.restore('test', execution, steps, new Date(), null)).toThrow(expectedError)
     })
 
     test('needs an execution method', () => {
@@ -37,7 +47,7 @@ describe('Phase', () => {
 
       // When + Then
       // @ts-expect-error A Phase needs an execution method.
-      expect(() => Phase.restore(status, null, steps)).toThrow(expectedError)
+      expect(() => Phase.restore(status, null, steps, new Date(), null)).toThrow(expectedError)
     })
 
     test('needs valid steps', () => {
@@ -48,14 +58,42 @@ describe('Phase', () => {
 
       // When + Then
       // @ts-expect-error A Phase needs valid steps.
-      expect(() => Phase.restore(status, execution, null)).toThrow(expectedError)
+      expect(() => Phase.restore(status, execution, null, new Date(), null)).toThrow(expectedError)
       // @ts-expect-error A Phase needs valid steps.
-      expect(() => Phase.restore(status, execution, 'test')).toThrow(expectedError)
-      expect(() => Phase.restore(status, execution, [])).toThrow(expectedError)
+      expect(() => Phase.restore(status, execution, 'test', new Date(), null)).toThrow(
+        expectedError
+      )
+      expect(() => Phase.restore(status, execution, [], new Date(), null)).toThrow(expectedError)
+    })
+
+    test('needs a valid creation date', () => {
+      // Given
+      const { status, execution, steps } = EXAMPLE_PHASE_VALUES
+
+      const expectedError = new DomainError('A Phase needs a valid creation date!')
+
+      // When + Then
+      // @ts-expect-error A Phase needs a valid creation date.
+      expect(() => Phase.restore(status, execution, steps, null, null)).toThrow(expectedError)
+      // @ts-expect-error A Phase needs a valid creation date.
+      expect(() => Phase.restore(status, execution, steps, 'test', null)).toThrow(expectedError)
+    })
+
+    test('needs a valid last update date', () => {
+      // Given
+      const { status, execution, steps } = EXAMPLE_PHASE_VALUES
+
+      const expectedError = new DomainError('A Phase needs a valid last update date!')
+
+      // When + Then
+      // @ts-expect-error A Phase needs a valid last update date.
+      expect(() => Phase.restore(status, execution, steps, new Date(), 'test')).toThrow(
+        expectedError
+      )
     })
   })
 
-  describe('restore', () => {
+  describe('create', () => {
     test('can be created', () => {
       // Given
       const { execution, steps } = EXAMPLE_PHASE_VALUES
@@ -77,6 +115,28 @@ describe('Phase', () => {
 
       // When + Then
       expect(Phase.isValid(phase)).toBeTruthy()
+    })
+
+    test('needs a valid last update date', () => {
+      // When + Then
+      expect(
+        Phase.isValid({
+          status: 'WAITING',
+          execution: 'PARALLEL',
+          steps: [
+            {
+              repository: 'test',
+              workflowId: '6666',
+              workflowOutcome: 'WAITING',
+              workflowInputs: {},
+              createdAt: new Date(),
+              lastUpdatedAt: null
+            }
+          ],
+          createdAt: new Date(),
+          lastUpdatedAt: 'test'
+        })
+      ).toBeFalsy()
     })
 
     test('needs to be defined', () => {

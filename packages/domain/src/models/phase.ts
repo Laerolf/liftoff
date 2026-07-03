@@ -1,3 +1,5 @@
+import { DomainElement } from '@/shared/domainElement'
+import { isValidDate } from '@/utils/date'
 import { isPhaseStatus } from '@/utils/status'
 
 import { DomainError } from '../shared/errors'
@@ -8,7 +10,7 @@ import { Step } from './step'
 /**
  * Represents a stage in a Mission.
  */
-export default class Phase {
+export default class Phase implements DomainElement {
   /**
    * The status of this {@link Phase}.
    */
@@ -21,15 +23,31 @@ export default class Phase {
    * The steps of this {@link Phase}.
    */
   readonly steps: Step[]
+  /**
+   * The moment this {@link Phase} was created.
+   */
+  private _createdAt: Date
+  /**
+   * The moment this {@link Phase} was last updated.
+   */
+  private _lastUpdatedAt: Date | null
 
   /**
    * Creates a new {@link Phase}.
    * @param status - The status of the {@link Phase} to create.
    * @param execution - The execution of the {@link Phase} to create.
    * @param steps - The steps of the {@link Phase} to create.
+   * @param createdAt - The moment the {@link Phase} to create was created.
+   * @param lastUpdatedAt - The moment the {@link Phase} to create was last updated.
    * @throws {DomainError}
    */
-  private constructor(status: PhaseStatus, execution: PhaseExecution, steps: Step[]) {
+  private constructor(
+    status: PhaseStatus,
+    execution: PhaseExecution,
+    steps: Step[],
+    createdAt: Date,
+    lastUpdatedAt: Date | null
+  ) {
     if (!isPhaseStatus(status)) {
       throw new DomainError('A Phase needs a valid status!')
     }
@@ -42,9 +60,19 @@ export default class Phase {
       throw new DomainError('A Phase needs valid steps!')
     }
 
+    if (!isValidDate(createdAt)) {
+      throw new DomainError('A Phase needs a valid creation date!')
+    }
+
+    if (lastUpdatedAt && !isValidDate(lastUpdatedAt)) {
+      throw new DomainError('A Phase needs a valid last update date!')
+    }
+
     this.status = status
     this.execution = execution
     this.steps = steps
+    this._createdAt = createdAt
+    this._lastUpdatedAt = lastUpdatedAt
   }
 
   /**
@@ -52,10 +80,18 @@ export default class Phase {
    * @param status - The status of the {@link Phase} to create.
    * @param execution - The execution of the {@link Phase} to create.
    * @param steps - The steps of the {@link Phase} to create.
+   * @param createdAt - The moment the {@link Phase} to create was created.
+   * @param lastUpdatedAt - The moment the {@link Phase} to create was last updated.
    * @throws {DomainError}
    */
-  static restore(status: PhaseStatus, execution: PhaseExecution, steps: Step[]): Phase {
-    return new Phase(status, execution, steps)
+  static restore(
+    status: PhaseStatus,
+    execution: PhaseExecution,
+    steps: Step[],
+    createdAt: Date,
+    lastUpdatedAt: Date | null
+  ): Phase {
+    return new Phase(status, execution, steps, createdAt, lastUpdatedAt)
   }
 
   /**
@@ -65,7 +101,7 @@ export default class Phase {
    * @throws {DomainError}
    */
   static create(execution: PhaseExecution, steps: Step[]): Phase {
-    return new Phase(PhaseStatus.Waiting, execution, steps)
+    return new Phase(PhaseStatus.Waiting, execution, steps, new Date(), null)
   }
 
   /**
@@ -84,8 +120,24 @@ export default class Phase {
       isPhaseExecution(candidate.execution) &&
       Array.isArray(candidate.steps) &&
       !!candidate.steps.length &&
-      candidate.steps.every(Step.isValid)
+      candidate.steps.every(Step.isValid) &&
+      isValidDate(candidate.createdAt) &&
+      (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt))
     )
+  }
+
+  /**
+   * The moment this {@link Phase} was created.
+   */
+  get createdAt(): Date {
+    return this._createdAt
+  }
+
+  /**
+   * The moment this {@link Phase} was last updated.
+   */
+  get lastUpdatedAt(): Date | null {
+    return this._lastUpdatedAt
   }
 }
 
