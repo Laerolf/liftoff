@@ -1,5 +1,6 @@
 import { v7 as uuidv7 } from 'uuid'
 
+import { DomainElement } from '@/shared/domainElement'
 import { isValidDate } from '@/utils/date'
 import { isMissionStatus } from '@/utils/status'
 
@@ -12,7 +13,7 @@ import { MissionStatus } from './status'
 /**
  * Represents a single execution of a {@link FlightPlan}.
  */
-export default class Mission {
+export default class Mission implements DomainElement {
   /**
    * The ID of this {@link Mission}.
    */
@@ -53,12 +54,26 @@ export default class Mission {
    * The phases of this {@link Mission}.
    */
   readonly phases: Phase[]
+  /**
+   * The moment this {@link Mission} was created.
+   */
+  private _createdAt: Date
+  /**
+   * The moment this {@link Mission} was last updated.
+   */
+  private _lastUpdatedAt: Date | null
+  /**
+   * The date this {@link Mission} was completed.
+   */
+  readonly completedAt: Date | null
 
   /**
    * Creates a new {@link Mission}.
    * @param id - The ID of the {@link Mission} to create.
    * @param correlationId - The correlation ID of the {@link Mission} to create.
    * @param flightPlanId - The ID of the Flight Plan that the {@link Mission} to create is based on.
+   * @param createdAt - The moment the {@link Mission} to create was created.
+   * @param lastUpdatedAt - The moment the {@link Mission} to create was last updated.
    * @param workflowBranch - The branch name of the workflow that will be run by the {@link Mission} to create.
    * @param environment - The environment that the {@link Mission} to create targets.
    * @param services - The names of what the {@link Mission} to create targets.
@@ -66,19 +81,23 @@ export default class Mission {
    * @param phases - The phases of the {@link Mission} to create.
    * @param status - The status of the {@link Mission} to create.
    * @param launchedAt - The date of the {@link Mission}'s launch to create.
+   * @param completedAt - The date this {@link Mission} to create was completed.
    * @throws {DomainError}
    */
   private constructor(
     id: string,
     correlationId: string,
     flightPlanId: string | null,
+    createdAt: Date,
+    lastUpdatedAt: Date | null,
     workflowBranch: string,
     environment: string,
     services: string[],
     director: string,
     phases: Phase[],
     status: MissionStatus,
-    launchedAt: Date | null
+    launchedAt: Date | null,
+    completedAt: Date | null
   ) {
     if (!id) {
       throw new DomainError('A Mission needs an ID!')
@@ -86,6 +105,14 @@ export default class Mission {
 
     if (!correlationId) {
       throw new DomainError('A Mission needs a correlation ID!')
+    }
+
+    if (!isValidDate(createdAt)) {
+      throw new DomainError('A Mission needs a valid creation date!')
+    }
+
+    if (lastUpdatedAt && !isValidDate(lastUpdatedAt)) {
+      throw new DomainError('A Mission needs a valid last update date!')
     }
 
     if (!workflowBranch) {
@@ -104,6 +131,10 @@ export default class Mission {
       throw new DomainError('A Mission needs a director!')
     }
 
+    if (!phases || !Array.isArray(phases) || phases.length <= 0) {
+      throw new DomainError('A Mission needs valid phases!')
+    }
+
     if (!isMissionStatus(status)) {
       throw new DomainError('A Mission needs a valid status!')
     }
@@ -112,20 +143,23 @@ export default class Mission {
       throw new DomainError('A Mission needs a valid launch date!')
     }
 
-    if (!phases || !Array.isArray(phases) || phases.length <= 0) {
-      throw new DomainError('A Mission needs valid phases!')
+    if (completedAt && !isValidDate(completedAt)) {
+      throw new DomainError('A Mission needs a valid completion date!')
     }
 
     this.id = id
     this.correlationId = correlationId
     this.flightPlanId = flightPlanId
+    this._createdAt = createdAt
+    this._lastUpdatedAt = lastUpdatedAt || null
     this.workflowBranch = workflowBranch
     this.environment = environment
     this.services = services
     this.director = director
     this.phases = phases
     this._status = status
-    this.launchedAt = launchedAt
+    this.launchedAt = launchedAt || null
+    this.completedAt = completedAt || null
   }
 
   /**
@@ -133,6 +167,8 @@ export default class Mission {
    * @param id - The ID of the {@link Mission} to create.
    * @param correlationId - The correlation ID of the {@link Mission} to create.
    * @param flightPlanId - The ID of the Flight Plan that the {@link Mission} to create is based on.
+   * @param createdAt - The moment the {@link Mission} to create was created.
+   * @param lastUpdatedAt - The moment the {@link Mission} to create was last updated.
    * @param workflowBranch - The branch name of the workflow that will be run by the {@link Mission} to create.
    * @param environment - The environment that the {@link Mission} to create targets.
    * @param services - The names of what the {@link Mission} to create targets.
@@ -140,31 +176,38 @@ export default class Mission {
    * @param status - The status of the {@link Mission} to create.
    * @param phases - The phases of the {@link Mission} to create.
    * @param launchedAt - The date of the {@link Mission}'s launch to create.
+   * @param completedAt - The date this {@link Mission} to create was completed.
    * @throws {DomainError}
    */
   static restore(
     id: string,
     correlationId: string,
     flightPlanId: string | null,
+    createdAt: Date,
+    lastUpdatedAt: Date | null,
     workflowBranch: string,
     environment: string,
     services: string[],
     director: string,
     phases: Phase[],
     status: MissionStatus,
-    launchedAt: Date | null
+    launchedAt: Date | null,
+    completedAt: Date | null
   ): Mission {
     return new Mission(
       id,
       correlationId,
       flightPlanId,
+      createdAt,
+      lastUpdatedAt,
       workflowBranch,
       environment,
       services,
       director,
       phases,
       status,
-      launchedAt
+      launchedAt,
+      completedAt
     )
   }
 
@@ -188,12 +231,15 @@ export default class Mission {
       uuidv7(),
       uuidv7(),
       null,
+      new Date(),
+      null,
       workflowBranch,
       environment,
       services,
       director,
       phases,
       MissionStatus.Launching,
+      null,
       null
     )
   }
@@ -217,18 +263,38 @@ export default class Mission {
       uuidv7(),
       uuidv7(),
       flightPlan.id,
+      new Date(),
+      null,
       flightPlan.workflowBranch,
       flightPlan.environment,
       flightPlan.services,
       director,
       flightPlan.phases,
       MissionStatus.Launching,
+      null,
       null
     )
   }
 
+  /**
+   *  The status of this {@link Mission}.
+   */
   get status(): MissionStatus {
     return this._status
+  }
+
+  /**
+   * The moment this {@link Mission} was created.
+   */
+  get createdAt(): Date {
+    return this._createdAt
+  }
+
+  /**
+   * The moment this {@link Mission} was last updated.
+   */
+  get lastUpdatedAt(): Date | null {
+    return this._lastUpdatedAt
   }
 
   /**
@@ -241,6 +307,7 @@ export default class Mission {
     }
 
     this._status = MissionStatus.InOrbit
+    this._lastUpdatedAt = new Date()
 
     return this
   }
