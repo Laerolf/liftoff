@@ -15,6 +15,7 @@ describe('Step', () => {
       let id = uuidv7()
       const creationDate = new Date()
       const lastUpdateDate = new Date()
+      const startDate = new Date()
       const completionDate = new Date()
 
       // When
@@ -24,6 +25,7 @@ describe('Step', () => {
         workflowId,
         creationDate,
         lastUpdateDate,
+        startDate,
         completionDate,
         outcome,
         {}
@@ -35,6 +37,7 @@ describe('Step', () => {
       expect(step.workflowId).toBe(workflowId)
       expect(step.createdAt).toBe(creationDate)
       expect(step.lastUpdatedAt).toBe(lastUpdateDate)
+      expect(step.startedAt).toBe(startDate)
       expect(step.completedAt).toBe(completionDate)
       expect(step.workflowOutcome).toBe(outcome)
       expect(step.workflowInputs).toStrictEqual({})
@@ -49,7 +52,7 @@ describe('Step', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs an ID.
-        Step.restore(null, repository, workflowId, new Date(), null, null, outcome)
+        Step.restore(null, repository, workflowId, new Date(), null, null, null, outcome)
       ).toThrow(expectedError)
     })
 
@@ -62,7 +65,7 @@ describe('Step', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs a repository.
-        Step.restore(uuidv7(), null, workflowId, new Date(), null, null, outcome)
+        Step.restore(uuidv7(), null, workflowId, new Date(), null, null, null, outcome)
       ).toThrow(expectedError)
     })
 
@@ -75,7 +78,7 @@ describe('Step', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs a workflow ID.
-        Step.restore(uuidv7(), repository, null, new Date(), null, null, outcome)
+        Step.restore(uuidv7(), repository, null, new Date(), null, null, null, outcome)
       ).toThrow(expectedError)
     })
 
@@ -88,11 +91,11 @@ describe('Step', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs a valid creation date.
-        Step.restore(uuidv7(), repository, workflowId, null, null, null, outcome)
+        Step.restore(uuidv7(), repository, workflowId, null, null, null, null, outcome)
       ).toThrow(expectedError)
       expect(() =>
         // @ts-expect-error A Step needs a valid creation date.
-        Step.restore(uuidv7(), repository, workflowId, 'test', null, null, outcome)
+        Step.restore(uuidv7(), repository, workflowId, 'test', null, null, null, outcome)
       ).toThrow(expectedError)
     })
 
@@ -105,7 +108,20 @@ describe('Step', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs a valid last update date.
-        Step.restore(uuidv7(), repository, workflowId, new Date(), 'test', null, outcome)
+        Step.restore(uuidv7(), repository, workflowId, new Date(), 'test', null, null, outcome)
+      ).toThrow(expectedError)
+    })
+
+    test('needs a valid start date', () => {
+      // Given
+      const { repository, workflowId, outcome } = EXAMPLE_STEP_VALUES
+
+      const expectedError = new DomainError('A Step needs a valid start date!')
+
+      // When + Then
+      expect(() =>
+        // @ts-expect-error A Step needs a valid start date.
+        Step.restore(uuidv7(), repository, workflowId, new Date(), null, 'test', null, outcome)
       ).toThrow(expectedError)
     })
 
@@ -118,7 +134,7 @@ describe('Step', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs a valid completion date.
-        Step.restore(uuidv7(), repository, workflowId, new Date(), null, 'test', outcome)
+        Step.restore(uuidv7(), repository, workflowId, new Date(), null, null, 'test', outcome)
       ).toThrow(expectedError)
     })
 
@@ -131,11 +147,11 @@ describe('Step', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs a valid outcome.
-        Step.restore(uuidv7(), repository, workflowId, new Date(), null, null, null)
+        Step.restore(uuidv7(), repository, workflowId, new Date(), null, null, null, null)
       ).toThrow(expectedError)
       expect(() =>
         // @ts-expect-error A Step needs a valid outcome.
-        Step.restore(uuidv7(), repository, workflowId, new Date(), null, null, 'test')
+        Step.restore(uuidv7(), repository, workflowId, new Date(), null, null, null, 'test')
       ).toThrow(expectedError)
     })
 
@@ -147,12 +163,22 @@ describe('Step', () => {
 
       // When + Then
       expect(() =>
-        // @ts-expect-error A Step needs valid workflow inputs.
-        Step.restore(uuidv7(), repository, workflowId, new Date(), null, null, outcome, 'test')
+        Step.restore(
+          uuidv7(),
+          repository,
+          workflowId,
+          new Date(),
+          null,
+          null,
+          null,
+          outcome,
+          // @ts-expect-error A Step needs valid workflow inputs.
+          'test'
+        )
       ).toThrow(expectedError)
       expect(() =>
         // @ts-expect-error A Step needs valid workflow inputs.
-        Step.restore(uuidv7(), repository, workflowId, new Date(), null, null, outcome, null)
+        Step.restore(uuidv7(), repository, workflowId, new Date(), null, null, null, outcome, null)
       ).not.toThrow()
     })
   })
@@ -170,6 +196,7 @@ describe('Step', () => {
       expect(step.workflowOutcome).toBe(StepStatus.Waiting)
       expect(step.createdAt).toBeDefined()
       expect(step.lastUpdatedAt).toBeNull()
+      expect(step.startedAt).toBeNull()
       expect(step.completedAt).toBeNull()
     })
   })
@@ -197,6 +224,22 @@ describe('Step', () => {
           createdAt: new Date(),
           lastUpdatedAt: 'test',
           completedAt: null
+        })
+      ).toBeFalsy()
+    })
+
+    test('needs a valid start date', () => {
+      // When + Then
+      expect(
+        Step.isValid({
+          id: uuidv7(),
+          repository: 'test',
+          workflowId: '6666',
+          workflowOutcome: 'WAITING',
+          workflowInputs: {},
+          createdAt: new Date(),
+          lastUpdatedAt: null,
+          startedAt: 'test'
         })
       ).toBeFalsy()
     })

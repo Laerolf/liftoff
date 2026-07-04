@@ -16,6 +16,7 @@ describe('Phase', () => {
       const id = uuidv7()
       const creationDate = new Date()
       const lastUpdateDate = new Date()
+      const startedAt = new Date()
       const completedAt = new Date()
 
       // When
@@ -26,6 +27,7 @@ describe('Phase', () => {
         steps,
         creationDate,
         lastUpdateDate,
+        startedAt,
         completedAt
       )
 
@@ -36,6 +38,7 @@ describe('Phase', () => {
       expect(phase.steps).toStrictEqual(steps)
       expect(phase.createdAt).toBe(creationDate)
       expect(phase.lastUpdatedAt).toStrictEqual(lastUpdateDate)
+      expect(phase.startedAt).toBe(startedAt)
       expect(phase.completedAt).toBe(completedAt)
     })
 
@@ -46,10 +49,10 @@ describe('Phase', () => {
       const expectedError = new DomainError('A Phase needs an ID!')
 
       // When + Then
-      // @ts-expect-error A Phase needs an ID.
-      expect(() => Phase.restore(null, status, execution, steps, new Date(), null, null)).toThrow(
-        expectedError
-      )
+      expect(() =>
+        // @ts-expect-error A Phase needs an ID.
+        Phase.restore(null, status, execution, steps, new Date(), null, null, null)
+      ).toThrow(expectedError)
     })
 
     test('needs a valid status', () => {
@@ -59,13 +62,13 @@ describe('Phase', () => {
       const expectedError = new DomainError('A Phase needs a valid status!')
 
       // When + Then
-      // @ts-expect-error A Phase needs a status.
-      expect(() => Phase.restore(uuidv7(), null, execution, steps, new Date(), null, null)).toThrow(
-        expectedError
-      )
       expect(() =>
         // @ts-expect-error A Phase needs a status.
-        Phase.restore(uuidv7(), 'test', execution, steps, new Date(), null, null)
+        Phase.restore(uuidv7(), null, execution, steps, new Date(), null, null, null)
+      ).toThrow(expectedError)
+      expect(() =>
+        // @ts-expect-error A Phase needs a status.
+        Phase.restore(uuidv7(), 'test', execution, steps, new Date(), null, null, null)
       ).toThrow(expectedError)
     })
 
@@ -76,10 +79,10 @@ describe('Phase', () => {
       const expectedError = new DomainError('A Phase needs an execution method!')
 
       // When + Then
-      // @ts-expect-error A Phase needs an execution method.
-      expect(() => Phase.restore(uuidv7(), status, null, steps, new Date(), null, null)).toThrow(
-        expectedError
-      )
+      expect(() =>
+        // @ts-expect-error A Phase needs an execution method.
+        Phase.restore(uuidv7(), status, null, steps, new Date(), null, null, null)
+      ).toThrow(expectedError)
     })
 
     test('needs valid steps', () => {
@@ -91,15 +94,15 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs valid steps.
-        Phase.restore(uuidv7(), status, execution, null, new Date(), null, null)
+        Phase.restore(uuidv7(), status, execution, null, new Date(), null, null, null)
       ).toThrow(expectedError)
       expect(() =>
         // @ts-expect-error A Phase needs valid steps.
-        Phase.restore(uuidv7(), status, execution, 'test', new Date(), null, null)
+        Phase.restore(uuidv7(), status, execution, 'test', new Date(), null, null, null)
       ).toThrow(expectedError)
-      expect(() => Phase.restore(uuidv7(), status, execution, [], new Date(), null, null)).toThrow(
-        expectedError
-      )
+      expect(() =>
+        Phase.restore(uuidv7(), status, execution, [], new Date(), null, null, null)
+      ).toThrow(expectedError)
     })
 
     test('needs a valid creation date', () => {
@@ -109,14 +112,14 @@ describe('Phase', () => {
       const expectedError = new DomainError('A Phase needs a valid creation date!')
 
       // When + Then
-      // @ts-expect-error A Phase needs a valid creation date.
-      expect(() => Phase.restore(uuidv7(), status, execution, steps, null, null, null)).toThrow(
-        expectedError
-      )
-      // @ts-expect-error A Phase needs a valid creation date.
-      expect(() => Phase.restore(uuidv7(), status, execution, steps, 'test', null, null)).toThrow(
-        expectedError
-      )
+      expect(() =>
+        // @ts-expect-error A Phase needs a valid creation date.
+        Phase.restore(uuidv7(), status, execution, steps, null, null, null, null)
+      ).toThrow(expectedError)
+      expect(() =>
+        // @ts-expect-error A Phase needs a valid creation date.
+        Phase.restore(uuidv7(), status, execution, steps, 'test', null, null, null)
+      ).toThrow(expectedError)
     })
 
     test('needs a valid last update date', () => {
@@ -128,7 +131,20 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs a valid last update date.
-        Phase.restore(uuidv7(), status, execution, steps, new Date(), 'test', null)
+        Phase.restore(uuidv7(), status, execution, steps, new Date(), 'test', null, null)
+      ).toThrow(expectedError)
+    })
+
+    test('needs a valid start date', () => {
+      // Given
+      const { status, execution, steps } = EXAMPLE_PHASE_VALUES
+
+      const expectedError = new DomainError('A Phase needs a valid start date!')
+
+      // When + Then
+      expect(() =>
+        // @ts-expect-error A Phase needs a valid start date.
+        Phase.restore(uuidv7(), status, execution, steps, new Date(), null, 'test', null)
       ).toThrow(expectedError)
     })
 
@@ -141,7 +157,7 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs a valid completion date.
-        Phase.restore(uuidv7(), status, execution, steps, new Date(), null, 'test')
+        Phase.restore(uuidv7(), status, execution, steps, new Date(), null, null, 'test')
       ).toThrow(expectedError)
     })
   })
@@ -157,6 +173,7 @@ describe('Phase', () => {
       // Then
       expect(phase.id).toBeDefined()
       expect(phase.status).toBe(PhaseStatus.Waiting)
+      expect(phase.startedAt).toBeNull()
       expect(phase.completedAt).toBeNull()
     })
   })
@@ -193,6 +210,31 @@ describe('Phase', () => {
           createdAt: new Date(),
           lastUpdatedAt: 'test',
           completedAt: null
+        })
+      ).toBeFalsy()
+    })
+
+    test('needs a valid start date', () => {
+      // When + Then
+      expect(
+        Phase.isValid({
+          id: uuidv7(),
+          status: 'WAITING',
+          execution: 'PARALLEL',
+          steps: [
+            {
+              id: uuidv7(),
+              repository: 'test',
+              workflowId: '6666',
+              workflowOutcome: 'WAITING',
+              workflowInputs: {},
+              createdAt: new Date(),
+              lastUpdatedAt: null
+            }
+          ],
+          createdAt: new Date(),
+          lastUpdatedAt: null,
+          startedAt: 'test'
         })
       ).toBeFalsy()
     })

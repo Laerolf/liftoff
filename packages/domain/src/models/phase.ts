@@ -38,6 +38,10 @@ export default class Phase implements DomainElement {
    */
   private _lastUpdatedAt: Date | null
   /**
+   * The date this {@link Phase} was started.
+   */
+  readonly startedAt: Date | null
+  /**
    * The date this {@link Phase} was completed.
    */
   readonly completedAt: Date | null
@@ -50,6 +54,7 @@ export default class Phase implements DomainElement {
    * @param steps - The steps of the {@link Phase} to create.
    * @param createdAt - The moment the {@link Phase} to create was created.
    * @param lastUpdatedAt - The moment the {@link Phase} to create was last updated.
+   * @param startedAt - The date this {@link Phase} to create was started.
    * @param completedAt - The date this {@link Phase} to create was completed.
    * @throws {DomainError}
    */
@@ -60,6 +65,7 @@ export default class Phase implements DomainElement {
     steps: Step[],
     createdAt: Date,
     lastUpdatedAt: Date | null,
+    startedAt: Date | null,
     completedAt: Date | null
   ) {
     if (!id) {
@@ -86,6 +92,10 @@ export default class Phase implements DomainElement {
       throw new DomainError('A Phase needs a valid last update date!')
     }
 
+    if (startedAt && !isValidDate(startedAt)) {
+      throw new DomainError('A Phase needs a valid start date!')
+    }
+
     if (completedAt && !isValidDate(completedAt)) {
       throw new DomainError('A Phase needs a valid completion date!')
     }
@@ -96,6 +106,7 @@ export default class Phase implements DomainElement {
     this.steps = steps
     this._createdAt = createdAt
     this._lastUpdatedAt = lastUpdatedAt
+    this.startedAt = startedAt
     this.completedAt = completedAt
   }
 
@@ -107,6 +118,7 @@ export default class Phase implements DomainElement {
    * @param steps - The steps of the {@link Phase} to create.
    * @param createdAt - The moment the {@link Phase} to create was created.
    * @param lastUpdatedAt - The moment the {@link Phase} to create was last updated.
+   * @param startedAt - The date this {@link Phase} to create was started.
    * @param completedAt - The date this {@link Phase} to create was completed.
    * @throws {DomainError}
    */
@@ -117,9 +129,10 @@ export default class Phase implements DomainElement {
     steps: Step[],
     createdAt: Date,
     lastUpdatedAt: Date | null,
+    startedAt: Date | null,
     completedAt: Date | null
   ): Phase {
-    return new Phase(id, status, execution, steps, createdAt, lastUpdatedAt, completedAt)
+    return new Phase(id, status, execution, steps, createdAt, lastUpdatedAt, startedAt, completedAt)
   }
 
   /**
@@ -129,7 +142,7 @@ export default class Phase implements DomainElement {
    * @throws {DomainError}
    */
   static create(execution: PhaseExecution, steps: Step[]): Phase {
-    return new Phase(uuidv7(), PhaseStatus.Waiting, execution, steps, new Date(), null, null)
+    return new Phase(uuidv7(), PhaseStatus.Waiting, execution, steps, new Date(), null, null, null)
   }
 
   /**
@@ -152,6 +165,7 @@ export default class Phase implements DomainElement {
       candidate.steps.every(Step.isValid) &&
       isValidDate(candidate.createdAt) &&
       (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
+      (!candidate.startedAt || isValidDate(candidate.startedAt)) &&
       (!candidate.completedAt || isValidDate(candidate.completedAt))
     )
   }
