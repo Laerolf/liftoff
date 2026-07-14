@@ -2,7 +2,7 @@ import { describe, test, expect } from '@jest/globals'
 import { EXAMPLE_PHASE_VALUES, EXAMPLE_STEP_VALUES } from '@test/fixtures'
 import { v7 as uuidv7 } from 'uuid'
 
-import Phase, { PhaseExecution } from '@/models/phase'
+import { Phase, PhaseExecution } from '@/models/phase'
 import { PhaseStatus } from '@/models/status'
 import { Step } from '@/models/step'
 import { DomainError } from '@/shared/errors'
@@ -14,6 +14,7 @@ describe('Phase', () => {
       const { status, execution, steps } = EXAMPLE_PHASE_VALUES
 
       const id = uuidv7()
+      const missionId = uuidv7()
       const creationDate = new Date()
       const lastUpdateDate = new Date()
       const startedAt = new Date()
@@ -22,6 +23,7 @@ describe('Phase', () => {
       // When
       const phase = Phase.restore(
         id,
+        missionId,
         status,
         execution,
         steps,
@@ -33,6 +35,7 @@ describe('Phase', () => {
 
       // Then
       expect(phase.id).toBe(id)
+      expect(phase.missionId).toBe(missionId)
       expect(phase.status).toBe(status)
       expect(phase.execution).toBe(execution)
       expect(phase.steps).toStrictEqual(steps)
@@ -51,7 +54,20 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs an ID.
-        Phase.restore(null, status, execution, steps, new Date(), null, null, null)
+        Phase.restore(null, uuidv7(), status, execution, steps, new Date(), null, null, null)
+      ).toThrow(expectedError)
+    })
+
+    test('needs a Mission ID', () => {
+      // Given
+      const { status, execution, steps } = EXAMPLE_PHASE_VALUES
+
+      const expectedError = new DomainError('A Phase needs a Mission ID!')
+
+      // When + Then
+      expect(() =>
+        // @ts-expect-error A Phase needs a Mission ID.
+        Phase.restore(uuidv7(), null, status, execution, steps, new Date(), null, null, null)
       ).toThrow(expectedError)
     })
 
@@ -64,11 +80,11 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs a status.
-        Phase.restore(uuidv7(), null, execution, steps, new Date(), null, null, null)
+        Phase.restore(uuidv7(), uuidv7(), null, execution, steps, new Date(), null, null, null)
       ).toThrow(expectedError)
       expect(() =>
         // @ts-expect-error A Phase needs a status.
-        Phase.restore(uuidv7(), 'test', execution, steps, new Date(), null, null, null)
+        Phase.restore(uuidv7(), uuidv7(), 'test', execution, steps, new Date(), null, null, null)
       ).toThrow(expectedError)
     })
 
@@ -81,7 +97,7 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs an execution method.
-        Phase.restore(uuidv7(), status, null, steps, new Date(), null, null, null)
+        Phase.restore(uuidv7(), uuidv7(), status, null, steps, new Date(), null, null, null)
       ).toThrow(expectedError)
     })
 
@@ -94,14 +110,14 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs valid steps.
-        Phase.restore(uuidv7(), status, execution, null, new Date(), null, null, null)
+        Phase.restore(uuidv7(), uuidv7(), status, execution, null, new Date(), null, null, null)
       ).toThrow(expectedError)
       expect(() =>
         // @ts-expect-error A Phase needs valid steps.
-        Phase.restore(uuidv7(), status, execution, 'test', new Date(), null, null, null)
+        Phase.restore(uuidv7(), uuidv7(), status, execution, 'test', new Date(), null, null, null)
       ).toThrow(expectedError)
       expect(() =>
-        Phase.restore(uuidv7(), status, execution, [], new Date(), null, null, null)
+        Phase.restore(uuidv7(), uuidv7(), status, execution, [], new Date(), null, null, null)
       ).toThrow(expectedError)
     })
 
@@ -114,11 +130,11 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs a valid creation date.
-        Phase.restore(uuidv7(), status, execution, steps, null, null, null, null)
+        Phase.restore(uuidv7(), uuidv7(), status, execution, steps, null, null, null, null)
       ).toThrow(expectedError)
       expect(() =>
         // @ts-expect-error A Phase needs a valid creation date.
-        Phase.restore(uuidv7(), status, execution, steps, 'test', null, null, null)
+        Phase.restore(uuidv7(), uuidv7(), status, execution, steps, 'test', null, null, null)
       ).toThrow(expectedError)
     })
 
@@ -131,7 +147,7 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs a valid last update date.
-        Phase.restore(uuidv7(), status, execution, steps, new Date(), 'test', null, null)
+        Phase.restore(uuidv7(), uuidv7(), status, execution, steps, new Date(), 'test', null, null)
       ).toThrow(expectedError)
     })
 
@@ -144,7 +160,7 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs a valid start date.
-        Phase.restore(uuidv7(), status, execution, steps, new Date(), null, 'test', null)
+        Phase.restore(uuidv7(), uuidv7(), status, execution, steps, new Date(), null, 'test', null)
       ).toThrow(expectedError)
     })
 
@@ -157,7 +173,7 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs a valid completion date.
-        Phase.restore(uuidv7(), status, execution, steps, new Date(), null, null, 'test')
+        Phase.restore(uuidv7(), uuidv7(), status, execution, steps, new Date(), null, null, 'test')
       ).toThrow(expectedError)
     })
   })
@@ -167,11 +183,14 @@ describe('Phase', () => {
       // Given
       const { execution, steps } = EXAMPLE_PHASE_VALUES
 
+      const missionId = uuidv7()
+
       // When
-      const phase = Phase.create(execution, steps)
+      const phase = Phase.create(missionId, execution, steps)
 
       // Then
       expect(phase.id).toBeDefined()
+      expect(phase.missionId).toBe(missionId)
       expect(phase.status).toBe(PhaseStatus.Waiting)
       expect(phase.startedAt).toBeNull()
       expect(phase.completedAt).toBeNull()
@@ -183,7 +202,9 @@ describe('Phase', () => {
       // Given
       const { repository, workflowId } = EXAMPLE_STEP_VALUES
 
-      const phase = Phase.create(PhaseExecution.Parallel, [Step.create(repository, workflowId)])
+      const phase = Phase.create(uuidv7(), PhaseExecution.Parallel, [
+        Step.create(uuidv7(), repository, workflowId)
+      ])
 
       // When + Then
       expect(Phase.isValid(phase)).toBeTruthy()
@@ -194,11 +215,13 @@ describe('Phase', () => {
       expect(
         Phase.isValid({
           id: uuidv7(),
+          missionId: uuidv7(),
           status: 'WAITING',
           execution: 'PARALLEL',
           steps: [
             {
               id: uuidv7(),
+              phaseId: uuidv7(),
               repository: 'test',
               workflowId: '6666',
               workflowOutcome: 'WAITING',
@@ -219,11 +242,13 @@ describe('Phase', () => {
       expect(
         Phase.isValid({
           id: uuidv7(),
+          missionId: uuidv7(),
           status: 'WAITING',
           execution: 'PARALLEL',
           steps: [
             {
               id: uuidv7(),
+              phaseId: uuidv7(),
               repository: 'test',
               workflowId: '6666',
               workflowOutcome: 'WAITING',
@@ -244,11 +269,13 @@ describe('Phase', () => {
       expect(
         Phase.isValid({
           id: uuidv7(),
+          missionId: uuidv7(),
           status: 'WAITING',
           execution: 'PARALLEL',
           steps: [
             {
               id: uuidv7(),
+              phaseId: uuidv7(),
               repository: 'test',
               workflowId: '6666',
               workflowOutcome: 'WAITING',

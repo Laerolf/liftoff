@@ -1,7 +1,7 @@
 import { describe, test, expect } from '@jest/globals'
 import { EXAMPLE_FLIGHT_PLAN_VALUES } from '@test/fixtures'
 
-import FlightPlan from '@/models/flightPlan'
+import { FlightPlan } from '@/models/flightPlan'
 import { DomainError } from '@/shared/errors'
 
 describe('FlightPlan', () => {

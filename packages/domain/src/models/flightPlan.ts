@@ -1,16 +1,15 @@
 import { v7 as uuidv7 } from 'uuid'
 
-import { DomainElement } from '@/shared/domainElement'
-import { isValidDate } from '@/utils/date'
-
+import { DomainElement } from '../shared/domainElement'
 import { DomainError } from '../shared/errors'
+import { isValidDate } from '../utils/date'
 
-import Phase from './phase'
+import { Phase } from './phase'
 
 /**
  * Represents a plan for {@link Mission}.
  */
-export default class FlightPlan implements DomainElement {
+export class FlightPlan implements DomainElement {
   /**
    * The ID of this {@link FlightPlan}.
    */
@@ -47,77 +46,6 @@ export default class FlightPlan implements DomainElement {
    * The moment this {@link FlightPlan} was last updated.
    */
   private _lastUpdatedAt: Date | null
-
-  /**
-   * Creates a new {@link FlightPlan}.
-   * @param id - The ID of the {@link FlightPlan} to create.
-   * @param name - The name of the {@link FlightPlan} to create.
-   * @param createdAt - The moment the {@link FlightPlan} to create was created.
-   * @param lastUpdatedAt - The moment the {@link FlightPlan} to create was last updated.
-   * @param workflowBranch - The branch name of the workflow that will be run by the {@link FlightPlan} to create.
-   * @param environment - The environment that the {@link FlightPlan} to create targets.
-   * @param services - The names of what the {@link FlightPlan} to create targets.
-   * @param phases - The phases of the {@link FlightPlan} to create.
-   * @params exposedWorkflowInputs - The exposed GitHub Workflow inputs of the {@link FlightPlan} to create.
-   * @throws {DomainError}
-   */
-  private constructor(
-    id: string,
-    name: string,
-    createdAt: Date,
-    lastUpdatedAt: Date | null,
-    workflowBranch: string,
-    environment: string,
-    services: string[],
-    phases: Phase[],
-    exposedWorkflowInputs?: Record<string, string>
-  ) {
-    if (!id) {
-      throw new DomainError('A Flight Plan needs an ID!')
-    }
-
-    if (!name) {
-      throw new DomainError('A Flight Plan needs a name!')
-    }
-
-    if (!isValidDate(createdAt)) {
-      throw new DomainError('A Flight Plan needs a valid creation date!')
-    }
-
-    if (lastUpdatedAt && !isValidDate(lastUpdatedAt)) {
-      throw new DomainError('A Flight Plan needs a valid last update date!')
-    }
-
-    if (!workflowBranch) {
-      throw new DomainError('A Flight Plan needs a target workflow branch name!')
-    }
-
-    if (!environment) {
-      throw new DomainError('A Flight Plan needs a target environment!')
-    }
-
-    if (!services || !Array.isArray(services) || services.length <= 0) {
-      throw new DomainError('A Flight Plan needs valid target service IDs!')
-    }
-
-    if (!phases || !Array.isArray(phases) || phases.length <= 0) {
-      throw new DomainError('A Flight Plan needs valid phases!')
-    }
-
-    if (exposedWorkflowInputs && typeof exposedWorkflowInputs != 'object') {
-      throw new DomainError('A Flight Plan needs valid workflow inputs!')
-    }
-
-    this.id = id
-    this.name = name
-    this._createdAt = createdAt
-    this._lastUpdatedAt = lastUpdatedAt || null
-    this.workflowBranch = workflowBranch
-    this.environment = environment
-    this.services = services
-    this.phases = phases
-    this.exposedWorkflowInputs = exposedWorkflowInputs || {}
-  }
 
   /**
    * Restores a {@link FlightPlan}.
@@ -211,6 +139,77 @@ export default class FlightPlan implements DomainElement {
       !!candidate.phases.length &&
       candidate.phases.every(Phase.isValid)
     )
+  }
+
+  /**
+   * Creates a new {@link FlightPlan}.
+   * @param id - The ID of the {@link FlightPlan} to create.
+   * @param name - The name of the {@link FlightPlan} to create.
+   * @param createdAt - The moment the {@link FlightPlan} to create was created.
+   * @param lastUpdatedAt - The moment the {@link FlightPlan} to create was last updated.
+   * @param workflowBranch - The branch name of the workflow that will be run by the {@link FlightPlan} to create.
+   * @param environment - The environment that the {@link FlightPlan} to create targets.
+   * @param services - The names of what the {@link FlightPlan} to create targets.
+   * @param phases - The phases of the {@link FlightPlan} to create.
+   * @params exposedWorkflowInputs - The exposed GitHub Workflow inputs of the {@link FlightPlan} to create.
+   * @throws {DomainError}
+   */
+  private constructor(
+    id: string,
+    name: string,
+    createdAt: Date,
+    lastUpdatedAt: Date | null,
+    workflowBranch: string,
+    environment: string,
+    services: string[],
+    phases: Phase[],
+    exposedWorkflowInputs?: Record<string, string>
+  ) {
+    if (!id) {
+      throw new DomainError('A Flight Plan needs an ID!')
+    }
+
+    if (!name) {
+      throw new DomainError('A Flight Plan needs a name!')
+    }
+
+    if (!isValidDate(createdAt)) {
+      throw new DomainError('A Flight Plan needs a valid creation date!')
+    }
+
+    if (lastUpdatedAt && !isValidDate(lastUpdatedAt)) {
+      throw new DomainError('A Flight Plan needs a valid last update date!')
+    }
+
+    if (!workflowBranch) {
+      throw new DomainError('A Flight Plan needs a target workflow branch name!')
+    }
+
+    if (!environment) {
+      throw new DomainError('A Flight Plan needs a target environment!')
+    }
+
+    if (!services || !Array.isArray(services) || services.length <= 0) {
+      throw new DomainError('A Flight Plan needs valid target service IDs!')
+    }
+
+    if (!phases || !Array.isArray(phases) || phases.length <= 0) {
+      throw new DomainError('A Flight Plan needs valid phases!')
+    }
+
+    if (exposedWorkflowInputs && typeof exposedWorkflowInputs != 'object') {
+      throw new DomainError('A Flight Plan needs valid workflow inputs!')
+    }
+
+    this.id = id
+    this.name = name
+    this._createdAt = createdAt
+    this._lastUpdatedAt = lastUpdatedAt || null
+    this.workflowBranch = workflowBranch
+    this.environment = environment
+    this.services = services
+    this.phases = phases
+    this.exposedWorkflowInputs = exposedWorkflowInputs || {}
   }
 
   /**

@@ -2,8 +2,8 @@ import { describe, test, expect } from '@jest/globals'
 import { EXAMPLE_FLIGHT_PLAN_VALUES, EXAMPLE_MISSION_VALUES, EXAMPLE_VALUES } from '@test/fixtures'
 import { v7 as uuidv7 } from 'uuid'
 
-import FlightPlan from '@/models/flightPlan'
-import Mission from '@/models/mission'
+import { FlightPlan } from '@/models/flightPlan'
+import { Mission } from '@/models/mission'
 import { MissionStatus } from '@/models/status'
 import { DomainError } from '@/shared/errors'
 
@@ -508,6 +508,260 @@ describe('Mission', () => {
       // When + Then
       // @ts-expect-error A Mission needs a director.
       expect(() => Mission.from(flightPlan, null)).toThrow(expectedError)
+    })
+  })
+
+  describe('isValid', () => {
+    test('can be valid', () => {
+      // Given
+      const {
+        director: { name: directorName }
+      } = EXAMPLE_VALUES
+
+      const { branch, environment, services, phases } = EXAMPLE_MISSION_VALUES
+
+      const mission = Mission.fromScratch(branch, environment, services, directorName, phases)
+
+      // When + Then
+      expect(Mission.isValid(mission)).toBeTruthy()
+    })
+
+    test('needs a valid Flight Plan ID', () => {
+      // When + Then
+      expect(
+        Mission.isValid({
+          id: '6666',
+          correlationId: '5555',
+          flightPlanId: 123456,
+          workflowBranch: 'protoype/hell-on-earth',
+          environment: 'develop',
+          services: ['app-a', 'app-b'],
+          director: 'Ozzy',
+          status: 'LAUNCHING',
+          launchedAt: null,
+          phases: [
+            {
+              id: '6666',
+              missionId: '4444',
+              status: 'WAITING',
+              execution: 'PARALLEL',
+              steps: [
+                {
+                  id: uuidv7(),
+                  phaseId: uuidv7(),
+                  repository: 'test',
+                  workflowId: '6666',
+                  workflowOutcome: 'WAITING',
+                  workflowInputs: {},
+                  createdAt: new Date(),
+                  lastUpdatedAt: null,
+                  startedAt: new Date()
+                }
+              ],
+              createdAt: new Date(),
+              lastUpdatedAt: null,
+              startedAt: null,
+              completedAt: null
+            }
+          ],
+          createdAt: new Date(),
+          lastUpdatedAt: null,
+          completedAt: null
+        })
+      ).toBeFalsy()
+    })
+
+    test('needs a valid launch date', () => {
+      // When + Then
+      expect(
+        Mission.isValid({
+          id: '6666',
+          correlationId: '5555',
+          flightPlanId: '1111',
+          workflowBranch: 'protoype/hell-on-earth',
+          environment: 'develop',
+          services: ['app-a', 'app-b'],
+          director: 'Ozzy',
+          status: 'LAUNCHING',
+          launchedAt: 123456,
+          phases: [
+            {
+              id: '6666',
+              missionId: '4444',
+              status: 'WAITING',
+              execution: 'PARALLEL',
+              steps: [
+                {
+                  id: uuidv7(),
+                  phaseId: uuidv7(),
+                  repository: 'test',
+                  workflowId: '6666',
+                  workflowOutcome: 'WAITING',
+                  workflowInputs: {},
+                  createdAt: new Date(),
+                  lastUpdatedAt: null,
+                  startedAt: new Date()
+                }
+              ],
+              createdAt: new Date(),
+              lastUpdatedAt: null,
+              startedAt: null,
+              completedAt: null
+            }
+          ],
+          createdAt: new Date(),
+          lastUpdatedAt: null,
+          completedAt: null
+        })
+      ).toBeFalsy()
+    })
+
+    test('needs a valid creation date', () => {
+      // When + Then
+      expect(
+        Mission.isValid({
+          id: '6666',
+          correlationId: '5555',
+          flightPlanId: '1111',
+          workflowBranch: 'protoype/hell-on-earth',
+          environment: 'develop',
+          services: ['app-a', 'app-b'],
+          director: 'Ozzy',
+          status: 'LAUNCHING',
+          launchedAt: null,
+          phases: [
+            {
+              id: '6666',
+              missionId: '4444',
+              status: 'WAITING',
+              execution: 'PARALLEL',
+              steps: [
+                {
+                  id: uuidv7(),
+                  phaseId: uuidv7(),
+                  repository: 'test',
+                  workflowId: '6666',
+                  workflowOutcome: 'WAITING',
+                  workflowInputs: {},
+                  createdAt: new Date(),
+                  lastUpdatedAt: null,
+                  startedAt: new Date()
+                }
+              ],
+              createdAt: new Date(),
+              lastUpdatedAt: null,
+              startedAt: null,
+              completedAt: null
+            }
+          ],
+          createdAt: null,
+          lastUpdatedAt: null,
+          completedAt: null
+        })
+      ).toBeFalsy()
+    })
+
+    test('needs a valid last update date', () => {
+      // When + Then
+      expect(
+        Mission.isValid({
+          id: '6666',
+          correlationId: '5555',
+          flightPlanId: '1111',
+          workflowBranch: 'protoype/hell-on-earth',
+          environment: 'develop',
+          services: ['app-a', 'app-b'],
+          director: 'Ozzy',
+          status: 'LAUNCHING',
+          launchedAt: null,
+          phases: [
+            {
+              id: '6666',
+              missionId: '4444',
+              status: 'WAITING',
+              execution: 'PARALLEL',
+              steps: [
+                {
+                  id: uuidv7(),
+                  phaseId: uuidv7(),
+                  repository: 'test',
+                  workflowId: '6666',
+                  workflowOutcome: 'WAITING',
+                  workflowInputs: {},
+                  createdAt: new Date(),
+                  lastUpdatedAt: null,
+                  startedAt: new Date()
+                }
+              ],
+              createdAt: new Date(),
+              lastUpdatedAt: null,
+              startedAt: null,
+              completedAt: null
+            }
+          ],
+          createdAt: new Date(),
+          lastUpdatedAt: 123456,
+          completedAt: null
+        })
+      ).toBeFalsy()
+    })
+
+    test('needs a valid completion date', () => {
+      // When + Then
+      expect(
+        Mission.isValid({
+          id: '6666',
+          correlationId: '5555',
+          flightPlanId: '1111',
+          workflowBranch: 'protoype/hell-on-earth',
+          environment: 'develop',
+          services: ['app-a', 'app-b'],
+          director: 'Ozzy',
+          status: 'LAUNCHING',
+          launchedAt: null,
+          phases: [
+            {
+              id: '6666',
+              missionId: '4444',
+              status: 'WAITING',
+              execution: 'PARALLEL',
+              steps: [
+                {
+                  id: uuidv7(),
+                  phaseId: uuidv7(),
+                  repository: 'test',
+                  workflowId: '6666',
+                  workflowOutcome: 'WAITING',
+                  workflowInputs: {},
+                  createdAt: new Date(),
+                  lastUpdatedAt: null,
+                  startedAt: new Date()
+                }
+              ],
+              createdAt: new Date(),
+              lastUpdatedAt: null,
+              startedAt: null,
+              completedAt: null
+            }
+          ],
+          createdAt: new Date(),
+          lastUpdatedAt: null,
+          completedAt: 123456
+        })
+      ).toBeFalsy()
+    })
+
+    test('needs to be defined', () => {
+      // When + Then
+      expect(Mission.isValid(null)).toBeFalsy()
+      expect(Mission.isValid(undefined)).toBeFalsy()
+    })
+
+    test('needs to be an object', () => {
+      // When + Then
+      expect(Mission.isValid([])).toBeFalsy()
+      expect(Mission.isValid('test')).toBeFalsy()
+      expect(Mission.isValid(6666)).toBeFalsy()
     })
   })
 

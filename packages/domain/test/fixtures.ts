@@ -1,4 +1,4 @@
-import Phase, { PhaseExecution } from '@/models/phase'
+import { Phase, PhaseExecution } from '@/models/phase'
 import { MissionStatus, PhaseStatus, StepStatus } from '@/models/status'
 import { Step } from '@/models/step'
 
@@ -19,7 +19,7 @@ export const EXAMPLE_STEP_VALUES = {
 export const EXAMPLE_PHASE_VALUES = {
   status: PhaseStatus.Waiting,
   execution: PhaseExecution.Parallel,
-  steps: [Step.create(EXAMPLE_STEP_VALUES.repository, EXAMPLE_STEP_VALUES.workflowId)]
+  steps: [Step.create('5555', EXAMPLE_STEP_VALUES.repository, EXAMPLE_STEP_VALUES.workflowId)]
 }
 
 export const EXAMPLE_FLIGHT_PLAN_VALUES = {
@@ -27,7 +27,7 @@ export const EXAMPLE_FLIGHT_PLAN_VALUES = {
   services: ['app-a', 'app-b'],
   environment: 'develop',
   branch: 'protoype/hell-on-earth',
-  phases: [Phase.create(PhaseExecution.Parallel, EXAMPLE_PHASE_VALUES.steps)]
+  phases: [Phase.create('4444', PhaseExecution.Parallel, EXAMPLE_PHASE_VALUES.steps)]
 }
 
 export const EXAMPLE_MISSION_VALUES = {

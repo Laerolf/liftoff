@@ -1,4 +1,4 @@
-import { MissionStatus, PhaseStatus, StepStatus } from '@/models/status'
+import { MissionStatus, PhaseStatus, StepStatus } from '../models/status'
 
 const VALID_MISSION_STATUSES = new Set<unknown>(Object.values(MissionStatus))
 const VALID_PHASE_STATUSES = new Set<unknown>(Object.values(PhaseStatus))
