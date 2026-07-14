@@ -324,10 +324,10 @@ describe('Mission', () => {
         director: { name: directorName }
       } = EXAMPLE_VALUES
 
-      const { branch, environment, services, phases } = EXAMPLE_MISSION_VALUES
+      const { branch, environment, services } = EXAMPLE_MISSION_VALUES
 
       // When
-      const mission = Mission.fromScratch(branch, environment, services, directorName, phases)
+      const mission = Mission.fromScratch(branch, environment, services, directorName)
 
       // Then
       expect(mission.id).toBeDefined()
@@ -341,7 +341,6 @@ describe('Mission', () => {
       expect(mission.director).toBe(directorName)
       expect(mission.status).toBe(MissionStatus.Launching)
       expect(mission.launchedAt).toBeNull()
-      expect(mission.phases).toStrictEqual(phases)
       expect(mission.completedAt).toBeNull()
     })
 
@@ -385,20 +384,20 @@ describe('Mission', () => {
         director: { name: directorName }
       } = EXAMPLE_VALUES
 
-      const { branch, environment, phases } = EXAMPLE_MISSION_VALUES
+      const { branch, environment } = EXAMPLE_MISSION_VALUES
 
       const expectedError = new DomainError('A Mission needs valid target service IDs!')
 
       // When + Then
       expect(() =>
         // @ts-expect-error A Mission needs valid target service IDs.
-        Mission.fromScratch(branch, environment, null, directorName, phases)
+        Mission.fromScratch(branch, environment, null, directorName)
       ).toThrow(expectedError)
       expect(() =>
         // @ts-expect-error A Mission needs valid target service IDs.
-        Mission.fromScratch(branch, environment, 'test', directorName, phases)
+        Mission.fromScratch(branch, environment, 'test', directorName)
       ).toThrow(expectedError)
-      expect(() => Mission.fromScratch(branch, environment, [], directorName, phases)).toThrow(
+      expect(() => Mission.fromScratch(branch, environment, [], directorName)).toThrow(
         expectedError
       )
     })
@@ -406,39 +405,15 @@ describe('Mission', () => {
     test('needs a director', () => {
       // Given
 
-      const { branch, environment, services, phases } = EXAMPLE_MISSION_VALUES
+      const { branch, environment, services } = EXAMPLE_MISSION_VALUES
 
       const expectedError = new DomainError('A Mission needs a director!')
 
       // When + Then
       expect(() =>
         // @ts-expect-error A Mission needs a director.
-        Mission.fromScratch(branch, environment, services, null, phases)
+        Mission.fromScratch(branch, environment, services, null)
       ).toThrow(expectedError)
-    })
-
-    test('needs valid phases', () => {
-      // Given
-      const {
-        director: { name: directorName }
-      } = EXAMPLE_VALUES
-
-      const { branch, environment, services } = EXAMPLE_MISSION_VALUES
-
-      const expectedError = new DomainError('A Mission needs valid phases!')
-
-      // When + Then
-      expect(() =>
-        // @ts-expect-error A Mission needs valid phases.
-        Mission.fromScratch(branch, environment, services, directorName, null)
-      ).toThrow(expectedError)
-      expect(() =>
-        // @ts-expect-error A Mission needs valid phases.
-        Mission.fromScratch(branch, environment, services, directorName, 'test')
-      ).toThrow(expectedError)
-      expect(() => Mission.fromScratch(branch, environment, services, directorName, [])).toThrow(
-        expectedError
-      )
     })
   })
 
@@ -518,9 +493,9 @@ describe('Mission', () => {
         director: { name: directorName }
       } = EXAMPLE_VALUES
 
-      const { branch, environment, services, phases } = EXAMPLE_MISSION_VALUES
+      const { branch, environment, services } = EXAMPLE_MISSION_VALUES
 
-      const mission = Mission.fromScratch(branch, environment, services, directorName, phases)
+      const mission = Mission.fromScratch(branch, environment, services, directorName)
 
       // When + Then
       expect(Mission.isValid(mission)).toBeTruthy()
@@ -774,7 +749,8 @@ describe('Mission', () => {
 
       const { branch, environment, services, phases } = EXAMPLE_MISSION_VALUES
 
-      const mission = Mission.fromScratch(branch, environment, services, directorName, phases)
+      const mission = Mission.fromScratch(branch, environment, services, directorName)
+      mission.phases = phases
 
       // When
       const launchedMission = mission.launch()
@@ -792,15 +768,28 @@ describe('Mission', () => {
 
       const { branch, environment, services, phases } = EXAMPLE_MISSION_VALUES
 
-      const mission = Mission.fromScratch(
-        branch,
-        environment,
-        services,
-        directorName,
-        phases
-      ).launch()
+      const mission = Mission.fromScratch(branch, environment, services, directorName)
+      mission.phases = phases
+
+      mission.launch()
 
       const expectedError = new DomainError('The Mission has already been launched.')
+
+      // When + Then
+      expect(() => mission.launch()).toThrow(expectedError)
+    })
+
+    test('can not be launched without phases', () => {
+      // Given
+      const {
+        director: { name: directorName }
+      } = EXAMPLE_VALUES
+
+      const { branch, environment, services } = EXAMPLE_MISSION_VALUES
+
+      const mission = Mission.fromScratch(branch, environment, services, directorName)
+
+      const expectedError = new DomainError('A Mission needs valid phases before launching!')
 
       // When + Then
       expect(() => mission.launch()).toThrow(expectedError)

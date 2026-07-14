@@ -52,7 +52,7 @@ export class Mission implements DomainElement {
   /**
    * The phases of this {@link Mission}.
    */
-  readonly phases: Phase[]
+  phases: Phase[]
   /**
    * The moment this {@link Mission} was created.
    */
@@ -121,15 +121,13 @@ export class Mission implements DomainElement {
    * @param environment - The environment that the {@link Mission} to create targets.
    * @param services - The names of what the {@link Mission} to create targets.
    * @param director - The person who executed the {@link Mission} to create.
-   * @param phases - The phases of the {@link Mission} to create.
    * @throws {DomainError}
    */
   static fromScratch(
     workflowBranch: string,
     environment: string,
     services: string[],
-    director: string,
-    phases: Phase[]
+    director: string
   ): Mission {
     return new Mission(
       uuidv7(),
@@ -141,7 +139,7 @@ export class Mission implements DomainElement {
       environment,
       services,
       director,
-      phases,
+      [],
       MissionStatus.Launching,
       null,
       null
@@ -204,7 +202,6 @@ export class Mission implements DomainElement {
       isMissionStatus(candidate.status) &&
       (!candidate.launchedAt || isValidDate(candidate.launchedAt)) &&
       Array.isArray(candidate.phases) &&
-      !!candidate.phases.length &&
       candidate.phases.every(Phase.isValid) &&
       isValidDate(candidate.createdAt) &&
       (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
@@ -276,10 +273,6 @@ export class Mission implements DomainElement {
       throw new DomainError('A Mission needs a director!')
     }
 
-    if (!phases || !Array.isArray(phases) || phases.length <= 0) {
-      throw new DomainError('A Mission needs valid phases!')
-    }
-
     if (!isMissionStatus(status)) {
       throw new DomainError('A Mission needs a valid status!')
     }
@@ -335,6 +328,10 @@ export class Mission implements DomainElement {
   launch(): Mission {
     if (this.status !== MissionStatus.Launching) {
       throw new DomainError('The Mission has already been launched.')
+    }
+
+    if (!this.phases || !Array.isArray(this.phases) || this.phases.length <= 0) {
+      throw new DomainError('A Mission needs valid phases before launching!')
     }
 
     this._status = MissionStatus.InOrbit
