@@ -1,5 +1,6 @@
 import { describe, test, expect } from '@jest/globals'
-import { EXAMPLE_FLIGHT_PLAN_VALUES } from '@test/fixtures'
+import { createExampleFlightPlanData } from '@test/fixtures/data'
+import { EXAMPLE_FLIGHT_PLAN, EXAMPLE_VALUES } from '@test/fixtures/values'
 
 import { FlightPlan } from '@/models/flightPlan'
 import { DomainError } from '@/shared/errors'
@@ -8,7 +9,13 @@ describe('FlightPlan', () => {
   describe('restore', () => {
     test('can be restored', () => {
       // Given
-      const { name, branch, environment, services, phases } = EXAMPLE_FLIGHT_PLAN_VALUES
+      const { phases } = EXAMPLE_FLIGHT_PLAN
+      const {
+        flightPlans: { name },
+        branchName,
+        environmentName,
+        serviceIds
+      } = EXAMPLE_VALUES
 
       // When + Then
       expect(() =>
@@ -17,9 +24,9 @@ describe('FlightPlan', () => {
           name,
           new Date(),
           null,
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           phases
         )
       ).not.toThrow()
@@ -27,20 +34,28 @@ describe('FlightPlan', () => {
 
     test('needs an ID', () => {
       // Given
-      const { name, branch, environment, services, phases } = EXAMPLE_FLIGHT_PLAN_VALUES
+      const { phases } = EXAMPLE_FLIGHT_PLAN
+      const {
+        flightPlans: { name },
+        date,
+        branchName,
+        environmentName,
+        serviceIds
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Flight Plan needs an ID!')
 
       // When + Then
       expect(() =>
         // @ts-expect-error A Flight Plan needs an ID.
-        FlightPlan.restore(null, name, new Date(), null, branch, environment, services, phases)
+        FlightPlan.restore(null, name, date, null, branchName, environmentName, serviceIds, phases)
       ).toThrow(expectedError)
     })
 
     test('needs a name', () => {
       // Given
-      const { branch, environment, services, phases } = EXAMPLE_FLIGHT_PLAN_VALUES
+      const { phases } = EXAMPLE_FLIGHT_PLAN
+      const { date, branchName, environmentName, serviceIds } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Flight Plan needs a name!')
 
@@ -50,11 +65,11 @@ describe('FlightPlan', () => {
           crypto.randomUUID(),
           // @ts-expect-error A Flight Plan needs a name.
           null,
-          new Date(),
+          date,
           null,
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           phases
         )
       ).toThrow(expectedError)
@@ -62,7 +77,13 @@ describe('FlightPlan', () => {
 
     test('needs a valid creation date', () => {
       // Given
-      const { branch, environment, services, phases, name } = EXAMPLE_FLIGHT_PLAN_VALUES
+      const { phases } = EXAMPLE_FLIGHT_PLAN
+      const {
+        flightPlans: { name },
+        branchName,
+        environmentName,
+        serviceIds
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Flight Plan needs a valid creation date!')
 
@@ -74,9 +95,9 @@ describe('FlightPlan', () => {
           // @ts-expect-error A Flight Plan needs a valid creation date.
           null,
           null,
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           phases
         )
       ).toThrow(expectedError)
@@ -87,9 +108,9 @@ describe('FlightPlan', () => {
           // @ts-expect-error A Flight Plan needs a valid creation date.
           'test',
           null,
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           phases
         )
       ).toThrow(expectedError)
@@ -97,7 +118,14 @@ describe('FlightPlan', () => {
 
     test('needs a valid last update date', () => {
       // Given
-      const { branch, environment, services, phases, name } = EXAMPLE_FLIGHT_PLAN_VALUES
+      const { phases } = EXAMPLE_FLIGHT_PLAN
+      const {
+        flightPlans: { name },
+        date,
+        branchName,
+        environmentName,
+        serviceIds
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Flight Plan needs a valid last update date!')
 
@@ -106,12 +134,12 @@ describe('FlightPlan', () => {
         FlightPlan.restore(
           crypto.randomUUID(),
           name,
-          new Date(),
+          date,
           // @ts-expect-error A Flight Plan needs a valid last update date.
           'test',
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           phases
         )
       ).toThrow(expectedError)
@@ -119,7 +147,13 @@ describe('FlightPlan', () => {
 
     test('needs a target workflow branch name', () => {
       // Given
-      const { name, environment, services, phases } = EXAMPLE_FLIGHT_PLAN_VALUES
+      const { phases } = EXAMPLE_FLIGHT_PLAN
+      const {
+        flightPlans: { name },
+        date,
+        environmentName,
+        serviceIds
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Flight Plan needs a target workflow branch name!')
 
@@ -128,12 +162,12 @@ describe('FlightPlan', () => {
         FlightPlan.restore(
           crypto.randomUUID(),
           name,
-          new Date(),
+          date,
           null,
           // @ts-expect-error A Flight Plan needs a target workflow branch.
           null,
-          environment,
-          services,
+          environmentName,
+          serviceIds,
           phases
         )
       ).toThrow(expectedError)
@@ -141,7 +175,13 @@ describe('FlightPlan', () => {
 
     test('needs a target environment', () => {
       // Given
-      const { name, branch, services, phases } = EXAMPLE_FLIGHT_PLAN_VALUES
+      const { phases } = EXAMPLE_FLIGHT_PLAN
+      const {
+        flightPlans: { name },
+        date,
+        branchName,
+        serviceIds
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Flight Plan needs a target environment!')
 
@@ -150,12 +190,12 @@ describe('FlightPlan', () => {
         FlightPlan.restore(
           crypto.randomUUID(),
           name,
-          new Date(),
+          date,
           null,
-          branch,
+          branchName,
           // @ts-expect-error A Flight Plan needs a target environment.
           null,
-          services,
+          serviceIds,
           phases
         )
       ).toThrow(expectedError)
@@ -163,7 +203,13 @@ describe('FlightPlan', () => {
 
     test('needs valid target service IDs', () => {
       // Given
-      const { name, branch, environment, phases } = EXAMPLE_FLIGHT_PLAN_VALUES
+      const { phases } = EXAMPLE_FLIGHT_PLAN
+      const {
+        flightPlans: { name },
+        date,
+        branchName,
+        environmentName
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Flight Plan needs valid target service IDs!')
 
@@ -172,10 +218,10 @@ describe('FlightPlan', () => {
         FlightPlan.restore(
           crypto.randomUUID(),
           name,
-          new Date(),
+          date,
           null,
-          branch,
-          environment,
+          branchName,
+          environmentName,
           // @ts-expect-error A Flight Plan needs valid target service IDs.
           null,
           phases
@@ -185,10 +231,10 @@ describe('FlightPlan', () => {
         FlightPlan.restore(
           crypto.randomUUID(),
           name,
-          new Date(),
+          date,
           null,
-          branch,
-          environment,
+          branchName,
+          environmentName,
           // @ts-expect-error A Flight Plan needs valid target service IDs.
           'test',
           phases
@@ -198,66 +244,26 @@ describe('FlightPlan', () => {
         FlightPlan.restore(
           crypto.randomUUID(),
           name,
-          new Date(),
+          date,
           null,
-          branch,
-          environment,
+          branchName,
+          environmentName,
           [],
           phases
         )
       ).toThrow(expectedError)
     })
 
-    test('needs valid phases', () => {
-      // Given
-      const { name, branch, environment, services } = EXAMPLE_FLIGHT_PLAN_VALUES
-
-      const expectedError = new DomainError('A Flight Plan needs valid phases!')
-
-      // When + Then
-      expect(() =>
-        FlightPlan.restore(
-          crypto.randomUUID(),
-          name,
-          new Date(),
-          null,
-          branch,
-          environment,
-          services,
-          // @ts-expect-error A Flight Plan needs valid phases.
-          null
-        )
-      ).toThrow(expectedError)
-      expect(() =>
-        FlightPlan.restore(
-          crypto.randomUUID(),
-          name,
-          new Date(),
-          null,
-          branch,
-          environment,
-          services,
-          // @ts-expect-error A Flight Plan needs valid phases.
-          'test'
-        )
-      ).toThrow(expectedError)
-      expect(() =>
-        FlightPlan.restore(
-          crypto.randomUUID(),
-          name,
-          new Date(),
-          null,
-          branch,
-          environment,
-          services,
-          []
-        )
-      ).toThrow(expectedError)
-    })
-
     test('needs valid workflow inputs', () => {
       // Given
-      const { name, branch, environment, services, phases } = EXAMPLE_FLIGHT_PLAN_VALUES
+      const { phases } = EXAMPLE_FLIGHT_PLAN
+      const {
+        flightPlans: { name },
+        date,
+        branchName,
+        environmentName,
+        serviceIds
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Flight Plan needs valid workflow inputs!')
 
@@ -266,11 +272,11 @@ describe('FlightPlan', () => {
         FlightPlan.restore(
           crypto.randomUUID(),
           name,
-          new Date(),
+          date,
           null,
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           phases,
           // @ts-expect-error A Flight Plan needs valid workflow inputs.
           'test'
@@ -282,10 +288,15 @@ describe('FlightPlan', () => {
   describe('create', () => {
     test('can be created', () => {
       // Given
-      const { name, branch, environment, services, phases } = EXAMPLE_FLIGHT_PLAN_VALUES
+      const {
+        flightPlans: { name },
+        branchName,
+        environmentName,
+        serviceIds
+      } = EXAMPLE_VALUES
 
       // When
-      const flightPlan = FlightPlan.create(name, branch, environment, services, phases)
+      const flightPlan = FlightPlan.create(name, branchName, environmentName, serviceIds)
 
       // Then
       expect(flightPlan.id).toBeDefined()
@@ -296,40 +307,12 @@ describe('FlightPlan', () => {
 
   describe('isValid', () => {
     test('needs a valid last update date', () => {
-      // Given
-      const { name, branch, environment, services } = EXAMPLE_FLIGHT_PLAN_VALUES
-
       // When + Then
+      expect(FlightPlan.isValid(createExampleFlightPlanData({ lastUpdatedAt: null }))).toBeTruthy()
+      expect(FlightPlan.isValid(createExampleFlightPlanData({ lastUpdatedAt: 123456 }))).toBeFalsy()
       expect(
-        FlightPlan.isValid({
-          id: '666666',
-          name,
-          workflowBranch: branch,
-          environment: environment,
-          services,
-          phases: [
-            {
-              status: 'WAITING',
-              execution: 'PARALLEL',
-              steps: [
-                {
-                  repository: 'test',
-                  workflowId: '6666',
-                  workflowOutcome: 'WAITING',
-                  workflowInputs: {},
-                  createdAt: new Date(),
-                  lastUpdatedAt: null
-                }
-              ],
-              createdAt: new Date(),
-              lastUpdatedAt: null
-            }
-          ],
-          exposedWorkflowInputs: {},
-          createdAt: new Date(),
-          lastUpdatedAt: 'test'
-        })
-      ).toBeFalsy()
+        FlightPlan.isValid(createExampleFlightPlanData({ lastUpdatedAt: EXAMPLE_VALUES.date }))
+      ).toBeTruthy()
     })
   })
 })

@@ -33,7 +33,7 @@ export class FlightPlan implements DomainElement {
   /**
    * The phases of this {@link FlightPlan}.
    */
-  readonly phases: Phase[]
+  phases: Phase[] | null
   /**
    * The exposed GitHub Workflow inputs of this {@link FlightPlan}.
    */
@@ -68,7 +68,7 @@ export class FlightPlan implements DomainElement {
     workflowBranch: string,
     environment: string,
     services: string[],
-    phases: Phase[],
+    phases: Phase[] | null,
     exposedWorkflowInputs?: Record<string, string>
   ): FlightPlan {
     return new FlightPlan(
@@ -99,7 +99,6 @@ export class FlightPlan implements DomainElement {
     workflowBranch: string,
     environment: string,
     services: string[],
-    phases: Phase[],
     exposedWorkflowInputs?: Record<string, string>
   ): FlightPlan {
     return new FlightPlan(
@@ -110,7 +109,7 @@ export class FlightPlan implements DomainElement {
       workflowBranch,
       environment,
       services,
-      phases,
+      null,
       exposedWorkflowInputs
     )
   }
@@ -135,9 +134,8 @@ export class FlightPlan implements DomainElement {
       typeof candidate.environment === 'string' &&
       Array.isArray(candidate.services) &&
       candidate.services.every((service) => typeof service === 'string') &&
-      Array.isArray(candidate.phases) &&
-      !!candidate.phases.length &&
-      candidate.phases.every(Phase.isValid)
+      (!candidate.phases ||
+        (Array.isArray(candidate.phases) && candidate.phases.every(Phase.isValid)))
     )
   }
 
@@ -162,7 +160,7 @@ export class FlightPlan implements DomainElement {
     workflowBranch: string,
     environment: string,
     services: string[],
-    phases: Phase[],
+    phases: Phase[] | null,
     exposedWorkflowInputs?: Record<string, string>
   ) {
     if (!id) {
@@ -191,10 +189,6 @@ export class FlightPlan implements DomainElement {
 
     if (!services || !Array.isArray(services) || services.length <= 0) {
       throw new DomainError('A Flight Plan needs valid target service IDs!')
-    }
-
-    if (!phases || !Array.isArray(phases) || phases.length <= 0) {
-      throw new DomainError('A Flight Plan needs valid phases!')
     }
 
     if (exposedWorkflowInputs && typeof exposedWorkflowInputs != 'object') {

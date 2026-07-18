@@ -23,7 +23,7 @@ export class Phase implements DomainElement {
   /**
    * The status of this {@link Phase}.
    */
-  readonly status: PhaseStatus
+  private _status: PhaseStatus
   /**
    * The execution method of this {@link Phase}.
    */
@@ -31,7 +31,7 @@ export class Phase implements DomainElement {
   /**
    * The steps of this {@link Phase}.
    */
-  readonly steps: Step[]
+  private _steps: Step[] | null
   /**
    * The moment this {@link Phase} was created.
    */
@@ -90,16 +90,15 @@ export class Phase implements DomainElement {
    * Creates a new {@link Phase}.
    * @param missionId - The Mission ID that the {@link Phase} to create belongs to.
    * @param execution - The execution of the {@link Phase} to create.
-   * @param steps - The steps of the {@link Phase} to create.
    * @throws {DomainError}
    */
-  static create(missionId: string, execution: PhaseExecution, steps: Step[]): Phase {
+  static create(missionId: string, execution: PhaseExecution): Phase {
     return new Phase(
       uuidv7(),
       missionId,
-      PhaseStatus.Waiting,
+      PhaseStatus.Draft,
       execution,
-      steps,
+      [],
       new Date(),
       null,
       null,
@@ -124,7 +123,6 @@ export class Phase implements DomainElement {
       isPhaseStatus(candidate.status) &&
       isPhaseExecution(candidate.execution) &&
       Array.isArray(candidate.steps) &&
-      !!candidate.steps.length &&
       candidate.steps.every(Step.isValid) &&
       isValidDate(candidate.createdAt) &&
       (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
@@ -151,7 +149,7 @@ export class Phase implements DomainElement {
     missionId: string,
     status: PhaseStatus,
     execution: PhaseExecution,
-    steps: Step[],
+    steps: Step[] | null,
     createdAt: Date,
     lastUpdatedAt: Date | null,
     startedAt: Date | null,
@@ -173,10 +171,6 @@ export class Phase implements DomainElement {
       throw new DomainError('A Phase needs an execution method!')
     }
 
-    if (!steps || !Array.isArray(steps) || steps.length <= 0) {
-      throw new DomainError('A Phase needs valid steps!')
-    }
-
     if (!isValidDate(createdAt)) {
       throw new DomainError('A Phase needs a valid creation date!')
     }
@@ -195,13 +189,27 @@ export class Phase implements DomainElement {
 
     this.id = id
     this.missionId = missionId
-    this.status = status
+    this._status = status
     this.execution = execution
-    this.steps = steps
+    this._steps = steps
     this._createdAt = createdAt
     this._lastUpdatedAt = lastUpdatedAt
     this.startedAt = startedAt
     this.completedAt = completedAt
+  }
+
+  /**
+   *  The status of this {@link Phase}.
+   */
+  get status(): PhaseStatus {
+    return this._status
+  }
+
+  /**
+   *  The {@link Step[] | Steps} of this {@link Phase}.
+   */
+  get steps(): Step[] | null {
+    return this._steps
   }
 
   /**
@@ -216,6 +224,26 @@ export class Phase implements DomainElement {
    */
   get lastUpdatedAt(): Date | null {
     return this._lastUpdatedAt
+  }
+
+  /**
+   * Prepares a {@link Phase} to launch.
+   * @param steps - The {@link Step[] | Phases} of this {@link Phase}.
+   */
+  prepare(steps: Step[]): Phase {
+    if (this.status !== PhaseStatus.Draft) {
+      throw new DomainError('The Phase has already been prepared.')
+    }
+
+    if (!steps || !Array.isArray(steps) || steps.length <= 0 || !steps.some(Step.isValid)) {
+      throw new DomainError('The Phase needs valid Steps to be prepared to launch.')
+    }
+
+    this._steps = steps
+    this._status = PhaseStatus.Waiting
+    this._lastUpdatedAt = new Date()
+
+    return this
   }
 }
 

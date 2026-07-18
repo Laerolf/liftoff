@@ -1,5 +1,6 @@
 import { describe, test, expect } from '@jest/globals'
-import { EXAMPLE_STEP_VALUES } from '@test/fixtures'
+import { createExampleStepData } from '@test/fixtures/data'
+import { EXAMPLE_VALUES } from '@test/fixtures/values'
 import { v7 as uuidv7 } from 'uuid'
 
 import { StepStatus } from '@/models/status'
@@ -10,7 +11,11 @@ describe('Step', () => {
   describe('restore', () => {
     test('can be restored', () => {
       // Given
-      const { repository, workflowId, outcome } = EXAMPLE_STEP_VALUES
+      const {
+        repositoryName: repository,
+        workflowId,
+        steps: { workflowOutcome: outcome, exposedWorkflowInputs }
+      } = EXAMPLE_VALUES
 
       let id = uuidv7()
       const phaseId = uuidv7()
@@ -30,7 +35,7 @@ describe('Step', () => {
         startDate,
         completionDate,
         outcome,
-        {}
+        exposedWorkflowInputs
       )
 
       // Then
@@ -48,87 +53,119 @@ describe('Step', () => {
 
     test('needs an ID', () => {
       // Given
-      const { repository, workflowId, outcome } = EXAMPLE_STEP_VALUES
+      const {
+        repositoryName: repository,
+        workflowId,
+        steps: { workflowOutcome: outcome },
+        date
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Step needs an ID!')
 
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs an ID.
-        Step.restore(null, repository, workflowId, new Date(), null, null, null, outcome)
+        Step.restore(null, repository, workflowId, date, null, null, null, outcome)
       ).toThrow(expectedError)
     })
 
     test('needs a Phase ID', () => {
       // Given
-      const { repository, workflowId, outcome } = EXAMPLE_STEP_VALUES
+      const {
+        repositoryName: repository,
+        workflowId,
+        steps: { workflowOutcome: outcome },
+        date,
+        id
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Step needs a Phase ID!')
 
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs an ID.
-        Step.restore(uuidv7(), null, repository, workflowId, new Date(), null, null, null, outcome)
+        Step.restore(id, null, repository, workflowId, date, null, null, null, outcome)
       ).toThrow(expectedError)
     })
 
     test('needs a repository', () => {
       // Given
-      const { workflowId, outcome } = EXAMPLE_STEP_VALUES
+      const {
+        workflowId,
+        steps: { workflowOutcome: outcome },
+        date,
+        id
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Step needs a repository!')
 
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs a repository.
-        Step.restore(uuidv7(), uuidv7(), null, workflowId, new Date(), null, null, null, outcome)
+        Step.restore(id, id, null, workflowId, date, null, null, null, outcome)
       ).toThrow(expectedError)
     })
 
     test('needs a workflow ID', () => {
       // Given
-      const { repository, outcome } = EXAMPLE_STEP_VALUES
+      const {
+        repositoryName: repository,
+        steps: { workflowOutcome: outcome },
+        date,
+        id
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Step needs a workflow ID!')
 
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs a workflow ID.
-        Step.restore(uuidv7(), uuidv7(), repository, null, new Date(), null, null, null, outcome)
+        Step.restore(id, id, repository, null, date, null, null, null, outcome)
       ).toThrow(expectedError)
     })
 
     test('needs a valid creation date', () => {
       // Given
-      const { repository, workflowId, outcome } = EXAMPLE_STEP_VALUES
+      const {
+        repositoryName: repository,
+        workflowId,
+        steps: { workflowOutcome: outcome },
+        id
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Step needs a valid creation date!')
 
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs a valid creation date.
-        Step.restore(uuidv7(), uuidv7(), repository, workflowId, null, null, null, null, outcome)
+        Step.restore(id, id, repository, workflowId, null, null, null, null, outcome)
       ).toThrow(expectedError)
       expect(() =>
         // @ts-expect-error A Step needs a valid creation date.
-        Step.restore(uuidv7(), uuidv7(), repository, workflowId, 'test', null, null, null, outcome)
+        Step.restore(id, id, repository, workflowId, 'test', null, null, null, outcome)
       ).toThrow(expectedError)
     })
 
     test('needs a valid last update date', () => {
       // Given
-      const { repository, workflowId, outcome } = EXAMPLE_STEP_VALUES
+      const {
+        repositoryName: repository,
+        workflowId,
+        steps: { workflowOutcome: outcome },
+        date,
+        id
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Step needs a valid last update date!')
 
       // When + Then
       expect(() =>
         Step.restore(
-          uuidv7(),
-          uuidv7(),
+          id,
+          id,
           repository,
           workflowId,
-          new Date(),
+          date,
           // @ts-expect-error A Step needs a valid last update date.
           'test',
           null,
@@ -140,18 +177,24 @@ describe('Step', () => {
 
     test('needs a valid start date', () => {
       // Given
-      const { repository, workflowId, outcome } = EXAMPLE_STEP_VALUES
+      const {
+        repositoryName: repository,
+        workflowId,
+        steps: { workflowOutcome: outcome },
+        date,
+        id
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Step needs a valid start date!')
 
       // When + Then
       expect(() =>
         Step.restore(
-          uuidv7(),
-          uuidv7(),
+          id,
+          id,
           repository,
           workflowId,
-          new Date(),
+          date,
           null,
           // @ts-expect-error A Step needs a valid start date.
           'test',
@@ -163,18 +206,24 @@ describe('Step', () => {
 
     test('needs a valid completion date', () => {
       // Given
-      const { repository, workflowId, outcome } = EXAMPLE_STEP_VALUES
+      const {
+        repositoryName: repository,
+        workflowId,
+        steps: { workflowOutcome: outcome },
+        date,
+        id
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Step needs a valid completion date!')
 
       // When + Then
       expect(() =>
         Step.restore(
-          uuidv7(),
-          uuidv7(),
+          id,
+          id,
           repository,
           workflowId,
-          new Date(),
+          date,
           null,
           null,
           // @ts-expect-error A Step needs a valid completion date.
@@ -186,22 +235,22 @@ describe('Step', () => {
 
     test('needs a valid outcome', () => {
       // Given
-      const { repository, workflowId } = EXAMPLE_STEP_VALUES
+      const { repositoryName: repository, workflowId, date, id } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Step needs a valid outcome!')
 
       // When + Then
       expect(() =>
         // @ts-expect-error A Step needs a valid outcome.
-        Step.restore(uuidv7(), uuidv7(), repository, workflowId, new Date(), null, null, null, null)
+        Step.restore(id, id, repository, workflowId, date, null, null, null, null)
       ).toThrow(expectedError)
       expect(() =>
         Step.restore(
-          uuidv7(),
-          uuidv7(),
+          id,
+          id,
           repository,
           workflowId,
-          new Date(),
+          date,
           null,
           null,
           null,
@@ -213,18 +262,24 @@ describe('Step', () => {
 
     test('needs valid workflow inputs', () => {
       // Given
-      const { repository, workflowId, outcome } = EXAMPLE_STEP_VALUES
+      const {
+        repositoryName: repository,
+        workflowId,
+        steps: { workflowOutcome: outcome },
+        date,
+        id
+      } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Step needs valid workflow inputs!')
 
       // When + Then
       expect(() =>
         Step.restore(
-          uuidv7(),
-          uuidv7(),
+          id,
+          id,
           repository,
           workflowId,
-          new Date(),
+          date,
           null,
           null,
           null,
@@ -235,11 +290,11 @@ describe('Step', () => {
       ).toThrow(expectedError)
       expect(() =>
         Step.restore(
-          uuidv7(),
-          uuidv7(),
+          id,
+          id,
           repository,
           workflowId,
-          new Date(),
+          date,
           null,
           null,
           null,
@@ -254,16 +309,19 @@ describe('Step', () => {
   describe('create', () => {
     test('can be created', () => {
       // Given
-      const { repository, workflowId } = EXAMPLE_STEP_VALUES
-
-      const phaseId = uuidv7()
+      const {
+        repositoryName: repository,
+        workflowId,
+        steps: { exposedWorkflowInputs },
+        id
+      } = EXAMPLE_VALUES
 
       // When
-      const step = Step.create(phaseId, repository, workflowId, {})
+      const step = Step.create(id, repository, workflowId, exposedWorkflowInputs)
 
       // Then
       expect(step.id).toBeDefined()
-      expect(step.phaseId).toBe(phaseId)
+      expect(step.phaseId).toBe(id)
       expect(step.workflowOutcome).toBe(StepStatus.Waiting)
       expect(step.createdAt).toBeDefined()
       expect(step.lastUpdatedAt).toBeNull()
@@ -275,9 +333,9 @@ describe('Step', () => {
   describe('isValid', () => {
     test('can be valid', () => {
       // Given
-      const { repository, workflowId } = EXAMPLE_STEP_VALUES
+      const { repositoryName: repository, workflowId, id } = EXAMPLE_VALUES
 
-      const step = Step.create(uuidv7(), repository, workflowId)
+      const step = Step.create(id, repository, workflowId)
 
       // When + Then
       expect(Step.isValid(step)).toBeTruthy()
@@ -285,133 +343,31 @@ describe('Step', () => {
 
     test('needs a valid last update date', () => {
       // When + Then
-      expect(
-        Step.isValid({
-          id: uuidv7(),
-          phaseId: uuidv7(),
-          repository: 'test',
-          workflowId: '6666',
-          workflowOutcome: 'WAITING',
-          workflowInputs: {},
-          createdAt: new Date(),
-          lastUpdatedAt: 'test',
-          completedAt: null
-        })
-      ).toBeFalsy()
+      expect(Step.isValid(createExampleStepData({ lastUpdatedAt: 'test' }))).toBeFalsy()
     })
 
     test('needs a valid start date', () => {
       // When + Then
-      expect(
-        Step.isValid({
-          id: uuidv7(),
-          phaseId: uuidv7(),
-          repository: 'test',
-          workflowId: '6666',
-          workflowOutcome: 'WAITING',
-          workflowInputs: {},
-          createdAt: new Date(),
-          lastUpdatedAt: null,
-          startedAt: 'test'
-        })
-      ).toBeFalsy()
+      expect(Step.isValid(createExampleStepData({ startedAt: 'test' }))).toBeFalsy()
     })
 
     test('needs a valid completion date', () => {
       // When + Then
-      expect(
-        Step.isValid({
-          id: uuidv7(),
-          phaseId: uuidv7(),
-          repository: 'test',
-          workflowId: '6666',
-          workflowOutcome: 'WAITING',
-          workflowInputs: {},
-          createdAt: new Date(),
-          lastUpdatedAt: null,
-          completedAt: 'test'
-        })
-      ).toBeFalsy()
+      expect(Step.isValid(createExampleStepData({ completedAt: 'test' }))).toBeFalsy()
     })
 
     test('can have exposed inputs', () => {
-      // Given
-      const { repository, workflowId } = EXAMPLE_STEP_VALUES
-
       // When + Then
-      expect(
-        Step.isValid({
-          id: 'test',
-          phaseId: uuidv7(),
-          repository: repository,
-          workflowId: workflowId,
-          createdAt: new Date(),
-          workflowOutcome: 'WAITING',
-          workflowInputs: null
-        })
-      ).toBeTruthy()
-      expect(
-        Step.isValid({
-          id: 'test',
-          phaseId: uuidv7(),
-          repository: repository,
-          workflowId: workflowId,
-          createdAt: new Date(),
-          workflowOutcome: 'WAITING',
-          workflowInputs: {}
-        })
-      ).toBeTruthy()
-      expect(
-        Step.isValid({
-          id: uuidv7(),
-          phaseId: uuidv7(),
-          repository: repository,
-          workflowId: workflowId,
-          createdAt: new Date(),
-          workflowOutcome: 'WAITING',
-          workflowInputs: 'test'
-        })
-      ).toBeFalsy()
+      expect(Step.isValid(createExampleStepData({ workflowInputs: null }))).toBeTruthy()
+      expect(Step.isValid(createExampleStepData({ workflowInputs: {} }))).toBeTruthy()
+      expect(Step.isValid(createExampleStepData({ workflowInputs: 'test' }))).toBeFalsy()
     })
 
     test('needs a valid outcome', () => {
-      // Given
-      const { repository, workflowId } = EXAMPLE_STEP_VALUES
-
       // When + Then
-      expect(
-        Step.isValid({
-          id: uuidv7(),
-          phaseId: uuidv7(),
-          repository: repository,
-          workflowId: workflowId,
-          createdAt: new Date(),
-          workflowOutcome: 'test',
-          workflowInputs: null
-        })
-      ).toBeFalsy()
-      expect(
-        Step.isValid({
-          id: uuidv7(),
-          phaseId: uuidv7(),
-          repository: repository,
-          workflowId: workflowId,
-          createdAt: new Date(),
-          workflowOutcome: 'WAITING',
-          workflowInputs: null
-        })
-      ).toBeTruthy()
-      expect(
-        Step.isValid({
-          id: uuidv7(),
-          phaseId: uuidv7(),
-          repository: repository,
-          createdAt: new Date(),
-          workflowId: workflowId,
-          workflowOutcome: null,
-          workflowInputs: null
-        })
-      ).toBeFalsy()
+      expect(Step.isValid(createExampleStepData({ workflowOutcome: 'test' }))).toBeFalsy()
+      expect(Step.isValid(createExampleStepData({ workflowOutcome: 'WAITING' }))).toBeTruthy()
+      expect(Step.isValid(createExampleStepData({ workflowOutcome: null }))).toBeFalsy()
     })
 
     test('needs to be defined', () => {

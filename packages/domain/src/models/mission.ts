@@ -52,7 +52,7 @@ export class Mission implements DomainElement {
   /**
    * The phases of this {@link Mission}.
    */
-  phases: Phase[]
+  private _phases: Phase[] | null
   /**
    * The moment this {@link Mission} was created.
    */
@@ -140,7 +140,7 @@ export class Mission implements DomainElement {
       services,
       director,
       [],
-      MissionStatus.Launching,
+      MissionStatus.Draft,
       null,
       null
     )
@@ -172,7 +172,7 @@ export class Mission implements DomainElement {
       flightPlan.services,
       director,
       flightPlan.phases,
-      MissionStatus.Launching,
+      MissionStatus.Draft,
       null,
       null
     )
@@ -236,7 +236,7 @@ export class Mission implements DomainElement {
     environment: string,
     services: string[],
     director: string,
-    phases: Phase[],
+    phases: Phase[] | null,
     status: MissionStatus,
     launchedAt: Date | null,
     completedAt: Date | null
@@ -294,7 +294,7 @@ export class Mission implements DomainElement {
     this.environment = environment
     this.services = services
     this.director = director
-    this.phases = phases
+    this._phases = phases
     this._status = status
     this.launchedAt = launchedAt || null
     this.completedAt = completedAt || null
@@ -305,6 +305,13 @@ export class Mission implements DomainElement {
    */
   get status(): MissionStatus {
     return this._status
+  }
+
+  /**
+   *  The {@link Phase[] | Phases} of this {@link Mission}.
+   */
+  get phases(): Phase[] | null {
+    return this._phases
   }
 
   /**
@@ -322,16 +329,36 @@ export class Mission implements DomainElement {
   }
 
   /**
+   * Prepares a {@link Mission} to launch.
+   * @param phases - The {@link Phase[] | Phases} of this {@link Mission}.
+   */
+  prepare(phases: Phase[]): Mission {
+    if (this.status !== MissionStatus.Draft) {
+      throw new DomainError('The Mission has already been prepared.')
+    }
+
+    if (!phases || !Array.isArray(phases) || phases.length <= 0 || !phases.some(Phase.isValid)) {
+      throw new DomainError('The Mission needs valid Phases to be prepared to launch.')
+    }
+
+    this._phases = phases
+    this._status = MissionStatus.Launching
+    this._lastUpdatedAt = new Date()
+
+    return this
+  }
+
+  /**
    * Launches a {@link Mission}.
    * @throws {DomainError}
    */
   launch(): Mission {
-    if (this.status !== MissionStatus.Launching) {
-      throw new DomainError('The Mission has already been launched.')
+    if (this.status === MissionStatus.Draft) {
+      throw new DomainError('The Mission is just a draft.')
     }
 
-    if (!this.phases || !Array.isArray(this.phases) || this.phases.length <= 0) {
-      throw new DomainError('A Mission needs valid phases before launching!')
+    if (this.status !== MissionStatus.Launching) {
+      throw new DomainError('The Mission has already been launched.')
     }
 
     this._status = MissionStatus.InOrbit
