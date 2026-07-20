@@ -139,7 +139,7 @@ export class Mission implements DomainElement {
       environment,
       services,
       director,
-      [],
+      null,
       MissionStatus.Draft,
       null,
       null
@@ -201,8 +201,8 @@ export class Mission implements DomainElement {
       typeof candidate.director === 'string' &&
       isMissionStatus(candidate.status) &&
       (!candidate.launchedAt || isValidDate(candidate.launchedAt)) &&
-      Array.isArray(candidate.phases) &&
-      candidate.phases.every(Phase.isValid) &&
+      (!candidate.phases ||
+        (Array.isArray(candidate.phases) && candidate.phases.every(Phase.isValid))) &&
       isValidDate(candidate.createdAt) &&
       (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
       (!candidate.completedAt || isValidDate(candidate.completedAt))

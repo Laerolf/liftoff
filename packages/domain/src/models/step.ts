@@ -147,7 +147,7 @@ export class Step implements DomainElement {
   /**
    * Creates a new {@link Step}.
    * @param id - The ID of the {@link Step} to create.
-   * @param phaseId - The ID of the Phase that the {@link Phase} to create belongs to.
+   * @param phaseId - The ID of the Phase that the {@link Step} to create belongs to.
    * @param repository - The GitHub repository of the {@link Step} to create.
    * @param workflowId - The GitHub Workflow ID of the {@link Step} to create.
    * @param createdAt - The moment the {@link Step} to create was created.

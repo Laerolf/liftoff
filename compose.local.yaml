@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    shm_size: 128mb
+    environment:
+      - POSTGRES_DB=liftoff
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+    ports:
+      - 5432:5432
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 6080:8080

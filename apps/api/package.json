@@ -1,0 +1,37 @@
+{
+  "name": "@liftoff/api",
+  "type": "module",
+  "scripts": {
+    "dev": "node --env-file=.env --import=tsx --watch src/index.ts",
+    "lint": "oxlint --fix",
+    "format": "oxfmt",
+    "test:unit": "jest --detectOpenHandles",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "drizzle-kit:generate": "npx drizzle-kit generate",
+    "drizzle-kit:migrate": "npx drizzle-kit migrate"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.0.8",
+    "@liftoff/domain": "workspace:*",
+    "drizzle-orm": "catalog:",
+    "hono": "^4.12.27",
+    "pg": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@jest/globals": "catalog:",
+    "@types/node": "catalog:",
+    "@types/pg": "catalog:",
+    "drizzle-kit": "catalog:",
+    "http-status": "catalog:",
+    "jest": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
+    "ts-jest": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -98,7 +98,7 @@ export class Phase implements DomainElement {
       missionId,
       PhaseStatus.Draft,
       execution,
-      [],
+      null,
       new Date(),
       null,
       null,
@@ -122,8 +122,8 @@ export class Phase implements DomainElement {
       typeof candidate.missionId === 'string' &&
       isPhaseStatus(candidate.status) &&
       isPhaseExecution(candidate.execution) &&
-      Array.isArray(candidate.steps) &&
-      candidate.steps.every(Step.isValid) &&
+      (!candidate.steps ||
+        (Array.isArray(candidate.steps) && candidate.steps.every(Step.isValid))) &&
       isValidDate(candidate.createdAt) &&
       (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
       (!candidate.startedAt || isValidDate(candidate.startedAt)) &&
