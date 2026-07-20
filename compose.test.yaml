@@ -1,0 +1,9 @@
+services:
+  postgres-test:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: liftoff_test
+      POSTGRES_USER: liftoff
+      POSTGRES_PASSWORD: liftoff
+    ports:
+      - '5433:5432'

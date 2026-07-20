@@ -24,11 +24,11 @@ export default defineConfig({
   },
   modulePathIgnorePatterns: ['<rootDir>/dist/'],
   watchPathIgnorePatterns: ['<rootDir>/dist/'],
-  testMatch: ['<rootDir>/test/unit/**/*.spec.ts'],
-  setupFiles: ['<rootDir>/test/unit/setup-env.ts'],
+  testMatch: ['<rootDir>/test/integration/**/*.spec.ts'],
+  setupFiles: ['<rootDir>/test/integration/setup-env.ts'],
   collectCoverage: true,
   coverageProvider: 'v8',
-  collectCoverageFrom: ['src/**/*ts', '!src/index.ts', '!src/**/repository.ts', '!src/db/*.ts'],
+  collectCoverageFrom: ['src/**/repository.ts', 'src/db/*.ts'],
   coverageThreshold: {
     global: {
       // Requires 80% branch coverage

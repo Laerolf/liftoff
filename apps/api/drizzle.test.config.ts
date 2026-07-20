@@ -1,12 +1,10 @@
 import { defineConfig } from 'drizzle-kit'
 
-import { config } from './src/config'
-
 export default defineConfig({
   out: './.drizzle',
   schema: './src/db/schema.ts',
   dialect: 'postgresql',
   dbCredentials: {
-    url: config.dbUrl
+    url: 'postgres://liftoff:liftoff@localhost:5433/liftoff_test'
   }
 })

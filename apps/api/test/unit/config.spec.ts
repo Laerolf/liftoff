@@ -46,6 +46,7 @@ describe('config', () => {
 
   test('should parse USE_SSL as boolean', async () => {
     process.env.USE_SSL = 'true'
+    process.env.DATABASE_URL = 'armageddon://localhost/liftoff'
 
     const { config } = await import('@/config')
     expect(config.useSsl).toBe(true)

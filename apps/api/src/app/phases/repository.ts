@@ -74,11 +74,11 @@ export class PhaseRepository {
   }
 
   /**
-   * Inserts new {@link Phase[] | Phase} entities in the database.
-   * @param models - The models to persist.
+   * Inserts new {@link PhaseInsertEntity[] | Phase entities} in the database.
+   * @param models - The models to insert.
    * @param dbConnection - The database connection to use.
    */
-  async insert(
+  async insertMany(
     models: PhaseInsertEntity[],
     dbConnection: DatabaseConnection
   ): Promise<PhaseInsertEntity[]> {
@@ -91,6 +91,37 @@ export class PhaseRepository {
     } catch (error) {
       console.error('Failed to insert new Phase entities in the database.', error)
       throw new Error('Failed to insert new Phase entities in the database.', {
+        cause: error
+      })
+    }
+  }
+
+  /**
+   * Updates many {@link PhaseInsertEntity[] | Phase entities} in the database.
+   * @param models - The models to update.
+   * @param dbConnection - The database connection to use.
+   */
+  async updateMany(
+    models: PhaseInsertEntity[],
+    dbConnection: DatabaseConnection
+  ): Promise<PhaseInsertEntity[]> {
+    try {
+      if (!models.length) {
+        return []
+      }
+
+      return await Promise.all(
+        models.map((model) =>
+          dbConnection
+            .update(phasesTable)
+            .set(model)
+            .returning()
+            .then((result) => result[0])
+        )
+      )
+    } catch (error) {
+      console.error('Failed to update Phase entities in the database.', error)
+      throw new Error('Failed to update Phase entities in the database.', {
         cause: error
       })
     }

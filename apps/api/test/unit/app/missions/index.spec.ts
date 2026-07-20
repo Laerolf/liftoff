@@ -62,11 +62,11 @@ describe('/missions', () => {
       mockedMissionRepository.prototype.insert.mockResolvedValueOnce(expectedMissionEntity)
       mockedMissionRepository.prototype.findById.mockResolvedValueOnce(expectedMissionEntity)
 
-      mockedPhaseRepository.prototype.insert.mockResolvedValueOnce([expectedPhaseEntity])
+      mockedPhaseRepository.prototype.insertMany.mockResolvedValueOnce([expectedPhaseEntity])
       mockedPhaseRepository.prototype.getAllByIds.mockResolvedValueOnce([expectedPhaseEntity])
       mockedPhaseRepository.prototype.getAllByMissionId.mockResolvedValueOnce([expectedPhaseEntity])
 
-      mockedStepRepository.prototype.insert.mockResolvedValueOnce([expectedStepEntity])
+      mockedStepRepository.prototype.insertMany.mockResolvedValueOnce([expectedStepEntity])
       mockedStepRepository.prototype.getAllByIds.mockResolvedValueOnce([expectedStepEntity])
       mockedStepRepository.prototype.getAllByPhaseId.mockResolvedValueOnce([expectedStepEntity])
 

@@ -1,2 +1,2 @@
 # Testing
-test/setup-env.ts
+test/**/setup-env.ts

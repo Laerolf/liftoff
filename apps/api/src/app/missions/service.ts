@@ -2,6 +2,7 @@ import { Mission, Phase } from '@liftoff/domain'
 
 import { DatabaseConnection } from '@/db'
 
+import { PhaseCreationForm } from '../phases/form'
 import { PhaseMapper } from '../phases/mapper'
 import { PhaseCommandService } from '../phases/service'
 import { StepMapper } from '../steps/mapper'
@@ -34,7 +35,14 @@ export class MissionQueryService {
    */
   async getAll(dbConnection: DatabaseConnection): Promise<Mission[]> {
     try {
-      return (await this.repository.getAll(dbConnection)).map(MissionMapper.toMission)
+      return (await this.repository.getAll(dbConnection)).map((entity) => {
+        const phases = (entity?.phases || []).map((phase) => {
+          const steps = phase.steps.map(StepMapper.toStep)
+          return PhaseMapper.toPhase(phase, steps)
+        })
+
+        return MissionMapper.toMission(entity, phases)
+      })
     } catch (error) {
       console.error('Failed to get all the existing Missions.', error)
       throw new Error('Failed to get all the existing Missions.', { cause: error })
@@ -70,7 +78,7 @@ export class MissionQueryService {
 
   /**
    * Gets a {@link Mission} with the provided ID.
-   * @missionId - The Mission ID to search with.
+   * @param missionId - The Mission ID to search with.
    * @param dbConnection - The database connection to use.
    */
   async getById(missionId: string, dbConnection: DatabaseConnection): Promise<Mission> {
@@ -130,7 +138,7 @@ export class MissionCommandService {
   }
 
   /**
-   * Creates a new {@link Mission} from scratch.
+   * Creates a new {@link Mission} from scratch and prepares it for launch.
    * @param form - The form used to create the new {@link Mission}.
    * @param dbConnection - The database connection to use.
    */
@@ -146,23 +154,44 @@ export class MissionCommandService {
         form.director
       )
 
+      await this.repository.insert(MissionMapper.toMissionInsertEntity(model), dbConnection)
+
+      return this.prepareForLaunch(model, form.phases, dbConnection)
+    } catch (error) {
+      console.error('Failed to create a new Mission.', error)
+      throw new Error('Failed to create a new Mission.', { cause: error })
+    }
+  }
+
+  /**
+   * Prepares a {@link Mission} for launch.
+   * @param model - The {@link Mission} to prepare for launch.
+   * @param phaseCreationForms - The form used to create the {@link Phase[] | Phases} of the {@link Mission}.
+   * @param dbConnection - The database connection to use.
+   */
+  private async prepareForLaunch(
+    model: Mission,
+    phaseCreationForms: PhaseCreationForm[],
+    dbConnection: DatabaseConnection
+  ): Promise<Mission> {
+    try {
       const phaseModels: Phase[] = await this.phaseCommandService.createForMission(
         model.id,
-        form.phases,
+        phaseCreationForms,
         dbConnection
       )
 
       model.prepare(phaseModels)
 
-      const entity: MissionInsertEntity = await this.repository.insert(
+      const entity: MissionInsertEntity = await this.repository.update(
         MissionMapper.toMissionInsertEntity(model),
         dbConnection
       )
 
       return await this.missionQueryService.getById(entity.id, dbConnection)
     } catch (error) {
-      console.error('Failed to create a new Mission.', error)
-      throw new Error('Failed to create a new Mission.', { cause: error })
+      console.error('Failed to prepare a Mission for launch.', error)
+      throw new Error('Failed to prepare a Mission for launch.', { cause: error })
     }
   }
 }

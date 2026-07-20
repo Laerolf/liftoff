@@ -102,7 +102,7 @@ export class StepCommandService {
         .map((form) => Step.create(phaseId, form.repository, form.workflowId, form.workflowInputs))
         .map(StepMapper.toStepInsertEntity)
 
-      const entities: StepInsertEntity[] = await this.repository.insert(models, dbConnection)
+      const entities: StepInsertEntity[] = await this.repository.insertMany(models, dbConnection)
 
       return this.queryService.getAllByIds(
         entities.map(({ id }) => id),

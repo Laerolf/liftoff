@@ -58,8 +58,8 @@ export class MissionRepository {
   }
 
   /**
-   * Inserts a new Mission entity in the database.
-   * @param model - The model to persist.
+   * Inserts a new {@link MissionInsertEntity | Mission entity} in the database.
+   * @param model - The model to insert.
    * @param dbConnection - The database connection to use.
    */
   async insert(
@@ -67,11 +67,29 @@ export class MissionRepository {
     dbConnection: DatabaseConnection
   ): Promise<MissionInsertEntity> {
     try {
-      const [result] = await dbConnection.insert(missionsTable).values(model).returning()
-      return result
+      return (await dbConnection.insert(missionsTable).values(model).returning())[0]
     } catch (error) {
       console.error('Failed to insert a new Mission entity in the database.', error)
       throw new Error('Failed to insert a new Mission entity in the database.', {
+        cause: error
+      })
+    }
+  }
+
+  /**
+   * Updates a {@link MissionInsertEntity | Mission entity} in the database.
+   * @param model - The model to update.
+   * @param dbConnection - The database connection to use.
+   */
+  async update(
+    model: MissionInsertEntity,
+    dbConnection: DatabaseConnection
+  ): Promise<MissionInsertEntity> {
+    try {
+      return (await dbConnection.update(missionsTable).set(model).returning())[0]
+    } catch (error) {
+      console.error('Failed to update a Mission entity in the database.', error)
+      throw new Error('Failed to update a Mission entity in the database.', {
         cause: error
       })
     }

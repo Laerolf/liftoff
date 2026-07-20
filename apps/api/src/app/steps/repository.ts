@@ -66,11 +66,11 @@ export class StepRepository {
   }
 
   /**
-   * Inserts new {@link Step[] | Steps} entities in the database.
-   * @param models - The models to persist.
+   * Inserts new {@link StepInsertEntity[] | Steps} entities in the database.
+   * @param models - The models to insert.
    * @param dbConnection - The database connection to use.
    */
-  async insert(
+  async insertMany(
     models: StepInsertEntity[],
     dbConnection: DatabaseConnection
   ): Promise<StepInsertEntity[]> {

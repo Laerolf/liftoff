@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:15
+    image: postgres:16
     restart: always
     shm_size: 128mb
     environment:
@@ -9,9 +9,3 @@ services:
       - POSTGRES_PASSWORD=test
     ports:
       - 5432:5432
-
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 6080:8080

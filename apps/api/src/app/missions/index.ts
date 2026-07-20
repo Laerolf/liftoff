@@ -17,7 +17,7 @@ app.get('/', setRequestContext, async (context) => {
   try {
     const { missionQueryService } = context.get('context')
 
-    const missions = await missionQueryService.getAll(dbConnection)
+    const missions = (await missionQueryService.getAll(dbConnection)).map(MissionDto.from)
     return context.json(missions)
   } catch (error) {
     console.error('Failed to get all Missions.', { error })
@@ -62,7 +62,9 @@ app.post(
 
       const form = context.req.valid('json')
 
-      const model = await missionCommandService.createFromScratch(form, dbConnection)
+      const model = await dbConnection.transaction(async (tx) => {
+        return await missionCommandService.createFromScratch(form, tx)
+      })
 
       return context.json(MissionDto.from(model))
     } catch (error) {
