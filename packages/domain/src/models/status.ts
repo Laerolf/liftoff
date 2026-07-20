@@ -3,6 +3,10 @@
  */
 export enum MissionStatus {
   /**
+   * The Mission is just a draft.
+   */
+  Draft = 'DRAFT',
+  /**
    * The Mission is about to be launched.
    */
   Launching = 'LAUNCHING',
@@ -24,6 +28,10 @@ export enum MissionStatus {
  * Represents a status of a Phase.
  */
 export enum PhaseStatus {
+  /**
+   * The Phase is just a draft.
+   */
+  Draft = 'DRAFT',
   /**
    * The Phase is waiting to be run.
    */
@@ -50,6 +58,10 @@ export enum PhaseStatus {
  * Represents a status of a Step.
  */
 export enum StepStatus {
+  /**
+   * The Step is just a draft.
+   */
+  Draft = 'DRAFT',
   /**
    * The Step is waiting to be run.
    */

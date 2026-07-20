@@ -1,19 +1,18 @@
 import { v7 as uuidv7 } from 'uuid'
 
-import { DomainElement } from '@/shared/domainElement'
-import { isValidDate } from '@/utils/date'
-import { isMissionStatus } from '@/utils/status'
-
+import { DomainElement } from '../shared/domainElement'
 import { DomainError } from '../shared/errors'
+import { isValidDate } from '../utils/date'
+import { isMissionStatus } from '../utils/status'
 
-import FlightPlan from './flightPlan'
-import Phase from './phase'
+import { FlightPlan } from './flightPlan'
+import { Phase } from './phase'
 import { MissionStatus } from './status'
 
 /**
  * Represents a single execution of a {@link FlightPlan}.
  */
-export default class Mission implements DomainElement {
+export class Mission implements DomainElement {
   /**
    * The ID of this {@link Mission}.
    */
@@ -53,7 +52,7 @@ export default class Mission implements DomainElement {
   /**
    * The phases of this {@link Mission}.
    */
-  readonly phases: Phase[]
+  private _phases: Phase[] | null
   /**
    * The moment this {@link Mission} was created.
    */
@@ -66,101 +65,6 @@ export default class Mission implements DomainElement {
    * The date this {@link Mission} was completed.
    */
   readonly completedAt: Date | null
-
-  /**
-   * Creates a new {@link Mission}.
-   * @param id - The ID of the {@link Mission} to create.
-   * @param correlationId - The correlation ID of the {@link Mission} to create.
-   * @param flightPlanId - The ID of the Flight Plan that the {@link Mission} to create is based on.
-   * @param createdAt - The moment the {@link Mission} to create was created.
-   * @param lastUpdatedAt - The moment the {@link Mission} to create was last updated.
-   * @param workflowBranch - The branch name of the workflow that will be run by the {@link Mission} to create.
-   * @param environment - The environment that the {@link Mission} to create targets.
-   * @param services - The names of what the {@link Mission} to create targets.
-   * @param director - The person who executed the {@link Mission} to create.
-   * @param phases - The phases of the {@link Mission} to create.
-   * @param status - The status of the {@link Mission} to create.
-   * @param launchedAt - The date of the {@link Mission}'s launch to create.
-   * @param completedAt - The date this {@link Mission} to create was completed.
-   * @throws {DomainError}
-   */
-  private constructor(
-    id: string,
-    correlationId: string,
-    flightPlanId: string | null,
-    createdAt: Date,
-    lastUpdatedAt: Date | null,
-    workflowBranch: string,
-    environment: string,
-    services: string[],
-    director: string,
-    phases: Phase[],
-    status: MissionStatus,
-    launchedAt: Date | null,
-    completedAt: Date | null
-  ) {
-    if (!id) {
-      throw new DomainError('A Mission needs an ID!')
-    }
-
-    if (!correlationId) {
-      throw new DomainError('A Mission needs a correlation ID!')
-    }
-
-    if (!isValidDate(createdAt)) {
-      throw new DomainError('A Mission needs a valid creation date!')
-    }
-
-    if (lastUpdatedAt && !isValidDate(lastUpdatedAt)) {
-      throw new DomainError('A Mission needs a valid last update date!')
-    }
-
-    if (!workflowBranch) {
-      throw new DomainError('A Mission needs a target workflow branch name!')
-    }
-
-    if (!environment) {
-      throw new DomainError('A Mission needs a target environment!')
-    }
-
-    if (!services || !Array.isArray(services) || services.length <= 0) {
-      throw new DomainError('A Mission needs valid target service IDs!')
-    }
-
-    if (!director) {
-      throw new DomainError('A Mission needs a director!')
-    }
-
-    if (!phases || !Array.isArray(phases) || phases.length <= 0) {
-      throw new DomainError('A Mission needs valid phases!')
-    }
-
-    if (!isMissionStatus(status)) {
-      throw new DomainError('A Mission needs a valid status!')
-    }
-
-    if (launchedAt && !isValidDate(launchedAt)) {
-      throw new DomainError('A Mission needs a valid launch date!')
-    }
-
-    if (completedAt && !isValidDate(completedAt)) {
-      throw new DomainError('A Mission needs a valid completion date!')
-    }
-
-    this.id = id
-    this.correlationId = correlationId
-    this.flightPlanId = flightPlanId
-    this._createdAt = createdAt
-    this._lastUpdatedAt = lastUpdatedAt || null
-    this.workflowBranch = workflowBranch
-    this.environment = environment
-    this.services = services
-    this.director = director
-    this.phases = phases
-    this._status = status
-    this.launchedAt = launchedAt || null
-    this.completedAt = completedAt || null
-  }
 
   /**
    * Restores a {@link Mission}.
@@ -217,15 +121,13 @@ export default class Mission implements DomainElement {
    * @param environment - The environment that the {@link Mission} to create targets.
    * @param services - The names of what the {@link Mission} to create targets.
    * @param director - The person who executed the {@link Mission} to create.
-   * @param phases - The phases of the {@link Mission} to create.
    * @throws {DomainError}
    */
   static fromScratch(
     workflowBranch: string,
     environment: string,
     services: string[],
-    director: string,
-    phases: Phase[]
+    director: string
   ): Mission {
     return new Mission(
       uuidv7(),
@@ -237,8 +139,8 @@ export default class Mission implements DomainElement {
       environment,
       services,
       director,
-      phases,
-      MissionStatus.Launching,
+      null,
+      MissionStatus.Draft,
       null,
       null
     )
@@ -270,10 +172,132 @@ export default class Mission implements DomainElement {
       flightPlan.services,
       director,
       flightPlan.phases,
-      MissionStatus.Launching,
+      MissionStatus.Draft,
       null,
       null
     )
+  }
+
+  /**
+   * Tests whether the provided value is a valid {@link Mission}.
+   * @param value - The value to test.
+   */
+  static isValid(value: unknown): value is Mission {
+    if (typeof value !== 'object' || value === null) {
+      return false
+    }
+
+    const candidate = value as Record<string, unknown>
+
+    return (
+      typeof candidate.id === 'string' &&
+      typeof candidate.correlationId === 'string' &&
+      (!candidate.flightPlanId || typeof candidate.flightPlanId === 'string') &&
+      typeof candidate.workflowBranch === 'string' &&
+      typeof candidate.environment === 'string' &&
+      Array.isArray(candidate.services) &&
+      !!candidate.services.length &&
+      candidate.services.every((service) => typeof service === 'string') &&
+      typeof candidate.director === 'string' &&
+      isMissionStatus(candidate.status) &&
+      (!candidate.launchedAt || isValidDate(candidate.launchedAt)) &&
+      (!candidate.phases ||
+        (Array.isArray(candidate.phases) && candidate.phases.every(Phase.isValid))) &&
+      isValidDate(candidate.createdAt) &&
+      (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
+      (!candidate.completedAt || isValidDate(candidate.completedAt))
+    )
+  }
+
+  /**
+   * Creates a new {@link Mission}.
+   * @param id - The ID of the {@link Mission} to create.
+   * @param correlationId - The correlation ID of the {@link Mission} to create.
+   * @param flightPlanId - The ID of the Flight Plan that the {@link Mission} to create is based on.
+   * @param createdAt - The moment the {@link Mission} to create was created.
+   * @param lastUpdatedAt - The moment the {@link Mission} to create was last updated.
+   * @param workflowBranch - The branch name of the workflow that will be run by the {@link Mission} to create.
+   * @param environment - The environment that the {@link Mission} to create targets.
+   * @param services - The names of what the {@link Mission} to create targets.
+   * @param director - The person who executed the {@link Mission} to create.
+   * @param phases - The phases of the {@link Mission} to create.
+   * @param status - The status of the {@link Mission} to create.
+   * @param launchedAt - The date of the {@link Mission}'s launch to create.
+   * @param completedAt - The date this {@link Mission} to create was completed.
+   * @throws {DomainError}
+   */
+  private constructor(
+    id: string,
+    correlationId: string,
+    flightPlanId: string | null,
+    createdAt: Date,
+    lastUpdatedAt: Date | null,
+    workflowBranch: string,
+    environment: string,
+    services: string[],
+    director: string,
+    phases: Phase[] | null,
+    status: MissionStatus,
+    launchedAt: Date | null,
+    completedAt: Date | null
+  ) {
+    if (!id) {
+      throw new DomainError('A Mission needs an ID!')
+    }
+
+    if (!correlationId) {
+      throw new DomainError('A Mission needs a correlation ID!')
+    }
+
+    if (!isValidDate(createdAt)) {
+      throw new DomainError('A Mission needs a valid creation date!')
+    }
+
+    if (lastUpdatedAt && !isValidDate(lastUpdatedAt)) {
+      throw new DomainError('A Mission needs a valid last update date!')
+    }
+
+    if (!workflowBranch) {
+      throw new DomainError('A Mission needs a target workflow branch name!')
+    }
+
+    if (!environment) {
+      throw new DomainError('A Mission needs a target environment!')
+    }
+
+    if (!services || !Array.isArray(services) || services.length <= 0) {
+      throw new DomainError('A Mission needs valid target service IDs!')
+    }
+
+    if (!director) {
+      throw new DomainError('A Mission needs a director!')
+    }
+
+    if (!isMissionStatus(status)) {
+      throw new DomainError('A Mission needs a valid status!')
+    }
+
+    if (launchedAt && !isValidDate(launchedAt)) {
+      throw new DomainError('A Mission needs a valid launch date!')
+    }
+
+    if (completedAt && !isValidDate(completedAt)) {
+      throw new DomainError('A Mission needs a valid completion date!')
+    }
+
+    this.id = id
+    this.correlationId = correlationId
+    this.flightPlanId = flightPlanId
+    this._createdAt = createdAt
+    this._lastUpdatedAt = lastUpdatedAt || null
+    this.workflowBranch = workflowBranch
+    this.environment = environment
+    this.services = services
+    this.director = director
+    this._phases = phases
+    this._status = status
+    this.launchedAt = launchedAt || null
+    this.completedAt = completedAt || null
   }
 
   /**
@@ -281,6 +305,13 @@ export default class Mission implements DomainElement {
    */
   get status(): MissionStatus {
     return this._status
+  }
+
+  /**
+   *  The {@link Phase[] | Phases} of this {@link Mission}.
+   */
+  get phases(): Phase[] | null {
+    return this._phases
   }
 
   /**
@@ -298,10 +329,34 @@ export default class Mission implements DomainElement {
   }
 
   /**
+   * Prepares a {@link Mission} to launch.
+   * @param phases - The {@link Phase[] | Phases} of this {@link Mission}.
+   */
+  prepare(phases: Phase[]): Mission {
+    if (this.status !== MissionStatus.Draft) {
+      throw new DomainError('The Mission has already been prepared.')
+    }
+
+    if (!phases || !Array.isArray(phases) || phases.length <= 0 || !phases.some(Phase.isValid)) {
+      throw new DomainError('The Mission needs valid Phases to be prepared to launch.')
+    }
+
+    this._phases = phases
+    this._status = MissionStatus.Launching
+    this._lastUpdatedAt = new Date()
+
+    return this
+  }
+
+  /**
    * Launches a {@link Mission}.
    * @throws {DomainError}
    */
   launch(): Mission {
+    if (this.status === MissionStatus.Draft) {
+      throw new DomainError('The Mission is just a draft.')
+    }
+
     if (this.status !== MissionStatus.Launching) {
       throw new DomainError('The Mission has already been launched.')
     }

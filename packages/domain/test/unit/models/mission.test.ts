@@ -1,9 +1,10 @@
 import { describe, test, expect } from '@jest/globals'
-import { EXAMPLE_FLIGHT_PLAN_VALUES, EXAMPLE_MISSION_VALUES, EXAMPLE_VALUES } from '@test/fixtures'
+import { createExampleMissionData } from '@test/fixtures/data'
+import { EXAMPLE_PHASE, EXAMPLE_VALUES } from '@test/fixtures/values'
 import { v7 as uuidv7 } from 'uuid'
 
-import FlightPlan from '@/models/flightPlan'
-import Mission from '@/models/mission'
+import { FlightPlan } from '@/models/flightPlan'
+import { Mission } from '@/models/mission'
 import { MissionStatus } from '@/models/status'
 import { DomainError } from '@/shared/errors'
 
@@ -12,14 +13,16 @@ describe('Mission', () => {
     test('can be restored', () => {
       // Given
       const {
+        correlationId,
         date,
-        director: { name: directorName }
+        director: { name: directorName },
+        branchName,
+        environmentName,
+        serviceIds,
+        missions: { status }
       } = EXAMPLE_VALUES
 
-      const { branch, environment, services, phases, status } = EXAMPLE_MISSION_VALUES
-
       const id = uuidv7()
-      const correlationId = uuidv7()
       const flightPlanId = uuidv7()
       const creationDate = new Date()
       const lastUpdateDate = new Date()
@@ -32,11 +35,11 @@ describe('Mission', () => {
         flightPlanId,
         creationDate,
         lastUpdateDate,
-        branch,
-        environment,
-        services,
+        branchName,
+        environmentName,
+        serviceIds,
         directorName,
-        phases,
+        [EXAMPLE_PHASE],
         status,
         date,
         completionDate
@@ -48,11 +51,11 @@ describe('Mission', () => {
       expect(mission.flightPlanId).toBe(flightPlanId)
       expect(mission.createdAt).toBe(creationDate)
       expect(mission.lastUpdatedAt).toBe(lastUpdateDate)
-      expect(mission.workflowBranch).toBe(branch)
-      expect(mission.environment).toBe(environment)
-      expect(mission.services).toStrictEqual(services)
+      expect(mission.workflowBranch).toBe(branchName)
+      expect(mission.environment).toBe(environmentName)
+      expect(mission.services).toStrictEqual(serviceIds)
       expect(mission.director).toBe(directorName)
-      expect(mission.phases).toStrictEqual(phases)
+      expect(mission.phases).toStrictEqual([EXAMPLE_PHASE])
       expect(mission.status).toBe(status)
       expect(mission.launchedAt).toBe(date)
       expect(mission.completedAt).toBe(completionDate)
@@ -61,11 +64,14 @@ describe('Mission', () => {
     test('needs an ID', () => {
       // Given
       const {
+        correlationId,
+        date,
         director: { name: directorName },
-        date
+        branchName,
+        environmentName,
+        serviceIds,
+        missions: { status }
       } = EXAMPLE_VALUES
-
-      const { branch, environment, services, status, phases } = EXAMPLE_MISSION_VALUES
 
       const expectedError = new DomainError('A Mission needs an ID!')
 
@@ -74,15 +80,15 @@ describe('Mission', () => {
         Mission.restore(
           // @ts-expect-error A Mission needs an ID.
           null,
-          uuidv7(),
+          correlationId,
           null,
-          new Date(),
+          date,
           null,
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           directorName,
-          phases,
+          [EXAMPLE_PHASE],
           status,
           date,
           null
@@ -93,11 +99,13 @@ describe('Mission', () => {
     test('needs a correlation ID', () => {
       // Given
       const {
+        date,
         director: { name: directorName },
-        date
+        branchName,
+        environmentName,
+        serviceIds,
+        missions: { status }
       } = EXAMPLE_VALUES
-
-      const { branch, environment, services, status, phases } = EXAMPLE_MISSION_VALUES
 
       const expectedError = new DomainError('A Mission needs a correlation ID!')
 
@@ -108,13 +116,13 @@ describe('Mission', () => {
           // @ts-expect-error A Mission needs an correlation ID.
           null,
           null,
-          new Date(),
+          date,
           null,
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           directorName,
-          phases,
+          [EXAMPLE_PHASE],
           status,
           date,
           null
@@ -125,11 +133,14 @@ describe('Mission', () => {
     test('needs a valid creation date', () => {
       // Given
       const {
+        correlationId,
+        date,
         director: { name: directorName },
-        date
+        branchName,
+        environmentName,
+        serviceIds,
+        missions: { status }
       } = EXAMPLE_VALUES
-
-      const { branch, environment, services, status, phases } = EXAMPLE_MISSION_VALUES
 
       const expectedError = new DomainError('A Mission needs a valid creation date!')
 
@@ -137,16 +148,16 @@ describe('Mission', () => {
       expect(() =>
         Mission.restore(
           uuidv7(),
-          uuidv7(),
+          correlationId,
           null,
           // @ts-expect-error A Mission needs a valid creation date.
           null,
           null,
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           directorName,
-          phases,
+          [EXAMPLE_PHASE],
           status,
           date,
           null
@@ -160,11 +171,11 @@ describe('Mission', () => {
           // @ts-expect-error A Mission needs a valid creation date.
           'test',
           null,
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           directorName,
-          phases,
+          [EXAMPLE_PHASE],
           status,
           date,
           null
@@ -175,11 +186,14 @@ describe('Mission', () => {
     test('needs a valid last update date', () => {
       // Given
       const {
+        correlationId,
+        date,
         director: { name: directorName },
-        date
+        branchName,
+        environmentName,
+        serviceIds,
+        missions: { status }
       } = EXAMPLE_VALUES
-
-      const { branch, environment, services, status, phases } = EXAMPLE_MISSION_VALUES
 
       const expectedError = new DomainError('A Mission needs a valid last update date!')
 
@@ -187,16 +201,16 @@ describe('Mission', () => {
       expect(() =>
         Mission.restore(
           uuidv7(),
-          uuidv7(),
+          correlationId,
           null,
           new Date(),
           // @ts-expect-error A Mission needs a valid last update date.
           'test',
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           directorName,
-          phases,
+          [EXAMPLE_PHASE],
           status,
           date,
           null
@@ -207,11 +221,13 @@ describe('Mission', () => {
     test('needs a status', () => {
       // Given
       const {
+        correlationId,
         date,
-        director: { name: directorName }
+        director: { name: directorName },
+        branchName,
+        environmentName,
+        serviceIds
       } = EXAMPLE_VALUES
-
-      const { branch, environment, services, phases } = EXAMPLE_MISSION_VALUES
 
       const expectedError = new DomainError('A Mission needs a valid status!')
 
@@ -219,15 +235,15 @@ describe('Mission', () => {
       expect(() =>
         Mission.restore(
           uuidv7(),
-          uuidv7(),
+          correlationId,
           null,
           new Date(),
           null,
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           directorName,
-          phases,
+          [EXAMPLE_PHASE],
           // @ts-expect-error A Mission needs a valid status.
           null,
           date,
@@ -241,11 +257,11 @@ describe('Mission', () => {
           null,
           new Date(),
           null,
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           directorName,
-          phases,
+          [EXAMPLE_PHASE],
           // @ts-expect-error A Mission needs a valid status.
           'test',
           date,
@@ -257,10 +273,13 @@ describe('Mission', () => {
     test('needs a valid launch date', () => {
       // Given
       const {
-        director: { name: directorName }
+        correlationId,
+        director: { name: directorName },
+        branchName,
+        environmentName,
+        serviceIds,
+        missions: { status }
       } = EXAMPLE_VALUES
-
-      const { branch, environment, services, status, phases } = EXAMPLE_MISSION_VALUES
 
       const expectedError = new DomainError('A Mission needs a valid launch date!')
 
@@ -268,15 +287,15 @@ describe('Mission', () => {
       expect(() =>
         Mission.restore(
           uuidv7(),
-          uuidv7(),
+          correlationId,
           null,
           new Date(),
           null,
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           directorName,
-          phases,
+          [EXAMPLE_PHASE],
           status,
           // @ts-expect-error A Mission needs a valid launch date
           'test',
@@ -288,10 +307,14 @@ describe('Mission', () => {
     test('needs a valid completion date', () => {
       // Given
       const {
-        director: { name: directorName }
+        correlationId,
+        date,
+        director: { name: directorName },
+        branchName,
+        environmentName,
+        serviceIds,
+        missions: { status }
       } = EXAMPLE_VALUES
-
-      const { branch, environment, services, status, phases } = EXAMPLE_MISSION_VALUES
 
       const expectedError = new DomainError('A Mission needs a valid completion date!')
 
@@ -299,15 +322,15 @@ describe('Mission', () => {
       expect(() =>
         Mission.restore(
           uuidv7(),
-          uuidv7(),
+          correlationId,
           null,
-          new Date(),
+          date,
           null,
-          branch,
-          environment,
-          services,
+          branchName,
+          environmentName,
+          serviceIds,
           directorName,
-          phases,
+          [EXAMPLE_PHASE],
           status,
           null,
           // @ts-expect-error A Mission needs a valid completion date
@@ -321,13 +344,14 @@ describe('Mission', () => {
     test('can be created', () => {
       // Given
       const {
-        director: { name: directorName }
+        director: { name: directorName },
+        branchName,
+        environmentName,
+        serviceIds
       } = EXAMPLE_VALUES
 
-      const { branch, environment, services, phases } = EXAMPLE_MISSION_VALUES
-
       // When
-      const mission = Mission.fromScratch(branch, environment, services, directorName, phases)
+      const mission = Mission.fromScratch(branchName, environmentName, serviceIds, directorName)
 
       // Then
       expect(mission.id).toBeDefined()
@@ -335,110 +359,84 @@ describe('Mission', () => {
       expect(mission.flightPlanId).toBeNull()
       expect(mission.createdAt).toBeDefined()
       expect(mission.lastUpdatedAt).toBeNull()
-      expect(mission.workflowBranch).toBe(branch)
-      expect(mission.environment).toBe(environment)
-      expect(mission.services).toStrictEqual(services)
+      expect(mission.workflowBranch).toBe(branchName)
+      expect(mission.environment).toBe(environmentName)
+      expect(mission.services).toStrictEqual(serviceIds)
       expect(mission.director).toBe(directorName)
-      expect(mission.status).toBe(MissionStatus.Launching)
+      expect(mission.status).toBe(MissionStatus.Draft)
       expect(mission.launchedAt).toBeNull()
-      expect(mission.phases).toStrictEqual(phases)
       expect(mission.completedAt).toBeNull()
     })
 
     test('needs a target workflow branch name', () => {
       // Given
       const {
-        director: { name: directorName }
+        director: { name: directorName },
+        environmentName,
+        serviceIds
       } = EXAMPLE_VALUES
-
-      const { environment, services, phases } = EXAMPLE_MISSION_VALUES
 
       const expectedError = new DomainError('A Mission needs a target workflow branch name!')
 
       // When + Then
       expect(() =>
         // @ts-expect-error A Mission needs a target workflow branch name.
-        Mission.fromScratch(null, environment, services, directorName, phases)
+        Mission.fromScratch(null, environmentName, serviceIds, directorName, [EXAMPLE_PHASE])
       ).toThrow(expectedError)
     })
 
     test('needs a target environment', () => {
       // Given
       const {
-        director: { name: directorName }
+        director: { name: directorName },
+        branchName,
+        serviceIds
       } = EXAMPLE_VALUES
-
-      const { branch, services, phases } = EXAMPLE_MISSION_VALUES
 
       const expectedError = new DomainError('A Mission needs a target environment!')
 
       // When + Then
       expect(() =>
         // @ts-expect-error A Mission needs a target environment.
-        Mission.fromScratch(branch, null, services, directorName, phases)
+        Mission.fromScratch(branchName, null, serviceIds, directorName, [EXAMPLE_PHASE])
       ).toThrow(expectedError)
     })
 
     test('needs valid target service IDs', () => {
       // Given
       const {
-        director: { name: directorName }
+        director: { name: directorName },
+        branchName,
+        environmentName
       } = EXAMPLE_VALUES
-
-      const { branch, environment, phases } = EXAMPLE_MISSION_VALUES
 
       const expectedError = new DomainError('A Mission needs valid target service IDs!')
 
       // When + Then
       expect(() =>
         // @ts-expect-error A Mission needs valid target service IDs.
-        Mission.fromScratch(branch, environment, null, directorName, phases)
+        Mission.fromScratch(branchName, environmentName, null, directorName)
       ).toThrow(expectedError)
       expect(() =>
         // @ts-expect-error A Mission needs valid target service IDs.
-        Mission.fromScratch(branch, environment, 'test', directorName, phases)
+        Mission.fromScratch(branchName, environmentName, 'test', directorName)
       ).toThrow(expectedError)
-      expect(() => Mission.fromScratch(branch, environment, [], directorName, phases)).toThrow(
+      expect(() => Mission.fromScratch(branchName, environmentName, [], directorName)).toThrow(
         expectedError
       )
     })
 
     test('needs a director', () => {
       // Given
-
-      const { branch, environment, services, phases } = EXAMPLE_MISSION_VALUES
+      const { branchName, environmentName, serviceIds } = EXAMPLE_VALUES
 
       const expectedError = new DomainError('A Mission needs a director!')
 
       // When + Then
       expect(() =>
         // @ts-expect-error A Mission needs a director.
-        Mission.fromScratch(branch, environment, services, null, phases)
+        Mission.fromScratch(branchName, environmentName, serviceIds, null)
       ).toThrow(expectedError)
-    })
-
-    test('needs valid phases', () => {
-      // Given
-      const {
-        director: { name: directorName }
-      } = EXAMPLE_VALUES
-
-      const { branch, environment, services } = EXAMPLE_MISSION_VALUES
-
-      const expectedError = new DomainError('A Mission needs valid phases!')
-
-      // When + Then
-      expect(() =>
-        // @ts-expect-error A Mission needs valid phases.
-        Mission.fromScratch(branch, environment, services, directorName, null)
-      ).toThrow(expectedError)
-      expect(() =>
-        // @ts-expect-error A Mission needs valid phases.
-        Mission.fromScratch(branch, environment, services, directorName, 'test')
-      ).toThrow(expectedError)
-      expect(() => Mission.fromScratch(branch, environment, services, directorName, [])).toThrow(
-        expectedError
-      )
     })
   })
 
@@ -446,12 +444,15 @@ describe('Mission', () => {
     test('can be created', () => {
       // Given
       const {
-        director: { name: directorName }
+        director: { name: directorName },
+        branchName,
+        environmentName,
+        serviceIds,
+        flightPlans: { name }
       } = EXAMPLE_VALUES
 
-      const { branch, environment, services, phases, name } = EXAMPLE_FLIGHT_PLAN_VALUES
-
-      const flightPlan = FlightPlan.create(name, branch, environment, services, phases, {})
+      const flightPlan = FlightPlan.create(name, branchName, environmentName, serviceIds, {})
+      flightPlan.phases = [EXAMPLE_PHASE]
 
       // When
       const mission = Mission.from(flightPlan, directorName)
@@ -462,12 +463,12 @@ describe('Mission', () => {
       expect(mission.flightPlanId).toBe(flightPlan.id)
       expect(mission.createdAt).toBeDefined()
       expect(mission.lastUpdatedAt).toBeNull()
-      expect(mission.workflowBranch).toBe(branch)
-      expect(mission.environment).toBe(environment)
-      expect(mission.services).toStrictEqual(services)
+      expect(mission.workflowBranch).toBe(branchName)
+      expect(mission.environment).toBe(environmentName)
+      expect(mission.services).toStrictEqual(serviceIds)
       expect(mission.director).toBe(directorName)
-      expect(mission.phases).toStrictEqual(phases)
-      expect(mission.status).toBe(MissionStatus.Launching)
+      expect(mission.phases).toStrictEqual([EXAMPLE_PHASE])
+      expect(mission.status).toBe(MissionStatus.Draft)
       expect(mission.launchedAt).toBeNull()
       expect(mission.completedAt).toBeNull()
     })
@@ -499,9 +500,15 @@ describe('Mission', () => {
 
     test('needs a director', () => {
       // Given
-      const { branch, environment, services, phases, name } = EXAMPLE_FLIGHT_PLAN_VALUES
+      const {
+        branchName,
+        environmentName,
+        serviceIds,
+        flightPlans: { name }
+      } = EXAMPLE_VALUES
 
-      const flightPlan = FlightPlan.create(name, branch, environment, services, phases, {})
+      const flightPlan = FlightPlan.create(name, branchName, environmentName, serviceIds, {})
+      flightPlan.phases = [EXAMPLE_PHASE]
 
       const expectedError = new DomainError('The provided director is not valid!')
 
@@ -511,16 +518,147 @@ describe('Mission', () => {
     })
   })
 
+  describe('isValid', () => {
+    test('can be valid', () => {
+      // Given
+      const {
+        director: { name: directorName },
+        branchName,
+        environmentName,
+        serviceIds
+      } = EXAMPLE_VALUES
+
+      const mission = Mission.fromScratch(branchName, environmentName, serviceIds, directorName)
+
+      // When + Then
+      expect(Mission.isValid(mission)).toBeTruthy()
+    })
+
+    test('needs a valid Flight Plan ID', () => {
+      // When + Then
+      expect(Mission.isValid(createExampleMissionData({ flightPlanId: 123456 }))).toBeFalsy()
+    })
+
+    test('needs a valid launch date', () => {
+      // When + Then
+      expect(Mission.isValid(createExampleMissionData({ launchedAt: 123456 }))).toBeFalsy()
+    })
+
+    test('needs a valid creation date', () => {
+      // When + Then
+      expect(Mission.isValid(createExampleMissionData({ createdAt: null }))).toBeFalsy()
+    })
+
+    test('needs a valid last update date', () => {
+      // When + Then
+      expect(Mission.isValid(createExampleMissionData({ lastUpdatedAt: 123456 }))).toBeFalsy()
+    })
+
+    test('needs a valid completion date', () => {
+      // When + Then
+      expect(Mission.isValid(createExampleMissionData({ completedAt: 123456 }))).toBeFalsy()
+    })
+
+    test('needs to be defined', () => {
+      // When + Then
+      expect(Mission.isValid(null)).toBeFalsy()
+      expect(Mission.isValid(undefined)).toBeFalsy()
+    })
+
+    test('needs to be an object', () => {
+      // When + Then
+      expect(Mission.isValid([])).toBeFalsy()
+      expect(Mission.isValid('test')).toBeFalsy()
+      expect(Mission.isValid(6666)).toBeFalsy()
+    })
+  })
+
+  describe('prepare', () => {
+    test('can be prepared', () => {
+      // Given
+      const {
+        branchName,
+        environmentName,
+        serviceIds,
+        director: { name: directorName }
+      } = EXAMPLE_VALUES
+
+      const mission = Mission.fromScratch(branchName, environmentName, serviceIds, directorName)
+
+      // When
+      const launchedMission = mission.prepare([EXAMPLE_PHASE])
+
+      // Then
+      expect(launchedMission.status).toBe(MissionStatus.Launching)
+      expect(launchedMission.lastUpdatedAt).toBeDefined()
+    })
+
+    test('can not be prepared twice', () => {
+      // Given
+      const {
+        branchName,
+        environmentName,
+        serviceIds,
+        director: { name: directorName }
+      } = EXAMPLE_VALUES
+
+      const mission = Mission.fromScratch(
+        branchName,
+        environmentName,
+        serviceIds,
+        directorName
+      ).prepare([EXAMPLE_PHASE])
+
+      const expectedError = new DomainError('The Mission has already been prepared.')
+
+      // When + Then
+      expect(() => mission.prepare([EXAMPLE_PHASE])).toThrow(expectedError)
+    })
+
+    test('can not be prepared without phases', () => {
+      // Given
+      const {
+        branchName,
+        environmentName,
+        serviceIds,
+        director: { name: directorName }
+      } = EXAMPLE_VALUES
+
+      const mission = Mission.fromScratch(branchName, environmentName, serviceIds, directorName)
+
+      const expectedError = new DomainError(
+        'The Mission needs valid Phases to be prepared to launch.'
+      )
+
+      // When + Then
+      expect(() => mission.prepare([])).toThrow(expectedError)
+      // @ts-expect-error The Mission needs valid Phases to be prepared to launch.
+      expect(() => mission.prepare(['test'])).toThrow(expectedError)
+      // @ts-expect-error The Mission needs valid Phases to be prepared to launch.
+      expect(() => mission.prepare([null])).toThrow(expectedError)
+      // @ts-expect-error The Mission needs valid Phases to be prepared to launch.
+      expect(() => mission.prepare()).toThrow(expectedError)
+      // @ts-expect-error The Mission needs valid Phases to be prepared to launch.
+      expect(() => mission.prepare('test')).toThrow(expectedError)
+    })
+  })
+
   describe('launch', () => {
     test('can be launched', () => {
       // Given
       const {
+        branchName,
+        environmentName,
+        serviceIds,
         director: { name: directorName }
       } = EXAMPLE_VALUES
 
-      const { branch, environment, services, phases } = EXAMPLE_MISSION_VALUES
-
-      const mission = Mission.fromScratch(branch, environment, services, directorName, phases)
+      const mission = Mission.fromScratch(
+        branchName,
+        environmentName,
+        serviceIds,
+        directorName
+      ).prepare([EXAMPLE_PHASE])
 
       // When
       const launchedMission = mission.launch()
@@ -530,23 +668,59 @@ describe('Mission', () => {
       expect(launchedMission.lastUpdatedAt).toBeDefined()
     })
 
-    test('can not be launched twice', () => {
+    test('can not launch as a draft', () => {
       // Given
       const {
+        branchName,
+        environmentName,
+        serviceIds,
         director: { name: directorName }
       } = EXAMPLE_VALUES
 
-      const { branch, environment, services, phases } = EXAMPLE_MISSION_VALUES
+      const mission = Mission.fromScratch(branchName, environmentName, serviceIds, directorName)
+
+      const expectedError = new DomainError('The Mission is just a draft.')
+
+      // When + Then
+      expect(() => mission.launch()).toThrow(expectedError)
+    })
+
+    test('can not be launched twice', () => {
+      // Given
+      const {
+        branchName,
+        environmentName,
+        serviceIds,
+        director: { name: directorName }
+      } = EXAMPLE_VALUES
 
       const mission = Mission.fromScratch(
-        branch,
-        environment,
-        services,
-        directorName,
-        phases
-      ).launch()
+        branchName,
+        environmentName,
+        serviceIds,
+        directorName
+      ).prepare([EXAMPLE_PHASE])
+
+      mission.launch()
 
       const expectedError = new DomainError('The Mission has already been launched.')
+
+      // When + Then
+      expect(() => mission.launch()).toThrow(expectedError)
+    })
+
+    test('can not be launched without phases', () => {
+      // Given
+      const {
+        branchName,
+        environmentName,
+        serviceIds,
+        director: { name: directorName }
+      } = EXAMPLE_VALUES
+
+      const mission = Mission.fromScratch(branchName, environmentName, serviceIds, directorName)
+
+      const expectedError = new DomainError('The Mission is just a draft.')
 
       // When + Then
       expect(() => mission.launch()).toThrow(expectedError)

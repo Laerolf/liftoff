@@ -1,9 +1,9 @@
 {
-  "name": "liftoff/domain",
+  "name": "@liftoff/domain",
   "version": "0.0.1",
   "description": "The domain model of Liftoff.",
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
@@ -15,6 +15,7 @@
     "lint": "oxlint --fix",
     "format": "oxfmt",
     "test:unit": "jest",
+    "typecheck": "tsc --noEmit",
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {

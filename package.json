@@ -1,5 +1,5 @@
 {
-  "name": "liftoff",
+  "name": "@liftoff",
   "version": "0.0.0",
   "private": true,
   "description": "Mission control for your GitHub Actions.",
@@ -7,7 +7,11 @@
   "scripts": {
     "lint": "pnpm -r lint",
     "format": "pnpm -r format",
+    "test": "pnpm -r test",
     "test:unit": "pnpm -r test:unit",
+    "test:integration": "pnpm -r test:integration",
+    "dev": "pnpm -r dev",
+    "typecheck": "pnpm -r typecheck",
     "build": "pnpm -r build"
   },
   "devDependencies": {

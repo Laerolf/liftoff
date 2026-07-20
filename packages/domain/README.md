@@ -1,4 +1,4 @@
-# liftoff/domain
+# @liftoff/domain
 
 The domain model of Liftoff.
 

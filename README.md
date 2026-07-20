@@ -1,4 +1,4 @@
-# liftoff
+# @liftoff
 
 Mission control for your GitHub Actions.
 
@@ -31,7 +31,17 @@ pnpm lint
 pnpm format
 ```
 
+### Development
+
+```bash
+pnpm dev
+```
+
 ### Build
+
+```bash
+pnpm typecheck
+```
 
 ```bash
 pnpm build

@@ -1,10 +1,9 @@
 import { v7 as uuidv7 } from 'uuid'
 
-import { DomainElement } from '@/shared/domainElement'
-import { isValidDate } from '@/utils/date'
-import { isPhaseStatus } from '@/utils/status'
-
+import { DomainElement } from '../shared/domainElement'
 import { DomainError } from '../shared/errors'
+import { isValidDate } from '../utils/date'
+import { isPhaseStatus } from '../utils/status'
 
 import { PhaseStatus } from './status'
 import { Step } from './step'
@@ -12,15 +11,19 @@ import { Step } from './step'
 /**
  * Represents a stage in a Mission.
  */
-export default class Phase implements DomainElement {
+export class Phase implements DomainElement {
   /**
    * The ID of this {@link Phase}.
    */
   readonly id: string
   /**
+   * The ID of the Mission that this {@link Phase} belongs to.
+   */
+  readonly missionId: string
+  /**
    * The status of this {@link Phase}.
    */
-  readonly status: PhaseStatus
+  private _status: PhaseStatus
   /**
    * The execution method of this {@link Phase}.
    */
@@ -28,7 +31,7 @@ export default class Phase implements DomainElement {
   /**
    * The steps of this {@link Phase}.
    */
-  readonly steps: Step[]
+  private _steps: Step[] | null
   /**
    * The moment this {@link Phase} was created.
    */
@@ -47,8 +50,91 @@ export default class Phase implements DomainElement {
   readonly completedAt: Date | null
 
   /**
+   * Restores a {@link Phase}.
+   * @param id - The ID of the {@link Phase} to create.
+   * @param missionId - The Mission ID that the {@link Phase} to create belongs to.
+   * @param status - The status of the {@link Phase} to create.
+   * @param execution - The execution of the {@link Phase} to create.
+   * @param steps - The steps of the {@link Phase} to create.
+   * @param createdAt - The moment the {@link Phase} to create was created.
+   * @param lastUpdatedAt - The moment the {@link Phase} to create was last updated.
+   * @param startedAt - The date this {@link Phase} to create was started.
+   * @param completedAt - The date this {@link Phase} to create was completed.
+   * @throws {DomainError}
+   */
+  static restore(
+    id: string,
+    missionId: string,
+    status: PhaseStatus,
+    execution: PhaseExecution,
+    steps: Step[],
+    createdAt: Date,
+    lastUpdatedAt: Date | null,
+    startedAt: Date | null,
+    completedAt: Date | null
+  ): Phase {
+    return new Phase(
+      id,
+      missionId,
+      status,
+      execution,
+      steps,
+      createdAt,
+      lastUpdatedAt,
+      startedAt,
+      completedAt
+    )
+  }
+
+  /**
+   * Creates a new {@link Phase}.
+   * @param missionId - The Mission ID that the {@link Phase} to create belongs to.
+   * @param execution - The execution of the {@link Phase} to create.
+   * @throws {DomainError}
+   */
+  static create(missionId: string, execution: PhaseExecution): Phase {
+    return new Phase(
+      uuidv7(),
+      missionId,
+      PhaseStatus.Draft,
+      execution,
+      null,
+      new Date(),
+      null,
+      null,
+      null
+    )
+  }
+
+  /**
+   * Tests whether the provided value is a valid {@link Phase}.
+   * @param value - The value to test.
+   */
+  static isValid(value: unknown): value is Phase {
+    if (typeof value !== 'object' || value === null) {
+      return false
+    }
+
+    const candidate = value as Record<string, unknown>
+
+    return (
+      typeof candidate.id === 'string' &&
+      typeof candidate.missionId === 'string' &&
+      isPhaseStatus(candidate.status) &&
+      isPhaseExecution(candidate.execution) &&
+      (!candidate.steps ||
+        (Array.isArray(candidate.steps) && candidate.steps.every(Step.isValid))) &&
+      isValidDate(candidate.createdAt) &&
+      (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
+      (!candidate.startedAt || isValidDate(candidate.startedAt)) &&
+      (!candidate.completedAt || isValidDate(candidate.completedAt))
+    )
+  }
+
+  /**
    * Creates a new {@link Phase}.
    * @param id - The ID of the {@link Phase} to create.
+   * @param missionId - The Mission ID that the {@link Phase} to create belongs to.
    * @param status - The status of the {@link Phase} to create.
    * @param execution - The execution of the {@link Phase} to create.
    * @param steps - The steps of the {@link Phase} to create.
@@ -60,9 +146,10 @@ export default class Phase implements DomainElement {
    */
   private constructor(
     id: string,
+    missionId: string,
     status: PhaseStatus,
     execution: PhaseExecution,
-    steps: Step[],
+    steps: Step[] | null,
     createdAt: Date,
     lastUpdatedAt: Date | null,
     startedAt: Date | null,
@@ -72,16 +159,16 @@ export default class Phase implements DomainElement {
       throw new DomainError('A Phase needs an ID!')
     }
 
+    if (!missionId) {
+      throw new DomainError('A Phase needs a Mission ID!')
+    }
+
     if (!isPhaseStatus(status)) {
       throw new DomainError('A Phase needs a valid status!')
     }
 
     if (!isPhaseExecution(execution)) {
       throw new DomainError('A Phase needs an execution method!')
-    }
-
-    if (!steps || !Array.isArray(steps) || steps.length <= 0) {
-      throw new DomainError('A Phase needs valid steps!')
     }
 
     if (!isValidDate(createdAt)) {
@@ -101,9 +188,10 @@ export default class Phase implements DomainElement {
     }
 
     this.id = id
-    this.status = status
+    this.missionId = missionId
+    this._status = status
     this.execution = execution
-    this.steps = steps
+    this._steps = steps
     this._createdAt = createdAt
     this._lastUpdatedAt = lastUpdatedAt
     this.startedAt = startedAt
@@ -111,63 +199,17 @@ export default class Phase implements DomainElement {
   }
 
   /**
-   * Restores a {@link Phase}.
-   * @param id - The ID of the {@link Phase} to create.
-   * @param status - The status of the {@link Phase} to create.
-   * @param execution - The execution of the {@link Phase} to create.
-   * @param steps - The steps of the {@link Phase} to create.
-   * @param createdAt - The moment the {@link Phase} to create was created.
-   * @param lastUpdatedAt - The moment the {@link Phase} to create was last updated.
-   * @param startedAt - The date this {@link Phase} to create was started.
-   * @param completedAt - The date this {@link Phase} to create was completed.
-   * @throws {DomainError}
+   *  The status of this {@link Phase}.
    */
-  static restore(
-    id: string,
-    status: PhaseStatus,
-    execution: PhaseExecution,
-    steps: Step[],
-    createdAt: Date,
-    lastUpdatedAt: Date | null,
-    startedAt: Date | null,
-    completedAt: Date | null
-  ): Phase {
-    return new Phase(id, status, execution, steps, createdAt, lastUpdatedAt, startedAt, completedAt)
+  get status(): PhaseStatus {
+    return this._status
   }
 
   /**
-   * Creates a new {@link Phase}.
-   * @param execution - The execution of the {@link Phase} to create.
-   * @param steps - The steps of the {@link Phase} to create.
-   * @throws {DomainError}
+   *  The {@link Step[] | Steps} of this {@link Phase}.
    */
-  static create(execution: PhaseExecution, steps: Step[]): Phase {
-    return new Phase(uuidv7(), PhaseStatus.Waiting, execution, steps, new Date(), null, null, null)
-  }
-
-  /**
-   * Tests whether the provided value is a valid {@link Phase}.
-   * @param value - The value to test.
-   */
-  static isValid(value: unknown): value is Phase {
-    if (typeof value !== 'object' || value === null) {
-      return false
-    }
-
-    const candidate = value as Record<string, unknown>
-
-    return (
-      typeof candidate.id === 'string' &&
-      isPhaseStatus(candidate.status) &&
-      isPhaseExecution(candidate.execution) &&
-      Array.isArray(candidate.steps) &&
-      !!candidate.steps.length &&
-      candidate.steps.every(Step.isValid) &&
-      isValidDate(candidate.createdAt) &&
-      (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
-      (!candidate.startedAt || isValidDate(candidate.startedAt)) &&
-      (!candidate.completedAt || isValidDate(candidate.completedAt))
-    )
+  get steps(): Step[] | null {
+    return this._steps
   }
 
   /**
@@ -182,6 +224,26 @@ export default class Phase implements DomainElement {
    */
   get lastUpdatedAt(): Date | null {
     return this._lastUpdatedAt
+  }
+
+  /**
+   * Prepares a {@link Phase} to launch.
+   * @param steps - The {@link Step[] | Phases} of this {@link Phase}.
+   */
+  prepare(steps: Step[]): Phase {
+    if (this.status !== PhaseStatus.Draft) {
+      throw new DomainError('The Phase has already been prepared.')
+    }
+
+    if (!steps || !Array.isArray(steps) || steps.length <= 0 || !steps.some(Step.isValid)) {
+      throw new DomainError('The Phase needs valid Steps to be prepared to launch.')
+    }
+
+    this._steps = steps
+    this._status = PhaseStatus.Waiting
+    this._lastUpdatedAt = new Date()
+
+    return this
   }
 }
 
