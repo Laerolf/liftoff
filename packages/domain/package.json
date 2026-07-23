@@ -14,7 +14,9 @@
   "scripts": {
     "lint": "oxlint --fix",
     "format": "oxfmt",
-    "test:unit": "jest",
+    "test": "bun test --watch",
+    "test:unit": "bun test --watch --filter test/unit",
+    "test:ci": "bun test",
     "typecheck": "tsc --noEmit",
     "build": "tsc --project tsconfig.build.json"
   },
@@ -22,13 +24,7 @@
     "uuid": "catalog:"
   },
   "devDependencies": {
-    "@jest/globals": "catalog:",
-    "jest": "catalog:",
-    "oxfmt": "catalog:",
-    "oxlint": "catalog:",
-    "oxlint-tsgolint": "catalog:",
-    "ts-jest": "catalog:",
+    "@types/bun": "catalog:",
     "typescript": "catalog:"
-  },
-  "packageManager": "pnpm@11.9.0"
+  }
 }

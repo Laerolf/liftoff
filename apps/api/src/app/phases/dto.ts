@@ -1,4 +1,4 @@
-import { DomainError, isValidDate, Phase } from '@liftoff/domain'
+import { DomainError, Phase } from '@liftoff/domain'
 
 import { StepDto } from '../steps/dto'
 

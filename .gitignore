@@ -12,4 +12,5 @@ coverage/
 # Application
 dist/
 .env
+.env.*
 .drizzle/

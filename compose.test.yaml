@@ -1,5 +1,5 @@
 services:
-  postgres-test:
+  db-test:
     image: postgres:16
     environment:
       POSTGRES_DB: liftoff_test
