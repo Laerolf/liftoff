@@ -11,9 +11,9 @@ type EnvironmentConfig = {
    */
   dbUrl: string
   /**
-   * Use SSL?
+   * Use TLS?
    */
-  useSsl: boolean
+  useTls: boolean
 }
 
 const DEFAULT_PORT = 3000
@@ -55,8 +55,18 @@ function verifyEnvironmentConfigBooleanEntry(key: string): boolean {
   return process.env[key] == 'true'
 }
 
-export const config: EnvironmentConfig = {
-  port: verifyEnvironmentConfigNumberEntry('PORT') ?? DEFAULT_PORT,
-  dbUrl: verifyRequiredEnvironmentConfigStringEntry('DATABASE_URL'),
-  useSsl: verifyEnvironmentConfigBooleanEntry('USE_SSL')
+/**
+ * Parses the environment configuration and returns it as an object.
+ */
+export function useEnvConfig(): EnvironmentConfig {
+  try {
+    return {
+      port: verifyEnvironmentConfigNumberEntry('PORT') ?? DEFAULT_PORT,
+      dbUrl: verifyRequiredEnvironmentConfigStringEntry('DATABASE_URL'),
+      useTls: verifyEnvironmentConfigBooleanEntry('USE_TLS')
+    }
+  } catch (error) {
+    console.error('Failed to parse environment configuration.', { cause: error })
+    throw new Error('Failed to parse environment configuration.', { cause: error })
+  }
 }

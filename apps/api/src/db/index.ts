@@ -1,6 +1,6 @@
-import { drizzle } from 'drizzle-orm/node-postgres'
+import { drizzle } from 'drizzle-orm/bun-sql'
 
-import { config } from '@/config'
+import { useEnvConfig } from '@/config'
 
 import { relations } from './schema'
 
@@ -8,7 +8,9 @@ export type DatabaseConnection =
   | typeof dbConnection
   | Parameters<Parameters<typeof dbConnection.transaction>[0]>[0]
 
+const envConfig = useEnvConfig()
+
 export const dbConnection = drizzle({
-  connection: { connectionString: config.dbUrl, ssl: config.useSsl },
+  connection: { url: envConfig.dbUrl, tls: envConfig.useTls },
   relations
 })

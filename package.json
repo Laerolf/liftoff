@@ -1,27 +1,36 @@
 {
-  "name": "@liftoff",
+  "name": "liftoff",
   "version": "0.0.0",
   "private": true,
   "description": "Mission control for your GitHub Actions.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "type": "module",
   "scripts": {
-    "lint": "pnpm -r lint",
-    "format": "pnpm -r format",
-    "test": "pnpm -r test",
-    "test:unit": "pnpm -r test:unit",
-    "test:integration": "pnpm -r test:integration",
-    "dev": "pnpm -r dev",
-    "typecheck": "pnpm -r typecheck",
-    "build": "pnpm -r build"
+    "lint": "bun --filter='*' run lint",
+    "format": "bun --filter='*' run format",
+    "test": "bun --filter='*' run test",
+    "test:unit": "bun --filter='*' run test:unit",
+    "test:integration": "bun --filter='*' run test:integration",
+    "test:ci": "bun --elide-lines=0 --filter='*' run test:ci",
+    "dev": "bun --filter='*' run dev",
+    "typecheck": "bun --filter='*' run typecheck",
+    "build": "bun --filter='*' run build"
   },
   "devDependencies": {
-    "@jest/globals": "catalog:",
-    "jest": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
-    "oxlint-tsgolint": "catalog:",
-    "ts-jest": "catalog:",
-    "typescript": "catalog:"
+    "oxlint-tsgolint": "catalog:"
   },
-  "packageManager": "pnpm@11.9.0"
+  "catalog": {
+    "@types/bun": "^1.0.0",
+    "oxfmt": "^0.59.0",
+    "oxlint": "^1.0.0",
+    "oxlint-tsgolint": "^0.25.0",
+    "typescript": "^7.0.0",
+    "uuid": "^14.0.0",
+    "http-status": "^2.0.0"
+  }
 }

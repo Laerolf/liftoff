@@ -1,4 +1,5 @@
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test } from 'bun:test'
+
 import { DomainError, Mission, Phase } from '@liftoff/domain'
 import { EXAMPLE_VALUES } from '@test/fixtures/values'
 
@@ -45,7 +46,7 @@ describe('MissionDto', () => {
       )
       model.prepare([Phase.create(model.id, EXAMPLE_VALUES.phases.executionMethod)])
 
-      const expectedPhaseDtos = model.phases?.map(PhaseDto.from)
+      const expectedPhaseDtos = (model.phases || []).map(PhaseDto.from)
 
       // When
       const dto = MissionDto.from(model)

@@ -1,0 +1,31 @@
+info:
+  name: createFromScratch
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: '{{baseurl}}/api/missions'
+  body:
+    type: json
+    data: |-
+      {
+        "workflowBranch": "develop/test",
+        "environment": "test",
+        "services": ["liftoff"],
+        "director": "Ozzy",
+        "phases": [{
+          "execution": "SEQUENTIAL",
+          "steps": [{
+            "repository": "liftoff",
+            "workflowId": "rd-test.yml"
+          }]
+        }]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

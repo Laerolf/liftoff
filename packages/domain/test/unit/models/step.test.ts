@@ -1,4 +1,5 @@
-import { describe, test, expect } from '@jest/globals'
+import { describe, test, expect } from 'bun:test'
+
 import { createExampleStepData } from '@test/fixtures/data'
 import { EXAMPLE_VALUES } from '@test/fixtures/values'
 import { v7 as uuidv7 } from 'uuid'

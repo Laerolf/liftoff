@@ -1,4 +1,5 @@
-import { describe, test, expect } from '@jest/globals'
+import { describe, test, expect } from 'bun:test'
+
 import { createExampleFlightPlanData } from '@test/fixtures/data'
 import { EXAMPLE_FLIGHT_PLAN, EXAMPLE_VALUES } from '@test/fixtures/values'
 

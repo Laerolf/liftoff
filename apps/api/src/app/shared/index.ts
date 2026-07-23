@@ -1,9 +1,9 @@
-import { MissionRepository } from '../missions/repository'
-import { MissionCommandService, MissionQueryService } from '../missions/service'
-import { PhaseRepository } from '../phases/repository'
-import { PhaseCommandService, PhaseQueryService } from '../phases/service'
-import { StepRepository } from '../steps/repository'
-import { StepCommandService, StepQueryService } from '../steps/service'
+import { MissionRepository } from '@/app/missions/repository'
+import { MissionCommandService, MissionQueryService } from '@/app/missions/service'
+import { PhaseRepository } from '@/app/phases/repository'
+import { PhaseCommandService, PhaseQueryService } from '@/app/phases/service'
+import { StepRepository } from '@/app/steps/repository'
+import { StepCommandService, StepQueryService } from '@/app/steps/service'
 
 /**
  * Represent the request context.

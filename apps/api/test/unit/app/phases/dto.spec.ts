@@ -1,4 +1,5 @@
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test } from 'bun:test'
+
 import { DomainError, Phase, Step } from '@liftoff/domain'
 import { EXAMPLE_VALUES } from '@test/fixtures/values'
 
@@ -38,7 +39,7 @@ describe('PhaseDto', () => {
         )
       ])
 
-      const expectedStepDtos = model.steps?.map(StepDto.from)
+      const expectedStepDtos = (model.steps || []).map(StepDto.from)
 
       // When
       const dto = PhaseDto.from(model)

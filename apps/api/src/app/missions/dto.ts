@@ -1,4 +1,4 @@
-import { DomainError, isValidDate, Mission } from '@liftoff/domain'
+import { DomainError, Mission } from '@liftoff/domain'
 
 import { PhaseDto } from '../phases/dto'
 

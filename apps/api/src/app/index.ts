@@ -4,6 +4,6 @@ import Missions from '@/app/missions'
 
 const app = new Hono()
 
-app.route('/missions', Missions)
+app.route('api/missions', Missions)
 
 export default app

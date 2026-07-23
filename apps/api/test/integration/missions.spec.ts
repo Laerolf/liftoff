@@ -1,4 +1,5 @@
-import { describe, beforeEach, test, expect } from '@jest/globals'
+import { describe, beforeEach, test, expect } from 'bun:test'
+
 import { createExampleMissionFromScratchCreationForm } from '@test/fixtures/forms'
 import { clearDatabase } from '@test/helpers/db'
 import { isMissionDto } from '@test/helpers/validators'

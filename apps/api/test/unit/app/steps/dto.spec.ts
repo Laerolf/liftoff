@@ -1,4 +1,5 @@
-import { describe, expect, test } from '@jest/globals'
+import { describe, expect, test } from 'bun:test'
+
 import { DomainError, Step } from '@liftoff/domain'
 import { EXAMPLE_VALUES } from '@test/fixtures/values'
 
