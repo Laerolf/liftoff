@@ -17,10 +17,6 @@ export class Phase implements DomainElement {
    */
   readonly id: string
   /**
-   * The ID of the Mission that this {@link Phase} belongs to.
-   */
-  readonly missionId: string
-  /**
    * The status of this {@link Phase}.
    */
   private _status: PhaseStatus
@@ -52,7 +48,6 @@ export class Phase implements DomainElement {
   /**
    * Restores a {@link Phase}.
    * @param id - The ID of the {@link Phase} to create.
-   * @param missionId - The Mission ID that the {@link Phase} to create belongs to.
    * @param status - The status of the {@link Phase} to create.
    * @param execution - The execution of the {@link Phase} to create.
    * @param steps - The steps of the {@link Phase} to create.
@@ -64,7 +59,6 @@ export class Phase implements DomainElement {
    */
   static restore(
     id: string,
-    missionId: string,
     status: PhaseStatus,
     execution: PhaseExecution,
     steps: Step[],
@@ -73,37 +67,16 @@ export class Phase implements DomainElement {
     startedAt: Date | null,
     completedAt: Date | null
   ): Phase {
-    return new Phase(
-      id,
-      missionId,
-      status,
-      execution,
-      steps,
-      createdAt,
-      lastUpdatedAt,
-      startedAt,
-      completedAt
-    )
+    return new Phase(id, status, execution, steps, createdAt, lastUpdatedAt, startedAt, completedAt)
   }
 
   /**
    * Creates a new {@link Phase}.
-   * @param missionId - The Mission ID that the {@link Phase} to create belongs to.
    * @param execution - The execution of the {@link Phase} to create.
    * @throws {DomainError}
    */
-  static create(missionId: string, execution: PhaseExecution): Phase {
-    return new Phase(
-      uuidv7(),
-      missionId,
-      PhaseStatus.Draft,
-      execution,
-      null,
-      new Date(),
-      null,
-      null,
-      null
-    )
+  static create(execution: PhaseExecution): Phase {
+    return new Phase(uuidv7(), PhaseStatus.Draft, execution, null, new Date(), null, null, null)
   }
 
   /**
@@ -119,7 +92,6 @@ export class Phase implements DomainElement {
 
     return (
       typeof candidate.id === 'string' &&
-      typeof candidate.missionId === 'string' &&
       isPhaseStatus(candidate.status) &&
       isPhaseExecution(candidate.execution) &&
       (!candidate.steps ||
@@ -134,7 +106,6 @@ export class Phase implements DomainElement {
   /**
    * Creates a new {@link Phase}.
    * @param id - The ID of the {@link Phase} to create.
-   * @param missionId - The Mission ID that the {@link Phase} to create belongs to.
    * @param status - The status of the {@link Phase} to create.
    * @param execution - The execution of the {@link Phase} to create.
    * @param steps - The steps of the {@link Phase} to create.
@@ -146,7 +117,6 @@ export class Phase implements DomainElement {
    */
   private constructor(
     id: string,
-    missionId: string,
     status: PhaseStatus,
     execution: PhaseExecution,
     steps: Step[] | null,
@@ -157,10 +127,6 @@ export class Phase implements DomainElement {
   ) {
     if (!id) {
       throw new DomainError('A Phase needs an ID!')
-    }
-
-    if (!missionId) {
-      throw new DomainError('A Phase needs a Mission ID!')
     }
 
     if (!isPhaseStatus(status)) {
@@ -188,7 +154,6 @@ export class Phase implements DomainElement {
     }
 
     this.id = id
-    this.missionId = missionId
     this._status = status
     this.execution = execution
     this._steps = steps

@@ -15,7 +15,7 @@
     "lint": "oxlint --fix",
     "format": "oxfmt",
     "test": "bun test --watch",
-    "test:unit": "bun test --watch --filter test/unit",
+    "test:unit": "bun test --filter test/unit",
     "test:ci": "bun test",
     "typecheck": "tsc --noEmit",
     "build": "tsc --project tsconfig.build.json"

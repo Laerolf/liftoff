@@ -6,7 +6,8 @@ export const EXAMPLE_STEP_DATA = {
   repository: EXAMPLE_VALUES.repositoryName,
   workflowId: EXAMPLE_VALUES.workflowId,
   workflowOutcome: EXAMPLE_VALUES.steps.workflowOutcome,
-  workflowInputs: EXAMPLE_VALUES.steps.exposedWorkflowInputs,
+  exposedWorkflowInputs: EXAMPLE_VALUES.steps.exposedWorkflowInputs,
+  workflowInputs: EXAMPLE_VALUES.steps.workflowInputs,
   createdAt: EXAMPLE_VALUES.date,
   lastUpdatedAt: EXAMPLE_VALUES.date,
   startedAt: EXAMPLE_VALUES.date,
@@ -48,7 +49,6 @@ export const EXAMPLE_FLIGHT_PLAN_DATA = {
   environment: EXAMPLE_VALUES.environmentName,
   services: EXAMPLE_VALUES.serviceIds,
   phases: [EXAMPLE_PHASE_DATA],
-  exposedWorkflowInputs: EXAMPLE_VALUES.steps.exposedWorkflowInputs,
   createdAt: EXAMPLE_VALUES.date,
   lastUpdatedAt: EXAMPLE_VALUES.date
 }

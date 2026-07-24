@@ -30,7 +30,8 @@ export const EXAMPLE_VALUES = {
   phases: { status: PhaseStatus.Draft, executionMethod: PhaseExecution.Parallel },
   steps: {
     workflowOutcome: StepStatus.Waiting,
-    exposedWorkflowInputs: {}
+    exposedWorkflowInputs: {},
+    workflowInputs: {}
   }
 }
 
@@ -38,16 +39,14 @@ export const EXAMPLE_FLIGHT_PLAN = FlightPlan.create(
   EXAMPLE_VALUES.flightPlans.name,
   EXAMPLE_VALUES.branchName,
   EXAMPLE_VALUES.environmentName,
-  EXAMPLE_VALUES.serviceIds,
-  {}
+  EXAMPLE_VALUES.serviceIds
 )
 
 export const EXAMPLE_MISSION = Mission.from(EXAMPLE_FLIGHT_PLAN, EXAMPLE_VALUES.director.name)
 
-export const EXAMPLE_PHASE = Phase.create(EXAMPLE_MISSION.id, EXAMPLE_VALUES.phases.executionMethod)
+export const EXAMPLE_PHASE = Phase.create(EXAMPLE_VALUES.phases.executionMethod)
 
 export const EXAMPLE_STEP = Step.create(
-  EXAMPLE_PHASE.id,
   EXAMPLE_VALUES.repositoryName,
   EXAMPLE_VALUES.workflowId,
   EXAMPLE_VALUES.steps.exposedWorkflowInputs

@@ -35,10 +35,6 @@ export class FlightPlan implements DomainElement {
    */
   phases: Phase[] | null
   /**
-   * The exposed GitHub Workflow inputs of this {@link FlightPlan}.
-   */
-  readonly exposedWorkflowInputs: Record<string, string>
-  /**
    * The moment this {@link FlightPlan} was created.
    */
   private _createdAt: Date
@@ -57,7 +53,6 @@ export class FlightPlan implements DomainElement {
    * @param environment - The environment that the {@link FlightPlan} to create targets.
    * @param services - The names of what the {@link FlightPlan} to create targets.
    * @param phases - The phases of the {@link FlightPlan} to create.
-   * @params exposedWorkflowInputs - The exposed GitHub Workflow inputs of the {@link FlightPlan} to create.
    * @throws {DomainError}
    */
   static restore(
@@ -68,8 +63,7 @@ export class FlightPlan implements DomainElement {
     workflowBranch: string,
     environment: string,
     services: string[],
-    phases: Phase[] | null,
-    exposedWorkflowInputs?: Record<string, string>
+    phases: Phase[] | null
   ): FlightPlan {
     return new FlightPlan(
       id,
@@ -79,8 +73,7 @@ export class FlightPlan implements DomainElement {
       workflowBranch,
       environment,
       services,
-      phases,
-      exposedWorkflowInputs
+      phases
     )
   }
 
@@ -91,15 +84,13 @@ export class FlightPlan implements DomainElement {
    * @param environment - The environment that the {@link FlightPlan} to create targets.
    * @param services - The names of what the {@link FlightPlan} to create targets.
    * @param phases - The phases of the {@link FlightPlan} to create.
-   * @params exposedWorkflowInputs - The exposed GitHub Workflow inputs of the {@link FlightPlan} to create.
    * @throws {DomainError}
    */
   static create(
     name: string,
     workflowBranch: string,
     environment: string,
-    services: string[],
-    exposedWorkflowInputs?: Record<string, string>
+    services: string[]
   ): FlightPlan {
     return new FlightPlan(
       uuidv7(),
@@ -109,8 +100,7 @@ export class FlightPlan implements DomainElement {
       workflowBranch,
       environment,
       services,
-      null,
-      exposedWorkflowInputs
+      null
     )
   }
 
@@ -149,7 +139,6 @@ export class FlightPlan implements DomainElement {
    * @param environment - The environment that the {@link FlightPlan} to create targets.
    * @param services - The names of what the {@link FlightPlan} to create targets.
    * @param phases - The phases of the {@link FlightPlan} to create.
-   * @params exposedWorkflowInputs - The exposed GitHub Workflow inputs of the {@link FlightPlan} to create.
    * @throws {DomainError}
    */
   private constructor(
@@ -160,8 +149,7 @@ export class FlightPlan implements DomainElement {
     workflowBranch: string,
     environment: string,
     services: string[],
-    phases: Phase[] | null,
-    exposedWorkflowInputs?: Record<string, string>
+    phases: Phase[] | null
   ) {
     if (!id) {
       throw new DomainError('A Flight Plan needs an ID!')
@@ -191,10 +179,6 @@ export class FlightPlan implements DomainElement {
       throw new DomainError('A Flight Plan needs valid target service IDs!')
     }
 
-    if (exposedWorkflowInputs && typeof exposedWorkflowInputs != 'object') {
-      throw new DomainError('A Flight Plan needs valid workflow inputs!')
-    }
-
     this.id = id
     this.name = name
     this._createdAt = createdAt
@@ -203,7 +187,6 @@ export class FlightPlan implements DomainElement {
     this.environment = environment
     this.services = services
     this.phases = phases
-    this.exposedWorkflowInputs = exposedWorkflowInputs || {}
   }
 
   /**
