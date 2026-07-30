@@ -6,14 +6,14 @@
     "lint": "oxlint --fix",
     "format": "oxfmt",
     "test": "bun test --watch",
-    "test:unit": "bun test --filter test/unit --watch",
-    "test:integration": "bun test --filter test/integration --watch",
+    "test:unit": "bun test --filter test/unit",
+    "test:integration": "bun test --filter test/integration",
     "test:ci": "bun test",
     "typecheck": "tsc --noEmit",
     "build": "tsc --project tsconfig.build.json",
     "start": "bun dist/index.js",
     "drizzle-kit:generate": "bun --bun drizzle-kit generate",
-    "drizzle-kit:migrate": "bun --bun drizzle-kit migrate"
+    "drizzle-kit:migrate": "bun --bun .env.test drizzle-kit migrate"
   },
   "dependencies": {
     "@liftoff/domain": "workspace:*",

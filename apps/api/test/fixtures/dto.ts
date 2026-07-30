@@ -6,10 +6,10 @@ import { EXAMPLE_VALUES } from './values'
 
 const EXAMPLE_STEP_DTO = {
   id: EXAMPLE_VALUES.id,
-  phaseId: EXAMPLE_VALUES.id,
   repository: EXAMPLE_VALUES.repositoryName,
   workflowId: EXAMPLE_VALUES.workflowId,
-  workflowInputs: EXAMPLE_VALUES.steps.exposedWorkflowInputs,
+  exposedWorkflowInputs: EXAMPLE_VALUES.steps.exposedWorkflowInputs,
+  workflowInputs: EXAMPLE_VALUES.steps.workflowInputs,
   workflowOutcome: EXAMPLE_VALUES.steps.workflowOutcome,
   startedAt: null,
   completedAt: null,
@@ -19,7 +19,6 @@ const EXAMPLE_STEP_DTO = {
 
 const EXAMPLE_PHASE_DTO = {
   id: EXAMPLE_VALUES.id,
-  missionId: EXAMPLE_VALUES.id,
   execution: EXAMPLE_VALUES.phases.executionMethod,
   status: EXAMPLE_VALUES.phases.status,
   steps: [EXAMPLE_STEP_DTO],

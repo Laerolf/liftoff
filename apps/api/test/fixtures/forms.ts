@@ -7,7 +7,8 @@ import { EXAMPLE_VALUES } from './values'
 const EXAMPLE_STEP_CREATION_FORM: StepCreationForm = {
   repository: EXAMPLE_VALUES.repositoryName,
   workflowId: EXAMPLE_VALUES.workflowId,
-  workflowInputs: EXAMPLE_VALUES.steps.exposedWorkflowInputs
+  exposedWorkflowInputs: EXAMPLE_VALUES.steps.exposedWorkflowInputs,
+  workflowInputs: EXAMPLE_VALUES.steps.workflowInputs
 }
 
 const EXAMPLE_PHASE_CREATION_FORM: PhaseCreationForm = {

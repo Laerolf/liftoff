@@ -7,22 +7,22 @@ import status from 'http-status'
 
 import app from '@/app'
 
-describe('/missions', () => {
+describe('/api/missions', () => {
   beforeEach(async () => {
     await clearDatabase()
   })
 
-  describe('GET /missions', () => {
+  describe('GET /api/missions', () => {
     test('should return a list of Missions', async () => {
       // Given
-      await app.request('/missions', {
+      await app.request('/api/missions', {
         method: 'POST',
         body: JSON.stringify(createExampleMissionFromScratchCreationForm()),
         headers: new Headers({ 'Content-Type': 'application/json' })
       })
 
       // When
-      const response = await app.request('/missions')
+      const response = await app.request('/api/missions')
 
       // Then
       expect(response.status).toBe(status.OK)
@@ -32,10 +32,10 @@ describe('/missions', () => {
     })
   })
 
-  describe('POST /missions', () => {
+  describe('POST /api/missions', () => {
     test('should be able to create a new Mission', async () => {
       // When
-      const response = await app.request('/missions', {
+      const response = await app.request('/api/missions', {
         method: 'POST',
         body: JSON.stringify(createExampleMissionFromScratchCreationForm()),
         headers: new Headers({ 'Content-Type': 'application/json' })
@@ -58,7 +58,7 @@ describe('/missions', () => {
       }
 
       // When
-      const response = await app.request('/missions', {
+      const response = await app.request('/api/missions', {
         method: 'POST',
         body: JSON.stringify(createExampleMissionFromScratchCreationForm({ environment: null })),
         headers: new Headers({ 'Content-Type': 'application/json' })

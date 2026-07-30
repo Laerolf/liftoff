@@ -1,6 +1,6 @@
 import { Mission, MissionStatus, Phase, isMissionStatus } from '@liftoff/domain'
 
-import { MissionInsertEntity, MissionSelectEntity } from './repository'
+import { MissionInsertEntity, MissionPhaseInsertEntity, MissionSelectEntity } from './repository'
 
 /**
  * Represents a mapper for Missions.
@@ -76,6 +76,33 @@ export class MissionMapper {
       }
     } catch (error) {
       throw new Error('Failed to map a Mission to a Mission insert entity.', { cause: error })
+    }
+  }
+}
+
+/**
+ * Represents a mapper for Mission Phases.
+ */
+export class MissionPhaseMapper {
+  /**
+   * Maps a {@link Mission} to a {@link MissionPhaseInsertEntity[]}.
+   * @param mission - The {@link Mission} to map.
+   */
+  static toMissionPhaseInsertEntities(mission: Mission): MissionPhaseInsertEntity[] {
+    try {
+      if (!Mission.isValid(mission)) {
+        throw new Error('The provided Mission is invalid!')
+      }
+
+      return (mission.phases || []).map((phase, index) => ({
+        missionId: mission.id,
+        phaseId: phase.id,
+        order: index
+      }))
+    } catch (error) {
+      throw new Error('Failed to map a Mission to a Mission Phase insert entities.', {
+        cause: error
+      })
     }
   }
 }

@@ -44,7 +44,7 @@ describe('MissionDto', () => {
         EXAMPLE_VALUES.serviceIds,
         EXAMPLE_VALUES.director.name
       )
-      model.prepare([Phase.create(model.id, EXAMPLE_VALUES.phases.executionMethod)])
+      model.prepare([Phase.create(EXAMPLE_VALUES.phases.executionMethod)])
 
       const expectedPhaseDtos = (model.phases || []).map(PhaseDto.from)
 

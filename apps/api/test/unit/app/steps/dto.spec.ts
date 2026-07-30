@@ -10,7 +10,6 @@ describe('StepDto', () => {
     test('should take the properties from a Step model', () => {
       // Given
       const model = Step.create(
-        EXAMPLE_VALUES.id,
         EXAMPLE_VALUES.repositoryName,
         EXAMPLE_VALUES.workflowId,
         EXAMPLE_VALUES.steps.exposedWorkflowInputs
@@ -21,7 +20,6 @@ describe('StepDto', () => {
 
       // Then
       expect(dto.id).toBe(model.id)
-      expect(dto.phaseId).toBe(model.phaseId)
       expect(dto.repository).toBe(model.repository)
       expect(dto.workflowId).toBe(model.workflowId)
       expect(dto.workflowOutcome).toBe(model.workflowOutcome)

@@ -2,7 +2,9 @@ import { vi, mock, describe, test, expect, beforeEach } from 'bun:test'
 
 import {
   createExampleMissionEntity,
+  createExampleMissionPhaseEntity,
   createExamplePhaseEntity,
+  createExamplePhaseStepEntity,
   createExampleStepEntity
 } from '@test/fixtures/data'
 import { createExampleMissionDto } from '@test/fixtures/dto'
@@ -11,8 +13,8 @@ import { setupMockRepository } from '@test/helpers/mocks'
 import status from 'http-status'
 
 import app from '@/app'
-import { MissionRepository } from '@/app/missions/repository'
-import { PhaseRepository } from '@/app/phases/repository'
+import { MissionPhaseRepository, MissionRepository } from '@/app/missions/repository'
+import { PhaseRepository, PhaseStepRepository } from '@/app/phases/repository'
 import { StepRepository } from '@/app/steps/repository'
 import { dbConnection } from '@/db'
 
@@ -22,18 +24,18 @@ mock.module('@/db', () => ({
   }
 }))
 
-describe('/missions', () => {
+describe('/api/missions', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  describe('GET /missions', () => {
+  describe('GET /api/missions', () => {
     test('should return a list of Missions', async () => {
       // Given
       setupMockRepository(MissionRepository, { getAll: [] })
 
       // When
-      const response = await app.request('/missions')
+      const response = await app.request('/api/missions')
 
       // Then
       expect(response.status).toBe(status.OK)
@@ -45,19 +47,22 @@ describe('/missions', () => {
       vi.spyOn(MissionRepository.prototype, 'getAll').mockRejectedValueOnce(new Error('TEST'))
 
       // When
-      const response = await app.request('/missions')
+      const response = await app.request('/api/missions')
 
       // Then
       expect(response.status).toBe(status.INTERNAL_SERVER_ERROR)
     })
   })
 
-  describe('POST /missions', () => {
+  describe('POST /api/missions', () => {
     test('should be able to create a new Mission', async () => {
       // Given
       const expectedMissionEntity = createExampleMissionEntity()
       const expectedPhaseEntity = createExamplePhaseEntity()
+      const expectedMissionPhaseEntity = createExampleMissionPhaseEntity()
       const expectedStepEntity = createExampleStepEntity()
+      const expectedPhaseStepEntity = createExamplePhaseStepEntity()
+
       const expectedMissionDto = createExampleMissionDto()
 
       setupMockRepository(MissionRepository, {
@@ -66,21 +71,27 @@ describe('/missions', () => {
         update: expectedMissionEntity
       })
 
+      setupMockRepository(MissionPhaseRepository, {
+        insertMany: [expectedMissionPhaseEntity]
+      })
+
       setupMockRepository(PhaseRepository, {
         insertMany: [expectedPhaseEntity],
         getAllByIds: [expectedPhaseEntity],
-        getAllByMissionId: [expectedPhaseEntity],
         updateMany: [expectedPhaseEntity]
+      })
+
+      setupMockRepository(PhaseStepRepository, {
+        insertMany: [expectedPhaseStepEntity]
       })
 
       setupMockRepository(StepRepository, {
         insertMany: [expectedStepEntity],
-        getAllByIds: [expectedStepEntity],
-        getAllByPhaseId: [expectedStepEntity]
+        getAllByIds: [expectedStepEntity]
       })
 
       // When
-      const response = await app.request('/missions', {
+      const response = await app.request('/api/missions', {
         method: 'POST',
         body: JSON.stringify(createExampleMissionFromScratchCreationForm()),
         headers: new Headers({ 'Content-Type': 'application/json' })

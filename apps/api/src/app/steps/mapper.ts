@@ -31,7 +31,6 @@ export class StepMapper {
 
       return Step.restore(
         entity.id,
-        entity.phaseId,
         entity.repository,
         entity.workflowId,
         createdAt,
@@ -58,7 +57,6 @@ export class StepMapper {
 
       return {
         id: step.id,
-        phaseId: step.phaseId,
         repository: step.repository,
         workflowId: step.workflowId,
         createdAt: step.createdAt?.toISOString(),

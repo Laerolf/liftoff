@@ -37,35 +37,6 @@ export class StepRepository {
   }
 
   /**
-   * Gets all the {@link Step[] | Steps} matching the provided Phase ID.
-   * @param phaseId - The Phase ID to search with.
-   * @param dbConnection - The database connection to use.
-   */
-  async getAllByPhaseId(
-    phaseId: string,
-    dbConnection: DatabaseConnection
-  ): Promise<StepSelectEntity[]> {
-    try {
-      if (!phaseId) {
-        throw new Error('The provided Phase ID is invalid!')
-      }
-
-      return await dbConnection.query.steps.findMany({ where: { phaseId } })
-    } catch (error) {
-      console.error(
-        'Failed to get all existing Step entities with the provided Phase ID from the database.',
-        error
-      )
-      throw new Error(
-        'Failed to get all existing Step entities with the provided Phase ID from the database.',
-        {
-          cause: error
-        }
-      )
-    }
-  }
-
-  /**
    * Inserts new {@link StepInsertEntity[] | Steps} entities in the database.
    * @param models - The models to insert.
    * @param dbConnection - The database connection to use.

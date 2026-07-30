@@ -1,6 +1,6 @@
-import { MissionRepository } from '@/app/missions/repository'
+import { MissionRepository, MissionPhaseRepository } from '@/app/missions/repository'
 import { MissionCommandService, MissionQueryService } from '@/app/missions/service'
-import { PhaseRepository } from '@/app/phases/repository'
+import { PhaseRepository, PhaseStepRepository } from '@/app/phases/repository'
 import { PhaseCommandService, PhaseQueryService } from '@/app/phases/service'
 import { StepRepository } from '@/app/steps/repository'
 import { StepCommandService, StepQueryService } from '@/app/steps/service'
@@ -52,17 +52,21 @@ export class RequestContext {
     const stepCommandService = new StepCommandService(stepRepository, stepQueryService)
 
     const phaseRepository = new PhaseRepository()
+    const phaseStepRepository = new PhaseStepRepository()
     const phaseQueryService = new PhaseQueryService(phaseRepository)
     const phaseCommandService = new PhaseCommandService(
       phaseRepository,
+      phaseStepRepository,
       phaseQueryService,
       stepCommandService
     )
 
     const missionRepository = new MissionRepository()
+    const missionPhaseRepository = new MissionPhaseRepository()
     const missionQueryService = new MissionQueryService(missionRepository)
     const missionCommandService = new MissionCommandService(
       missionRepository,
+      missionPhaseRepository,
       missionQueryService,
       phaseCommandService
     )

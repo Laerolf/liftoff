@@ -9,10 +9,6 @@ export class StepDto {
    */
   readonly id: string
   /**
-   * The ID of the Phase that this Step belongs to.
-   */
-  readonly phaseId: string
-  /**
    * The GitHub repository of this Step.
    */
   readonly repository: string
@@ -24,6 +20,10 @@ export class StepDto {
    * The GitHub Workflow outcome of this Step.
    */
   readonly workflowOutcome: string
+  /**
+   * The exposed GitHub Workflow inputs of this Step.
+   */
+  readonly exposedWorkflowInputs: Record<string, string>
   /**
    * The GitHub Workflow inputs of this Step.
    */
@@ -58,7 +58,6 @@ export class StepDto {
 
       return new StepDto(
         model.id,
-        model.phaseId,
         model.repository,
         model.workflowId,
         model.createdAt,
@@ -66,6 +65,7 @@ export class StepDto {
         model.startedAt,
         model.completedAt,
         model.workflowOutcome,
+        model.exposedWorkflowInputs,
         model.workflowInputs
       )
     } catch (error) {
@@ -78,7 +78,6 @@ export class StepDto {
   /**
    * Creates a new Step DTO.
    * @param id - The ID of the Step to create.
-   * @param phaseId - The ID of the Phase that the Step to create belongs to.
    * @param repository - The GitHub repository of the Step to create.
    * @param workflowId - The GitHub Workflow ID of the Step to create.
    * @param createdAt - The moment the Step to create was created.
@@ -86,11 +85,11 @@ export class StepDto {
    * @param startedAt - The date this Step to create was started.
    * @param completedAt - The date this Step to create was completed.
    * @param workflowOutcome - The GitHub Workflow outcome of the Step to create.
+   * @param exposedWorkflowInputs - The exposed GitHub Workflow inputs of the Step to create.
    * @param workflowInputs - The GitHub Workflow inputs of the Step to create.
    */
   private constructor(
     id: string,
-    phaseId: string,
     repository: string,
     workflowId: string,
     createdAt: Date,
@@ -98,10 +97,10 @@ export class StepDto {
     startedAt: Date | null,
     completedAt: Date | null,
     workflowOutcome: string,
+    exposedWorkflowInputs: Record<string, string>,
     workflowInputs: Record<string, string>
   ) {
     this.id = id
-    this.phaseId = phaseId
     this.repository = repository
     this.workflowId = workflowId
     this.createdAt = createdAt
@@ -109,6 +108,7 @@ export class StepDto {
     this.startedAt = startedAt || null
     this.completedAt = completedAt || null
     this.workflowOutcome = workflowOutcome
+    this.exposedWorkflowInputs = exposedWorkflowInputs
     this.workflowInputs = workflowInputs
   }
 }

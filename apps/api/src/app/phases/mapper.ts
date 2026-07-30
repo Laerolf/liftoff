@@ -1,6 +1,6 @@
 import { Phase, Step, isPhaseExecution, isPhaseStatus } from '@liftoff/domain'
 
-import { PhaseInsertEntity, PhaseSelectEntity } from './repository'
+import { PhaseInsertEntity, PhaseSelectEntity, PhaseStepInsertEntity } from './repository'
 
 /**
  * Represents a mapper for Phases.
@@ -36,7 +36,6 @@ export class PhaseMapper {
 
       return Phase.restore(
         entity.id,
-        entity.missionId,
         entity.status,
         entity.execution,
         steps || [],
@@ -62,7 +61,6 @@ export class PhaseMapper {
 
       return {
         id: phase.id,
-        missionId: phase.missionId,
         status: phase.status,
         execution: phase.execution,
         startedAt: phase.startedAt?.toISOString(),
@@ -72,6 +70,31 @@ export class PhaseMapper {
       }
     } catch (error) {
       throw new Error('Failed to map a Phase to a Phase insert entity.', { cause: error })
+    }
+  }
+}
+
+/**
+ * Represents a mapper for Phase Steps.
+ */
+export class PhaseStepMapper {
+  /**
+   * Maps a {@link Phase} to a {@link PhaseStepInsertEntity[]}.
+   * @param phase - The {@link Phase} to map.
+   */
+  static toPhaseInsertEntities(phase: Phase): PhaseStepInsertEntity[] {
+    try {
+      if (!Phase.isValid(phase)) {
+        throw new Error('The provided Phase is invalid!')
+      }
+
+      return (phase.steps || []).map((step, index) => ({
+        phaseId: phase.id,
+        stepId: step.id,
+        order: index
+      }))
+    } catch (error) {
+      throw new Error('Failed to map a Phase to a Phase Step insert entities.', { cause: error })
     }
   }
 }
