@@ -195,7 +195,7 @@ export class MissionCommandService {
     dbConnection: DatabaseConnection
   ): Promise<Mission> {
     try {
-      const phaseModels: Phase[] = await this.phaseCommandService.createForMission(
+      const phaseModels: Phase[] = await this.phaseCommandService.createMany(
         phaseCreationForms,
         dbConnection
       )

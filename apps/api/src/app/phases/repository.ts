@@ -1,19 +1,19 @@
-import { InferSelectModel } from 'drizzle-orm'
+import { InferSelectModel, InferInsertModel } from 'drizzle-orm'
 
 import { DatabaseConnection } from '@/db'
-import { phasesTable, phaseStepsTable, stepsTable } from '@/db/schema'
+import { phasesTable, phaseStepsTable } from '@/db/schema'
+
+import { StepSelectEntity } from '../steps/repository'
 
 export type PhaseSelectEntity = InferSelectModel<typeof phasesTable> & {
-  phaseSteps: (InferSelectModel<typeof phaseStepsTable> & {
-    step: InferSelectModel<typeof stepsTable> | null
-  })[]
+  phaseSteps: PhaseStepSelectEntity[]
 }
-export type PhaseInsertEntity = typeof phasesTable.$inferInsert
+export type PhaseInsertEntity = InferInsertModel<typeof phasesTable>
 
 export type PhaseStepSelectEntity = InferSelectModel<typeof phaseStepsTable> & {
-  step: InferSelectModel<typeof stepsTable> | null
+  step: StepSelectEntity | null
 }
-export type PhaseStepInsertEntity = typeof phaseStepsTable.$inferInsert
+export type PhaseStepInsertEntity = InferInsertModel<typeof phaseStepsTable>
 
 /**
  * Represents the repository for Phases.

@@ -89,14 +89,11 @@ export class PhaseCommandService {
   }
 
   /**
-   * Creates new {@link Phase[] | Phases} for a Mission and prepares them for launch.
+   * Creates many new {@link Phase[] | Phases} and prepares them for launch.
    * @param forms - The forms used to create the new {@link Phase[] | Phases}.
    * @param dbConnection - The database connection to use.
    */
-  async createForMission(
-    forms: PhaseCreationForm[],
-    dbConnection: DatabaseConnection
-  ): Promise<Phase[]> {
+  async createMany(forms: PhaseCreationForm[], dbConnection: DatabaseConnection): Promise<Phase[]> {
     try {
       const models: Phase[] = (
         await this.repository.insertMany(
@@ -111,8 +108,8 @@ export class PhaseCommandService {
 
       return await this.prepareForLaunch(models, stepFormsByPhaseId, dbConnection)
     } catch (error) {
-      console.error('Failed to create new Phases for a Mission.', error)
-      throw new Error('Failed to create new Phases for a Mission.', { cause: error })
+      console.error('Failed to create many new Phases.', error)
+      throw new Error('Failed to create many new Phases.', { cause: error })
     }
   }
 
@@ -130,7 +127,7 @@ export class PhaseCommandService {
     try {
       const preparedModels: Phase[] = await Promise.all(
         models.map(async (model) => {
-          const steps = await this.stepCommandService.createForPhase(
+          const steps = await this.stepCommandService.createMany(
             stepCreationFormMap[model.id],
             dbConnection
           )

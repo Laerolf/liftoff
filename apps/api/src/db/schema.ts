@@ -14,10 +14,7 @@ export const flightPlansTable = pgTable('flight-plans', {
   lastUpdatedAt: timestamp({ mode: 'string' }),
   workflowBranch: varchar({ length: STRING_MAX_LENGTH }).notNull(),
   environment: varchar({ length: STRING_MAX_LENGTH }).notNull(),
-  services: json().$type<string[]>().notNull().default([]),
-  status: varchar({ length: STRING_MAX_LENGTH }).notNull(),
-  launchedAt: timestamp({ mode: 'string' }),
-  completedAt: timestamp({ mode: 'string' })
+  services: json().$type<string[]>().notNull().default([])
 })
 
 /**

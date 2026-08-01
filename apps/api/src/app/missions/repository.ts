@@ -1,37 +1,19 @@
-import { InferSelectModel } from 'drizzle-orm'
+import { InferSelectModel, InferInsertModel } from 'drizzle-orm'
 
 import { DatabaseConnection } from '@/db'
-import {
-  missionPhasesTable,
-  missionsTable,
-  phasesTable,
-  phaseStepsTable,
-  stepsTable
-} from '@/db/schema'
+import { missionPhasesTable, missionsTable } from '@/db/schema'
+
+import { PhaseSelectEntity } from '../phases/repository'
 
 export type MissionSelectEntity = InferSelectModel<typeof missionsTable> & {
-  missionPhases: (InferSelectModel<typeof missionPhasesTable> & {
-    phase:
-      | (InferSelectModel<typeof phasesTable> & {
-          phaseSteps: (InferSelectModel<typeof phaseStepsTable> & {
-            step: InferSelectModel<typeof stepsTable> | null
-          })[]
-        })
-      | null
-  })[]
+  missionPhases: MissionPhaseSelectEntity[]
 }
-export type MissionInsertEntity = typeof missionsTable.$inferInsert
+export type MissionInsertEntity = InferInsertModel<typeof missionsTable>
 
 export type MissionPhaseSelectEntity = InferSelectModel<typeof missionPhasesTable> & {
-  phase:
-      | (InferSelectModel<typeof phasesTable> & {
-          phaseSteps: (InferSelectModel<typeof phaseStepsTable> & {
-            step: InferSelectModel<typeof stepsTable> | null
-          })[]
-        })
-      | null
+  phase: PhaseSelectEntity | null
 }
-export type MissionPhaseInsertEntity = typeof missionPhasesTable.$inferInsert
+export type MissionPhaseInsertEntity = InferInsertModel<typeof missionPhasesTable>
 
 /**
  * Represents the repository for Missions.
@@ -128,7 +110,7 @@ export class MissionRepository {
  */
 export class MissionPhaseRepository {
   /**
-   * Inserts new {@link MissionPhaseInsertEntity[] | Mission entities} in the database.
+   * Inserts new {@link MissionPhaseInsertEntity[] | Mission Phase insert entities} in the database.
    * @param models - The models to insert.
    * @param dbConnection - The database connection to use.
    */

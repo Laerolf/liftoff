@@ -33,7 +33,7 @@ export class FlightPlan implements DomainElement {
   /**
    * The phases of this {@link FlightPlan}.
    */
-  phases: Phase[] | null
+  private _phases: Phase[] | null
   /**
    * The moment this {@link FlightPlan} was created.
    */
@@ -83,7 +83,6 @@ export class FlightPlan implements DomainElement {
    * @param workflowBranch - The branch name of the workflow that will be run by the {@link FlightPlan} to create.
    * @param environment - The environment that the {@link FlightPlan} to create targets.
    * @param services - The names of what the {@link FlightPlan} to create targets.
-   * @param phases - The phases of the {@link FlightPlan} to create.
    * @throws {DomainError}
    */
   static create(
@@ -186,7 +185,34 @@ export class FlightPlan implements DomainElement {
     this.workflowBranch = workflowBranch
     this.environment = environment
     this.services = services
-    this.phases = phases
+    this._phases = phases
+  }
+
+  /**
+   * Prepares the {@link FlightPlan} for usage.
+   * @param phases - The Phases to prepare this {@link FlightPlan} with.
+   * @throws {DomainError}
+   */
+  prepare(phases: Phase[]): FlightPlan {
+    try {
+      if (!phases || !phases.some(Phase.isValid)) {
+        throw new DomainError('The provided Flight Plan Phases are invalid!')
+      }
+
+      this._phases = phases
+      this._lastUpdatedAt = new Date()
+
+      return this
+    } catch (error) {
+      throw new DomainError('Failed to prepare a Flight Plan!', { cause: error })
+    }
+  }
+
+  /***
+   * The {@link Phase[] | Phases} of this {@link FlightPlan}.
+   */
+  get phases(): Phase[] | null {
+    return this._phases
   }
 
   /**

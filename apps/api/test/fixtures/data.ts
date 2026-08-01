@@ -1,3 +1,4 @@
+import { FlightPlanPhaseSelectEntity, FlightPlanSelectEntity } from '@/app/flightPlans/repository'
 import {
   MissionPhaseInsertEntity,
   MissionPhaseSelectEntity,
@@ -62,6 +63,24 @@ export const EXAMPLE_MISSION_ENTITY: MissionSelectEntity = {
   completedAt: null
 }
 
+export const EXAMPLE_FLIGHT_PLAN_PHASE_ENTITY: FlightPlanPhaseSelectEntity = {
+  flightPlanId: EXAMPLE_VALUES.id,
+  phaseId: EXAMPLE_VALUES.id,
+  order: 1,
+  phase: EXAMPLE_PHASE_ENTITY
+}
+
+export const EXAMPLE_FLIGHT_PLAN_ENTITY: FlightPlanSelectEntity = {
+  id: EXAMPLE_VALUES.id,
+  name: EXAMPLE_VALUES.flightPlans.name,
+  workflowBranch: EXAMPLE_VALUES.branchName,
+  environment: EXAMPLE_VALUES.environmentName,
+  services: EXAMPLE_VALUES.serviceIds,
+  flightPlanPhases: [EXAMPLE_FLIGHT_PLAN_PHASE_ENTITY],
+  createdAt: EXAMPLE_VALUES.date.toISOString(),
+  lastUpdatedAt: null
+}
+
 /**
  * Creates a new example Step entity.
  * @param overrides - Used to override the default values of the entity to create.
@@ -123,6 +142,32 @@ export function createExampleMissionEntity(
 ): typeof EXAMPLE_MISSION_ENTITY {
   return {
     ...EXAMPLE_MISSION_ENTITY,
+    ...overrides
+  }
+}
+
+/**
+ * Creates a new example Flight Plan Phase entity.
+ * @param overrides - Used to override the default values of the entity to create.
+ */
+export function createExampleFlightPlanPhaseEntity(
+  overrides?: Partial<typeof EXAMPLE_FLIGHT_PLAN_PHASE_ENTITY> | Record<string, unknown>
+): typeof EXAMPLE_FLIGHT_PLAN_PHASE_ENTITY {
+  return {
+    ...EXAMPLE_FLIGHT_PLAN_PHASE_ENTITY,
+    ...overrides
+  }
+}
+
+/**
+ * Creates a new example Flight Plan entity.
+ * @param overrides - Used to override the default values of the entity to create.
+ */
+export function createExampleFlightPlanEntity(
+  overrides?: Partial<typeof EXAMPLE_FLIGHT_PLAN_ENTITY> | Record<string, unknown>
+): typeof EXAMPLE_FLIGHT_PLAN_ENTITY {
+  return {
+    ...EXAMPLE_FLIGHT_PLAN_ENTITY,
     ...overrides
   }
 }

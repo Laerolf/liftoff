@@ -1,8 +1,10 @@
+import { InferSelectModel, InferInsertModel } from 'drizzle-orm'
+
 import { DatabaseConnection } from '@/db'
 import { stepsTable } from '@/db/schema'
 
-export type StepSelectEntity = typeof stepsTable.$inferSelect
-export type StepInsertEntity = typeof stepsTable.$inferInsert
+export type StepSelectEntity = InferSelectModel<typeof stepsTable>
+export type StepInsertEntity = InferInsertModel<typeof stepsTable>
 
 /**
  * Represents the repository for Steps.

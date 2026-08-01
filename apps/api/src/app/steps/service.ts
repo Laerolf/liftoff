@@ -71,14 +71,11 @@ export class StepCommandService {
   }
 
   /**
-   * Creates new {@link Step[] | Steps} for a Phase.
+   * Creates ùmany new {@link Step[] | Steps}.
    * @param form - The form used to create the new {@link Step[] | Steps}.
    * @param dbConnection - The database connection to use.
    */
-  async createForPhase(
-    forms: StepCreationForm[],
-    dbConnection: DatabaseConnection
-  ): Promise<Step[]> {
+  async createMany(forms: StepCreationForm[], dbConnection: DatabaseConnection): Promise<Step[]> {
     try {
       const models: StepInsertEntity[] = forms
         .map((form) => Step.create(form.repository, form.workflowId, form.workflowInputs))
@@ -91,8 +88,8 @@ export class StepCommandService {
         dbConnection
       )
     } catch (error) {
-      console.error('Failed to create new Steps for a Phase.', error)
-      throw new Error('Failed to create new Steps for a Phase.', { cause: error })
+      console.error('Failed to create many new Steps.', error)
+      throw new Error('Failed to create many new Steps.', { cause: error })
     }
   }
 }
