@@ -1,9 +1,12 @@
-import { MissionRepository } from '@/app/missions/repository'
+import { MissionRepository, MissionPhaseRepository } from '@/app/missions/repository'
 import { MissionCommandService, MissionQueryService } from '@/app/missions/service'
-import { PhaseRepository } from '@/app/phases/repository'
+import { PhaseRepository, PhaseStepRepository } from '@/app/phases/repository'
 import { PhaseCommandService, PhaseQueryService } from '@/app/phases/service'
 import { StepRepository } from '@/app/steps/repository'
 import { StepCommandService, StepQueryService } from '@/app/steps/service'
+
+import { FlightPlanPhaseRepository, FlightPlanRepository } from '../flightPlans/repository'
+import { FlightPlanCommandService, FlightPlanQueryService } from '../flightPlans/service'
 
 /**
  * Represent the request context.
@@ -18,6 +21,9 @@ export class RequestContext {
   readonly missionQueryService: MissionQueryService
   readonly missionCommandService: MissionCommandService
 
+  readonly flightPlanQueryService: FlightPlanQueryService
+  readonly flightPlanCommandService: FlightPlanCommandService
+
   /**
    * Creates a new {@link RequestContext}.
    * @param stepQueryService - The {@link StepQueryService} to use.
@@ -26,6 +32,8 @@ export class RequestContext {
    * @param phaseCommandService - The {@link PhaseCommandService} to use.
    * @param missionQueryService - The {@link MissionQueryService} to use.
    * @param missionCommandService - The {@link MissionCommandService} to use.
+   * @param flightPlanQueryService - The {@link FlightPlanQueryService} to use.
+   * @param flightPlanCommandService - The {@link FlightPlanCommandService} to use.
    */
   private constructor(
     stepQueryService: StepQueryService,
@@ -33,7 +41,9 @@ export class RequestContext {
     phaseQueryService: PhaseQueryService,
     phaseCommandService: PhaseCommandService,
     missionQueryService: MissionQueryService,
-    missionCommandService: MissionCommandService
+    missionCommandService: MissionCommandService,
+    flightPlanQueryService: FlightPlanQueryService,
+    flightPlanCommandService: FlightPlanCommandService
   ) {
     this.stepQueryService = stepQueryService
     this.stepCommandService = stepCommandService
@@ -41,6 +51,8 @@ export class RequestContext {
     this.phaseCommandService = phaseCommandService
     this.missionQueryService = missionQueryService
     this.missionCommandService = missionCommandService
+    this.flightPlanQueryService = flightPlanQueryService
+    this.flightPlanCommandService = flightPlanCommandService
   }
 
   /**
@@ -52,18 +64,32 @@ export class RequestContext {
     const stepCommandService = new StepCommandService(stepRepository, stepQueryService)
 
     const phaseRepository = new PhaseRepository()
+    const phaseStepRepository = new PhaseStepRepository()
     const phaseQueryService = new PhaseQueryService(phaseRepository)
     const phaseCommandService = new PhaseCommandService(
       phaseRepository,
+      phaseStepRepository,
       phaseQueryService,
       stepCommandService
     )
 
     const missionRepository = new MissionRepository()
+    const missionPhaseRepository = new MissionPhaseRepository()
     const missionQueryService = new MissionQueryService(missionRepository)
     const missionCommandService = new MissionCommandService(
       missionRepository,
+      missionPhaseRepository,
       missionQueryService,
+      phaseCommandService
+    )
+
+    const flightPlanRepository = new FlightPlanRepository()
+    const flightPlanPhaseRepository = new FlightPlanPhaseRepository()
+    const flightPlanQueryService = new FlightPlanQueryService(flightPlanRepository)
+    const flightPlanCommandService = new FlightPlanCommandService(
+      flightPlanRepository,
+      flightPlanPhaseRepository,
+      flightPlanQueryService,
       phaseCommandService
     )
 
@@ -73,7 +99,9 @@ export class RequestContext {
       phaseQueryService,
       phaseCommandService,
       missionQueryService,
-      missionCommandService
+      missionCommandService,
+      flightPlanQueryService,
+      flightPlanCommandService
     )
   }
 }

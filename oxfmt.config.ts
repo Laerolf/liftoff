@@ -1,6 +1,11 @@
 import { defineConfig } from 'oxfmt'
 
 export default defineConfig({
+  ignorePatterns: [
+    "**/node_modules/**", 
+    "**/.bun/**", 
+    "**/dist/**"
+  ],
   trailingComma: 'none',
   semi: false,
   singleQuote: true,

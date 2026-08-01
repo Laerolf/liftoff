@@ -8,8 +8,8 @@ import { PhaseCommandService } from '../phases/service'
 import { StepMapper } from '../steps/mapper'
 
 import { MissionFromScratchCreationForm } from './form'
-import { MissionMapper } from './mapper'
-import { MissionInsertEntity, MissionRepository } from './repository'
+import { MissionMapper, MissionPhaseMapper } from './mapper'
+import { MissionInsertEntity, MissionPhaseRepository, MissionRepository } from './repository'
 
 /**
  * Represents a query service for Missions.
@@ -36,10 +36,16 @@ export class MissionQueryService {
   async getAll(dbConnection: DatabaseConnection): Promise<Mission[]> {
     try {
       return (await this.repository.getAll(dbConnection)).map((entity) => {
-        const phases = (entity?.phases || []).map((phase) => {
-          const steps = phase.steps.map(StepMapper.toStep)
-          return PhaseMapper.toPhase(phase, steps)
-        })
+        const phases = (entity?.missionPhases || [])
+          .map(({ phase }) => phase)
+          .filter((phase) => !!phase)
+          .map((phase) => {
+            const steps = phase.phaseSteps
+              .flatMap(({ step }) => step)
+              .filter((step) => !!step)
+              .map(StepMapper.toStep)
+            return PhaseMapper.toPhase(phase, steps)
+          })
 
         return MissionMapper.toMission(entity, phases)
       })
@@ -64,10 +70,16 @@ export class MissionQueryService {
       }
 
       const entity = await this.repository.findById(missionId, dbConnection)
-      const phases = (entity?.phases || []).map((phase) => {
-        const steps = phase.steps.map(StepMapper.toStep)
-        return PhaseMapper.toPhase(phase, steps)
-      })
+      const phases = (entity?.missionPhases || [])
+        .map(({ phase }) => phase)
+        .filter((phase) => !!phase)
+        .map((phase) => {
+          const steps = phase.phaseSteps
+            .flatMap(({ step }) => step)
+            .filter((step) => !!step)
+            .map(StepMapper.toStep)
+          return PhaseMapper.toPhase(phase, steps)
+        })
 
       return entity ? MissionMapper.toMission(entity, phases) : undefined
     } catch (error) {
@@ -106,22 +118,29 @@ export class MissionQueryService {
  */
 export class MissionCommandService {
   private repository: MissionRepository
+  private missionPhaseRepository: MissionPhaseRepository
   private missionQueryService: MissionQueryService
   private phaseCommandService: PhaseCommandService
 
   /**
    * Creates a new {@link MissionCommandService}.
    * @param repository - The {@link MissionRepository} to use.
+   * @param missionPhaseRepository - The {@link MissionPhaseRepository} to use.
    * @param missionQueryService - The {@link MissionQueryService} to use.
    * @param phaseCommandService - The {@link PhaseCommandService} to use.
    */
   constructor(
     repository: MissionRepository,
+    missionPhaseRepository: MissionPhaseRepository,
     missionQueryService: MissionQueryService,
     phaseCommandService: PhaseCommandService
   ) {
     if (!repository || !(repository instanceof MissionRepository)) {
       throw new Error('The provided Mission repository is invalid!')
+    }
+
+    if (!missionPhaseRepository || !(missionPhaseRepository instanceof MissionPhaseRepository)) {
+      throw new Error('The provided Mission Phase repository is invalid!')
     }
 
     if (!missionQueryService || !(missionQueryService instanceof MissionQueryService)) {
@@ -133,6 +152,7 @@ export class MissionCommandService {
     }
 
     this.repository = repository
+    this.missionPhaseRepository = missionPhaseRepository
     this.missionQueryService = missionQueryService
     this.phaseCommandService = phaseCommandService
   }
@@ -175,13 +195,17 @@ export class MissionCommandService {
     dbConnection: DatabaseConnection
   ): Promise<Mission> {
     try {
-      const phaseModels: Phase[] = await this.phaseCommandService.createForMission(
-        model.id,
+      const phaseModels: Phase[] = await this.phaseCommandService.createMany(
         phaseCreationForms,
         dbConnection
       )
 
       model.prepare(phaseModels)
+
+      await this.missionPhaseRepository.insertMany(
+        MissionPhaseMapper.toMissionPhaseInsertEntities(model),
+        dbConnection
+      )
 
       const entity: MissionInsertEntity = await this.repository.update(
         MissionMapper.toMissionInsertEntity(model),

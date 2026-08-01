@@ -452,7 +452,7 @@ describe('Mission', () => {
         flightPlans: { name }
       } = EXAMPLE_VALUES
 
-      const flightPlan = FlightPlan.create(name, branchName, environmentName, serviceIds, {})
+      const flightPlan = FlightPlan.create(name, branchName, environmentName, serviceIds)
       flightPlan.phases = [EXAMPLE_PHASE]
 
       // When
@@ -508,7 +508,7 @@ describe('Mission', () => {
         flightPlans: { name }
       } = EXAMPLE_VALUES
 
-      const flightPlan = FlightPlan.create(name, branchName, environmentName, serviceIds, {})
+      const flightPlan = FlightPlan.create(name, branchName, environmentName, serviceIds)
       flightPlan.phases = [EXAMPLE_PHASE]
 
       const expectedError = new DomainError('The provided director is not valid!')

@@ -14,9 +14,9 @@
   "scripts": {
     "lint": "oxlint --fix",
     "format": "oxfmt",
-    "test": "bun test --watch",
-    "test:unit": "bun test --watch --filter test/unit",
-    "test:ci": "bun test",
+    "test": "bun test --watch --only-failures",
+    "test:unit": "bun test --filter test/unit --only-failures",
+    "test:ci": "bun test --only-failures",
     "typecheck": "tsc --noEmit",
     "build": "tsc --project tsconfig.build.json"
   },

@@ -11,10 +11,6 @@ export class PhaseDto {
    */
   readonly id: string
   /**
-   * The ID of the Mission that this Phase belongs to.
-   */
-  readonly missionId: string
-  /**
    * The status of this Phase.
    */
   readonly status: string
@@ -56,7 +52,6 @@ export class PhaseDto {
 
       return new PhaseDto(
         model.id,
-        model.missionId,
         model.status,
         model.execution,
         model.steps ? model.steps.map(StepDto.from) : null,
@@ -75,7 +70,6 @@ export class PhaseDto {
   /**
    * Creates a new Phase DTO.
    * @param id - The ID of the Phase to create.
-   * @param missionId - The Mission ID that the Phase to create belongs to.
    * @param status - The status of the Phase to create.
    * @param execution - The execution of the Phase to create.
    * @param steps - The steps of the Phase to create.
@@ -87,7 +81,6 @@ export class PhaseDto {
    */
   private constructor(
     id: string,
-    missionId: string,
     status: string,
     execution: string,
     steps: StepDto[] | null,
@@ -97,7 +90,6 @@ export class PhaseDto {
     completedAt: Date | null
   ) {
     this.id = id
-    this.missionId = missionId
     this.status = status
     this.execution = execution
     this.steps = steps

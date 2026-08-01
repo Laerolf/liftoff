@@ -1,8 +1,10 @@
+import { InferSelectModel, InferInsertModel } from 'drizzle-orm'
+
 import { DatabaseConnection } from '@/db'
 import { stepsTable } from '@/db/schema'
 
-export type StepSelectEntity = typeof stepsTable.$inferSelect
-export type StepInsertEntity = typeof stepsTable.$inferInsert
+export type StepSelectEntity = InferSelectModel<typeof stepsTable>
+export type StepInsertEntity = InferInsertModel<typeof stepsTable>
 
 /**
  * Represents the repository for Steps.
@@ -29,35 +31,6 @@ export class StepRepository {
       )
       throw new Error(
         'Failed to get all existing Step entities with the provided Step IDs from the database.',
-        {
-          cause: error
-        }
-      )
-    }
-  }
-
-  /**
-   * Gets all the {@link Step[] | Steps} matching the provided Phase ID.
-   * @param phaseId - The Phase ID to search with.
-   * @param dbConnection - The database connection to use.
-   */
-  async getAllByPhaseId(
-    phaseId: string,
-    dbConnection: DatabaseConnection
-  ): Promise<StepSelectEntity[]> {
-    try {
-      if (!phaseId) {
-        throw new Error('The provided Phase ID is invalid!')
-      }
-
-      return await dbConnection.query.steps.findMany({ where: { phaseId } })
-    } catch (error) {
-      console.error(
-        'Failed to get all existing Step entities with the provided Phase ID from the database.',
-        error
-      )
-      throw new Error(
-        'Failed to get all existing Step entities with the provided Phase ID from the database.',
         {
           cause: error
         }

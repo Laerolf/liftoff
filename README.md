@@ -6,6 +6,10 @@ This project currently has one package:
 
 - [domain](./packages/domain/README.md)
 
+And one project:
+
+- [api](./apps/api/README.md)
+
 ## Setup
 
 ### Install dependencies

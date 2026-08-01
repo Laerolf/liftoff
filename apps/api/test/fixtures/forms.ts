@@ -1,3 +1,4 @@
+import { FlightPlanCreationForm } from '@/app/flightPlans/form'
 import { MissionFromScratchCreationForm } from '@/app/missions/form'
 import { PhaseCreationForm } from '@/app/phases/form'
 import { StepCreationForm } from '@/app/steps/form'
@@ -7,7 +8,8 @@ import { EXAMPLE_VALUES } from './values'
 const EXAMPLE_STEP_CREATION_FORM: StepCreationForm = {
   repository: EXAMPLE_VALUES.repositoryName,
   workflowId: EXAMPLE_VALUES.workflowId,
-  workflowInputs: EXAMPLE_VALUES.steps.exposedWorkflowInputs
+  exposedWorkflowInputs: EXAMPLE_VALUES.steps.exposedWorkflowInputs,
+  workflowInputs: EXAMPLE_VALUES.steps.workflowInputs
 }
 
 const EXAMPLE_PHASE_CREATION_FORM: PhaseCreationForm = {
@@ -23,6 +25,14 @@ const EXAMPLE_MISSION_FROM_SCRATCH_CREATION_FORM: MissionFromScratchCreationForm
   workflowBranch: EXAMPLE_VALUES.branchName
 }
 
+const EXAMPLE_FLIGHT_PLAN_CREATION_FORM: FlightPlanCreationForm = {
+  name: EXAMPLE_VALUES.flightPlans.name,
+  environment: EXAMPLE_VALUES.environmentName,
+  phases: [EXAMPLE_PHASE_CREATION_FORM],
+  services: EXAMPLE_VALUES.serviceIds,
+  workflowBranch: EXAMPLE_VALUES.branchName
+}
+
 /**
  * Creates an example {@link MissionFromScratchCreationForm}.
  * @param overrides - Used to override properties.
@@ -32,6 +42,19 @@ export function createExampleMissionFromScratchCreationForm(
 ): MissionFromScratchCreationForm {
   return {
     ...EXAMPLE_MISSION_FROM_SCRATCH_CREATION_FORM,
+    ...overrides
+  }
+}
+
+/**
+ * Creates an example {@link FlightPlanCreationForm}.
+ * @param overrides - Used to override properties.
+ */
+export function createExampleFlightPlanCreationForm(
+  overrides?: Partial<FlightPlanCreationForm> | Record<string, unknown>
+): FlightPlanCreationForm {
+  return {
+    ...EXAMPLE_FLIGHT_PLAN_CREATION_FORM,
     ...overrides
   }
 }

@@ -17,10 +17,6 @@ export class Step implements DomainElement {
    */
   readonly id: string
   /**
-   * The ID of the Phase that this {@link Step} belongs to.
-   */
-  readonly phaseId: string
-  /**
    * The GitHub repository of this {@link Step}.
    */
   readonly repository: string
@@ -32,6 +28,10 @@ export class Step implements DomainElement {
    * The GitHub Workflow outcome of this {@link Step}.
    */
   readonly workflowOutcome: StepStatus
+  /**
+   * The exposed GitHub Workflow inputs of this {@link Step}.
+   */
+  readonly exposedWorkflowInputs: Record<string, string>
   /**
    * The GitHub Workflow inputs of this {@link Step}.
    */
@@ -56,19 +56,18 @@ export class Step implements DomainElement {
   /**
    * Restores a {@link Step}.
    * @param id - The ID of the {@link Phase} to create.
-   * @param phaseId - The ID of the Phase that the {@link Phase} to create belongs to.
    * @param repository - The GitHub repository of the {@link Step} to create.
    * @param workflowId - The GitHub Workflow ID of the {@link Step} to create.
    * @param createdAt - The moment the {@link Step} to create was created.
    * @param lastUpdatedAt - The moment the {@link Step} to create was last updated.
-   *  @param startedAt - The date this {@link Step} to create was started.
+   * @param startedAt - The date this {@link Step} to create was started.
    * @param completedAt - The date this {@link Step} to create was completed.
    * @param workflowOutcome - The GitHub Workflow outcome of the {@link Step} to create.
+   * @param exposedWorkflowInputs - The GitHub exposed Workflow inputs of the {@link Step} to create.
    * @param workflowInputs - The GitHub Workflow inputs of the {@link Step} to create.
    */
   static restore(
     id: string,
-    phaseId: string,
     repository: string,
     workflowId: string,
     createdAt: Date,
@@ -76,11 +75,11 @@ export class Step implements DomainElement {
     startedAt: Date | null,
     completedAt: Date | null,
     workflowOutcome: StepStatus,
+    exposedWorkflowInputs?: Record<string, string>,
     workflowInputs?: Record<string, string>
   ): Step {
     return new Step(
       id,
-      phaseId,
       repository,
       workflowId,
       createdAt,
@@ -88,26 +87,24 @@ export class Step implements DomainElement {
       startedAt,
       completedAt,
       workflowOutcome,
+      exposedWorkflowInputs,
       workflowInputs
     )
   }
 
   /**
    * Creates a new {@link Step}.
-   *  @param phaseId - The ID of the Phase that the {@link Phase} to create belongs to.
    * @param repository - The GitHub repository of the {@link Step} to create.
    * @param workflowId - The GitHub Workflow ID of the {@link Step} to create.
-   * @param workflowInputs - The GitHub Workflow inputs of the {@link Step} to create.
+   * @param exposedWorkflowInputs - The exposed GitHub Workflow inputs of the {@link Step} to create.
    */
   static create(
-    phaseId: string,
     repository: string,
     workflowId: string,
-    workflowInputs?: Record<string, string>
+    exposedWorkflowInputs?: Record<string, string>
   ): Step {
     return new Step(
       uuidv7(),
-      phaseId,
       repository,
       workflowId,
       new Date(),
@@ -115,7 +112,7 @@ export class Step implements DomainElement {
       null,
       null,
       StepStatus.Waiting,
-      workflowInputs
+      exposedWorkflowInputs
     )
   }
 
@@ -132,7 +129,6 @@ export class Step implements DomainElement {
 
     return (
       typeof candidate.id === 'string' &&
-      typeof candidate.phaseId === 'string' &&
       typeof candidate.repository === 'string' &&
       typeof candidate.workflowId === 'string' &&
       isValidDate(candidate.createdAt) &&
@@ -140,6 +136,8 @@ export class Step implements DomainElement {
       (!candidate.startedAt || isValidDate(candidate.startedAt)) &&
       (!candidate.completedAt || isValidDate(candidate.completedAt)) &&
       isStepStatus(candidate.workflowOutcome) &&
+      (typeof candidate.exposedWorkflowInputs === 'object' ||
+        candidate.exposedWorkflowInputs === null) &&
       (typeof candidate.workflowInputs === 'object' || candidate.workflowInputs === null)
     )
   }
@@ -147,7 +145,6 @@ export class Step implements DomainElement {
   /**
    * Creates a new {@link Step}.
    * @param id - The ID of the {@link Step} to create.
-   * @param phaseId - The ID of the Phase that the {@link Step} to create belongs to.
    * @param repository - The GitHub repository of the {@link Step} to create.
    * @param workflowId - The GitHub Workflow ID of the {@link Step} to create.
    * @param createdAt - The moment the {@link Step} to create was created.
@@ -155,11 +152,11 @@ export class Step implements DomainElement {
    * @param startedAt - The date this {@link Step} to create was started.
    * @param completedAt - The date this {@link Step} to create was completed.
    * @param workflowOutcome - The GitHub Workflow outcome of the {@link Step} to create.
+   * @param exposedWorkflowInputs - The exposed GitHub Workflow inputs of the {@link Step} to create.
    * @param workflowInputs - The GitHub Workflow inputs of the {@link Step} to create.
    */
   private constructor(
     id: string,
-    phaseId: string,
     repository: string,
     workflowId: string,
     createdAt: Date,
@@ -167,14 +164,11 @@ export class Step implements DomainElement {
     startedAt: Date | null,
     completedAt: Date | null,
     workflowOutcome: StepStatus,
+    exposedWorkflowInputs?: Record<string, string>,
     workflowInputs?: Record<string, string>
   ) {
     if (!id) {
       throw new DomainError('A Step needs an ID!')
-    }
-
-    if (!phaseId) {
-      throw new DomainError('A Step needs a Phase ID!')
     }
 
     if (!repository) {
@@ -201,6 +195,10 @@ export class Step implements DomainElement {
       throw new DomainError('A Step needs a valid completion date!')
     }
 
+    if (exposedWorkflowInputs && typeof exposedWorkflowInputs != 'object') {
+      throw new DomainError('A Step needs valid exposed workflow inputs!')
+    }
+
     if (workflowInputs && typeof workflowInputs != 'object') {
       throw new DomainError('A Step needs valid workflow inputs!')
     }
@@ -210,7 +208,6 @@ export class Step implements DomainElement {
     }
 
     this.id = id
-    this.phaseId = phaseId
     this.repository = repository
     this.workflowId = workflowId
     this._createdAt = createdAt
@@ -218,6 +215,7 @@ export class Step implements DomainElement {
     this.startedAt = startedAt || null
     this.completedAt = completedAt || null
     this.workflowOutcome = workflowOutcome
+    this.exposedWorkflowInputs = exposedWorkflowInputs || {}
     this.workflowInputs = workflowInputs || {}
   }
 

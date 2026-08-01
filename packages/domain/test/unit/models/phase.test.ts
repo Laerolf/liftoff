@@ -17,7 +17,6 @@ describe('Phase', () => {
       } = EXAMPLE_VALUES
 
       const id = uuidv7()
-      const missionId = uuidv7()
       const creationDate = new Date()
       const lastUpdateDate = new Date()
       const startedAt = new Date()
@@ -26,7 +25,6 @@ describe('Phase', () => {
       // When
       const phase = Phase.restore(
         id,
-        missionId,
         status,
         executionMethod,
         [EXAMPLE_STEP],
@@ -38,7 +36,6 @@ describe('Phase', () => {
 
       // Then
       expect(phase.id).toBe(id)
-      expect(phase.missionId).toBe(missionId)
       expect(phase.status).toBe(status)
       expect(phase.execution).toBe(executionMethod)
       expect(phase.steps).toStrictEqual([EXAMPLE_STEP])
@@ -52,7 +49,6 @@ describe('Phase', () => {
       // Given
       const {
         phases: { status, executionMethod },
-        id,
         date
       } = EXAMPLE_VALUES
 
@@ -61,24 +57,7 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs an ID.
-        Phase.restore(null, id, status, executionMethod, [EXAMPLE_STEP], date, null, null, null)
-      ).toThrow(expectedError)
-    })
-
-    test('needs a Mission ID', () => {
-      // Given
-      const {
-        phases: { status, executionMethod },
-        id,
-        date
-      } = EXAMPLE_VALUES
-
-      const expectedError = new DomainError('A Phase needs a Mission ID!')
-
-      // When + Then
-      expect(() =>
-        // @ts-expect-error A Phase needs a Mission ID.
-        Phase.restore(id, null, status, executionMethod, [EXAMPLE_STEP], date, null, null, null)
+        Phase.restore(null, status, executionMethod, [EXAMPLE_STEP], date, null, null, null)
       ).toThrow(expectedError)
     })
 
@@ -95,11 +74,11 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs a status.
-        Phase.restore(id, id, null, executionMethod, [EXAMPLE_STEP], date, null, null, null)
+        Phase.restore(id, null, executionMethod, [EXAMPLE_STEP], date, null, null, null)
       ).toThrow(expectedError)
       expect(() =>
         // @ts-expect-error A Phase needs a status.
-        Phase.restore(id, id, 'test', executionMethod, [EXAMPLE_STEP], date, null, null, null)
+        Phase.restore(id, 'test', executionMethod, [EXAMPLE_STEP], date, null, null, null)
       ).toThrow(expectedError)
     })
 
@@ -116,7 +95,7 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs an execution method.
-        Phase.restore(id, id, status, null, [EXAMPLE_STEP], date, null, null, null)
+        Phase.restore(id, status, null, [EXAMPLE_STEP], date, null, null, null)
       ).toThrow(expectedError)
     })
 
@@ -132,11 +111,11 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs a valid creation date.
-        Phase.restore(id, id, status, executionMethod, [EXAMPLE_STEP], null, null, null, null)
+        Phase.restore(id, status, executionMethod, [EXAMPLE_STEP], null, null, null, null)
       ).toThrow(expectedError)
       expect(() =>
         // @ts-expect-error A Phase needs a valid creation date.
-        Phase.restore(id, id, status, executionMethod, [EXAMPLE_STEP], 'test', null, null, null)
+        Phase.restore(id, status, executionMethod, [EXAMPLE_STEP], 'test', null, null, null)
       ).toThrow(expectedError)
     })
 
@@ -153,7 +132,7 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs a valid last update date.
-        Phase.restore(id, id, status, executionMethod, [EXAMPLE_STEP], date, 'test', null, null)
+        Phase.restore(id, status, executionMethod, [EXAMPLE_STEP], date, 'test', null, null)
       ).toThrow(expectedError)
     })
 
@@ -170,7 +149,7 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs a valid start date.
-        Phase.restore(id, id, status, executionMethod, [EXAMPLE_STEP], date, null, 'test', null)
+        Phase.restore(id, status, executionMethod, [EXAMPLE_STEP], date, null, 'test', null)
       ).toThrow(expectedError)
     })
 
@@ -187,7 +166,7 @@ describe('Phase', () => {
       // When + Then
       expect(() =>
         // @ts-expect-error A Phase needs a valid completion date.
-        Phase.restore(id, id, status, executionMethod, [EXAMPLE_STEP], date, null, null, 'test')
+        Phase.restore(id, status, executionMethod, [EXAMPLE_STEP], date, null, null, 'test')
       ).toThrow(expectedError)
     })
   })
@@ -196,16 +175,14 @@ describe('Phase', () => {
     test('can be created', () => {
       // Given
       const {
-        phases: { executionMethod },
-        id
+        phases: { executionMethod }
       } = EXAMPLE_VALUES
 
       // When
-      const phase = Phase.create(id, executionMethod)
+      const phase = Phase.create(executionMethod)
 
       // Then
       expect(phase.id).toBeDefined()
-      expect(phase.missionId).toBe(id)
       expect(phase.status).toBe(PhaseStatus.Draft)
       expect(phase.startedAt).toBeNull()
       expect(phase.completedAt).toBeNull()
@@ -215,7 +192,7 @@ describe('Phase', () => {
   describe('isValid', () => {
     test('can be valid', () => {
       // Given
-      const phase = Phase.create(uuidv7(), PhaseExecution.Parallel)
+      const phase = Phase.create(PhaseExecution.Parallel)
 
       // When + Then
       expect(Phase.isValid(phase)).toBeTruthy()
@@ -254,11 +231,10 @@ describe('Phase', () => {
     test('can be prepared', () => {
       // Given
       const {
-        phases: { executionMethod },
-        id
+        phases: { executionMethod }
       } = EXAMPLE_VALUES
 
-      const phase = Phase.create(id, executionMethod)
+      const phase = Phase.create(executionMethod)
 
       // When
       phase.prepare([EXAMPLE_STEP])
@@ -271,11 +247,10 @@ describe('Phase', () => {
     test('can not be prepared twice', () => {
       // Given
       const {
-        phases: { executionMethod },
-        id
+        phases: { executionMethod }
       } = EXAMPLE_VALUES
 
-      const phase = Phase.create(id, executionMethod).prepare([EXAMPLE_STEP])
+      const phase = Phase.create(executionMethod).prepare([EXAMPLE_STEP])
 
       const expectedError = new DomainError('The Phase has already been prepared.')
 
@@ -286,11 +261,10 @@ describe('Phase', () => {
     test('can not be prepared without steps', () => {
       // Given
       const {
-        phases: { executionMethod },
-        id
+        phases: { executionMethod }
       } = EXAMPLE_VALUES
 
-      const phase = Phase.create(id, executionMethod)
+      const phase = Phase.create(executionMethod)
 
       const expectedError = new DomainError('The Phase needs valid Steps to be prepared to launch.')
 

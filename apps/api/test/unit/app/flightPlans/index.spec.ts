@@ -1,19 +1,19 @@
 import { vi, mock, describe, test, expect, beforeEach } from 'bun:test'
 
 import {
-  createExampleMissionEntity,
-  createExampleMissionPhaseEntity,
+  createExampleFlightPlanEntity,
+  createExampleFlightPlanPhaseEntity,
   createExamplePhaseEntity,
   createExamplePhaseStepEntity,
   createExampleStepEntity
 } from '@test/fixtures/data'
-import { createExampleMissionDto } from '@test/fixtures/dto'
-import { createExampleMissionFromScratchCreationForm } from '@test/fixtures/forms'
+import { createExampleFlightPlanDto } from '@test/fixtures/dto'
+import { createExampleFlightPlanCreationForm } from '@test/fixtures/forms'
 import { setupMockRepository } from '@test/helpers/mocks'
 import status from 'http-status'
 
 import app from '@/app'
-import { MissionPhaseRepository, MissionRepository } from '@/app/missions/repository'
+import { FlightPlanPhaseRepository, FlightPlanRepository } from '@/app/flightPlans/repository'
 import { PhaseRepository, PhaseStepRepository } from '@/app/phases/repository'
 import { StepRepository } from '@/app/steps/repository'
 import { dbConnection } from '@/db'
@@ -24,18 +24,18 @@ mock.module('@/db', () => ({
   }
 }))
 
-describe('/api/missions', () => {
+describe('/api/flight-plans', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  describe('GET /api/missions', () => {
-    test('should return a list of Missions', async () => {
+  describe('GET /api/flight-plans', () => {
+    test('should return a list of Flight Plans', async () => {
       // Given
-      setupMockRepository(MissionRepository, { getAll: [] })
+      setupMockRepository(FlightPlanRepository, { getAll: [] })
 
       // When
-      const response = await app.request('/api/missions')
+      const response = await app.request('/api/flight-plans')
 
       // Then
       expect(response.status).toBe(status.OK)
@@ -44,35 +44,35 @@ describe('/api/missions', () => {
 
     test('should throw an error if something went wrong', async () => {
       // Given
-      vi.spyOn(MissionRepository.prototype, 'getAll').mockRejectedValueOnce(new Error('TEST'))
+      vi.spyOn(FlightPlanRepository.prototype, 'getAll').mockRejectedValueOnce(new Error('TEST'))
 
       // When
-      const response = await app.request('/api/missions')
+      const response = await app.request('/api/flight-plans')
 
       // Then
       expect(response.status).toBe(status.INTERNAL_SERVER_ERROR)
     })
   })
 
-  describe('POST /api/missions', () => {
-    test('should be able to create a new Mission', async () => {
+  describe('POST /api/flight-plans', () => {
+    test('should be able to create a new Flight Plan', async () => {
       // Given
-      const expectedMissionEntity = createExampleMissionEntity()
+      const expectedFlightPlanEntity = createExampleFlightPlanEntity()
       const expectedPhaseEntity = createExamplePhaseEntity()
-      const expectedMissionPhaseEntity = createExampleMissionPhaseEntity()
+      const expectedFlightPlanPhaseEntity = createExampleFlightPlanPhaseEntity()
       const expectedStepEntity = createExampleStepEntity()
       const expectedPhaseStepEntity = createExamplePhaseStepEntity()
 
-      const expectedMissionDto = createExampleMissionDto()
+      const expectedFlightPlanDto = createExampleFlightPlanDto()
 
-      setupMockRepository(MissionRepository, {
-        insert: expectedMissionEntity,
-        findById: expectedMissionEntity,
-        update: expectedMissionEntity
+      setupMockRepository(FlightPlanRepository, {
+        insert: expectedFlightPlanEntity,
+        findById: expectedFlightPlanEntity,
+        update: expectedFlightPlanEntity
       })
 
-      setupMockRepository(MissionPhaseRepository, {
-        insertMany: [expectedMissionPhaseEntity]
+      setupMockRepository(FlightPlanPhaseRepository, {
+        insertMany: [expectedFlightPlanPhaseEntity]
       })
 
       setupMockRepository(PhaseRepository, {
@@ -91,15 +91,15 @@ describe('/api/missions', () => {
       })
 
       // When
-      const response = await app.request('/api/missions', {
+      const response = await app.request('/api/flight-plans', {
         method: 'POST',
-        body: JSON.stringify(createExampleMissionFromScratchCreationForm()),
+        body: JSON.stringify(createExampleFlightPlanCreationForm()),
         headers: new Headers({ 'Content-Type': 'application/json' })
       })
 
       // Then
       expect(response.status).toBe(status.OK)
-      expect(await response.json()).toStrictEqual(expectedMissionDto)
+      expect(await response.json()).toStrictEqual(expectedFlightPlanDto)
     })
   })
 })

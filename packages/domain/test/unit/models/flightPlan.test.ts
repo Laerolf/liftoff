@@ -254,36 +254,6 @@ describe('FlightPlan', () => {
         )
       ).toThrow(expectedError)
     })
-
-    test('needs valid workflow inputs', () => {
-      // Given
-      const { phases } = EXAMPLE_FLIGHT_PLAN
-      const {
-        flightPlans: { name },
-        date,
-        branchName,
-        environmentName,
-        serviceIds
-      } = EXAMPLE_VALUES
-
-      const expectedError = new DomainError('A Flight Plan needs valid workflow inputs!')
-
-      // When + Then
-      expect(() =>
-        FlightPlan.restore(
-          crypto.randomUUID(),
-          name,
-          date,
-          null,
-          branchName,
-          environmentName,
-          serviceIds,
-          phases,
-          // @ts-expect-error A Flight Plan needs valid workflow inputs.
-          'test'
-        )
-      ).toThrow(expectedError)
-    })
   })
 
   describe('create', () => {

@@ -11,23 +11,32 @@ export class StepCreationForm {
     return object({
       repository: string(),
       workflowId: string(),
+      exposedWorkflowInputs: object().optional(),
       workflowInputs: object().optional()
     })
   }
 
   repository: string
   workflowId: string
+  exposedWorkflowInputs: Record<string, string>
   workflowInputs: Record<string, string>
 
   /**
    * Creates a new {@link StepCreationForm}.
    * @param repository - The GitHub repository name of the {@link Step} to create.
    * @param workflowId - The GitHub Workflow ID of the {@link Step} to create.
-   * @param workflowInputs - The provided GitHub Workflow inputs of the {@link Step} to create.
+   * @param exposedWorkflowInputs - The exposed GitHub Workflow inputs of the {@link Step} to create.
+   * @param workflowInputs - The GitHub Workflow inputs of the {@link Step} to create.
    */
-  constructor(repository: string, workflowId: string, workflowInputs?: Record<string, string>) {
+  constructor(
+    repository: string,
+    workflowId: string,
+    exposedWorkflowInputs?: Record<string, string>,
+    workflowInputs?: Record<string, string>
+  ) {
     this.repository = repository
     this.workflowId = workflowId
+    this.exposedWorkflowInputs = exposedWorkflowInputs || {}
     this.workflowInputs = workflowInputs || {}
   }
 }

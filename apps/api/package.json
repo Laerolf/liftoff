@@ -5,15 +5,15 @@
     "dev": "bun --elide-lines=0 --hot src/index.ts",
     "lint": "oxlint --fix",
     "format": "oxfmt",
-    "test": "bun test --watch",
-    "test:unit": "bun test --filter test/unit --watch",
-    "test:integration": "bun test --filter test/integration --watch",
-    "test:ci": "bun test",
+    "test": "bun test --watch --only-failures",
+    "test:unit": "bun test --only-failures --filter test/unit",
+    "test:integration": "bun test --only-failures --filter test/integration",
+    "test:ci": "bun test --only-failures",
     "typecheck": "tsc --noEmit",
     "build": "tsc --project tsconfig.build.json",
     "start": "bun dist/index.js",
     "drizzle-kit:generate": "bun --bun drizzle-kit generate",
-    "drizzle-kit:migrate": "bun --bun drizzle-kit migrate"
+    "drizzle-kit:migrate": "bun --bun .env.test drizzle-kit migrate"
   },
   "dependencies": {
     "@liftoff/domain": "workspace:*",

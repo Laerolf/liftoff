@@ -21,6 +21,7 @@ export const EXAMPLE_VALUES = {
   phases: { status: PhaseStatus.Draft, executionMethod: PhaseExecution.Parallel },
   steps: {
     workflowOutcome: StepStatus.Waiting,
-    exposedWorkflowInputs: {}
+    exposedWorkflowInputs: {},
+    workflowInputs: {}
   }
 }

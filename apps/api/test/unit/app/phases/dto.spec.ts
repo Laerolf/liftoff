@@ -10,14 +10,13 @@ describe('PhaseDto', () => {
   describe('from', () => {
     test('should take the properties from a draft Phase model', () => {
       // Given
-      const model = Phase.create(EXAMPLE_VALUES.id, EXAMPLE_VALUES.phases.executionMethod)
+      const model = Phase.create(EXAMPLE_VALUES.phases.executionMethod)
 
       // When
       const dto = PhaseDto.from(model)
 
       // Then
       expect(dto.id).toBe(model.id)
-      expect(dto.missionId).toBe(model.missionId)
       expect(dto.status).toBe(model.status)
       expect(dto.execution).toBe(model.execution)
       expect(dto.steps).toStrictEqual(model.steps)
@@ -29,10 +28,9 @@ describe('PhaseDto', () => {
 
     test('should take the properties from a prepared Phase model', () => {
       // Given
-      const model = Phase.create(EXAMPLE_VALUES.id, EXAMPLE_VALUES.phases.executionMethod)
+      const model = Phase.create(EXAMPLE_VALUES.phases.executionMethod)
       model.prepare([
         Step.create(
-          model.id,
           EXAMPLE_VALUES.repositoryName,
           EXAMPLE_VALUES.workflowId,
           EXAMPLE_VALUES.steps.exposedWorkflowInputs

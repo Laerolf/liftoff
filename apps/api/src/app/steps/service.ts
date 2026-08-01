@@ -43,22 +43,6 @@ export class StepQueryService {
       })
     }
   }
-
-  /**
-   * Gets all the existing Steps for the provided Phase ID.
-   * @param phaseId - The Phase ID to search with.
-   * @param dbConnection - The database connection to use.
-   */
-  async getAllByPhaseId(phaseId: string, dbConnection: DatabaseConnection): Promise<Step[]> {
-    try {
-      return (await this.repository.getAllByPhaseId(phaseId, dbConnection)).map(StepMapper.toStep)
-    } catch (error) {
-      console.error('Failed to get all the existing Steps for the provided Phase ID.', error)
-      throw new Error('Failed to get all the existing Steps for the provided Phase ID.', {
-        cause: error
-      })
-    }
-  }
 }
 
 /**
@@ -87,19 +71,14 @@ export class StepCommandService {
   }
 
   /**
-   * Creates new {@link Step[] | Steps} for a Phase.
-   * @param phaseId - The ID of the Phase the new {@link Step[] | Steps} will belong to.
+   * Creates ùmany new {@link Step[] | Steps}.
    * @param form - The form used to create the new {@link Step[] | Steps}.
    * @param dbConnection - The database connection to use.
    */
-  async createForPhase(
-    phaseId: string,
-    forms: StepCreationForm[],
-    dbConnection: DatabaseConnection
-  ): Promise<Step[]> {
+  async createMany(forms: StepCreationForm[], dbConnection: DatabaseConnection): Promise<Step[]> {
     try {
       const models: StepInsertEntity[] = forms
-        .map((form) => Step.create(phaseId, form.repository, form.workflowId, form.workflowInputs))
+        .map((form) => Step.create(form.repository, form.workflowId, form.workflowInputs))
         .map(StepMapper.toStepInsertEntity)
 
       const entities: StepInsertEntity[] = await this.repository.insertMany(models, dbConnection)
@@ -109,8 +88,8 @@ export class StepCommandService {
         dbConnection
       )
     } catch (error) {
-      console.error('Failed to create new Steps for a Phase.', error)
-      throw new Error('Failed to create new Steps for a Phase.', { cause: error })
+      console.error('Failed to create many new Steps.', error)
+      throw new Error('Failed to create many new Steps.', { cause: error })
     }
   }
 }

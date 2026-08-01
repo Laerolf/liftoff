@@ -48,7 +48,6 @@ export function isPhaseDto(value: unknown): value is PhaseDto {
 
   return (
     typeof candidate.id === 'string' &&
-    typeof candidate.missionId === 'string' &&
     isPhaseStatus(candidate.status) &&
     isPhaseExecution(candidate.execution) &&
     (!candidate.steps || (Array.isArray(candidate.steps) && candidate.steps.every(isStepDto))) &&
@@ -72,7 +71,6 @@ export function isStepDto(value: unknown): value is StepDto {
 
   return (
     typeof candidate.id === 'string' &&
-    typeof candidate.phaseId === 'string' &&
     typeof candidate.repository === 'string' &&
     typeof candidate.workflowId === 'string' &&
     isValidDateString(candidate.createdAt) &&
@@ -80,6 +78,8 @@ export function isStepDto(value: unknown): value is StepDto {
     (!candidate.startedAt || isValidDateString(candidate.startedAt)) &&
     (!candidate.completedAt || isValidDateString(candidate.completedAt)) &&
     isStepStatus(candidate.workflowOutcome) &&
+    (typeof candidate.exposedWorkflowInputs === 'object' ||
+      candidate.exposedWorkflowInputs === null) &&
     (typeof candidate.workflowInputs === 'object' || candidate.workflowInputs === null)
   )
 }

@@ -1,12 +1,19 @@
-import { InferSelectModel } from 'drizzle-orm'
+import { InferSelectModel, InferInsertModel } from 'drizzle-orm'
 
 import { DatabaseConnection } from '@/db'
-import { phasesTable, stepsTable } from '@/db/schema'
+import { phasesTable, phaseStepsTable } from '@/db/schema'
+
+import { StepSelectEntity } from '../steps/repository'
 
 export type PhaseSelectEntity = InferSelectModel<typeof phasesTable> & {
-  steps: InferSelectModel<typeof stepsTable>[]
+  phaseSteps: PhaseStepSelectEntity[]
 }
-export type PhaseInsertEntity = typeof phasesTable.$inferInsert
+export type PhaseInsertEntity = InferInsertModel<typeof phasesTable>
+
+export type PhaseStepSelectEntity = InferSelectModel<typeof phaseStepsTable> & {
+  step: StepSelectEntity | null
+}
+export type PhaseStepInsertEntity = InferInsertModel<typeof phaseStepsTable>
 
 /**
  * Represents the repository for Phases.
@@ -25,47 +32,17 @@ export class PhaseRepository {
 
       return await dbConnection.query.phases.findMany({
         where: { id: { in: ids } },
-        with: { steps: true }
-      })
-    } catch (error) {
-      console.error(
-        'Failed to get all existing Phase entities for the provided IDs from the database.',
-        error
-      )
-      throw new Error(
-        'Failed to get all existing Phase entities for the provided IDs from the database.',
-        {
-          cause: error
+        with: {
+          phaseSteps: { with: { step: true } }
         }
-      )
-    }
-  }
-
-  /**
-   * Gets all the {@link Phase[] | Phases} matching the provided Mission ID.
-   * @param missionId - The Mission ID to search with.
-   * @param dbConnection - The database connection to use.
-   */
-  async getAllByMissionId(
-    missionId: string,
-    dbConnection: DatabaseConnection
-  ): Promise<PhaseSelectEntity[]> {
-    try {
-      if (!missionId) {
-        throw new Error('The provided Mission ID is invalid!')
-      }
-
-      return await dbConnection.query.phases.findMany({
-        where: { missionId },
-        with: { steps: true }
       })
     } catch (error) {
       console.error(
-        'Failed to get all existing Phase entities for the provided Mission ID from the database.',
+        'Failed to get all existing Phase entities for the provided IDs from the database.',
         error
       )
       throw new Error(
-        'Failed to get all existing Phase entities for the provided Mission ID from the database.',
+        'Failed to get all existing Phase entities for the provided IDs from the database.',
         {
           cause: error
         }
@@ -122,6 +99,34 @@ export class PhaseRepository {
     } catch (error) {
       console.error('Failed to update Phase entities in the database.', error)
       throw new Error('Failed to update Phase entities in the database.', {
+        cause: error
+      })
+    }
+  }
+}
+
+/**
+ * Represents the repository for Phase Steps.
+ */
+export class PhaseStepRepository {
+  /**
+   * Inserts new {@link PhaseInsertEntity[] | Phase Step entities} in the database.
+   * @param models - The models to insert.
+   * @param dbConnection - The database connection to use.
+   */
+  async insertMany(
+    models: PhaseStepInsertEntity[],
+    dbConnection: DatabaseConnection
+  ): Promise<PhaseStepInsertEntity[]> {
+    try {
+      if (!models.length) {
+        return []
+      }
+
+      return await dbConnection.insert(phaseStepsTable).values(models).returning()
+    } catch (error) {
+      console.error('Failed to insert new Phase Step entities in the database.', error)
+      throw new Error('Failed to insert new Phase Step entities in the database.', {
         cause: error
       })
     }
