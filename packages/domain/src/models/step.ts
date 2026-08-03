@@ -1,4 +1,7 @@
 import { v7 as uuidv7 } from 'uuid'
+import { object, string, date, array, enum as zEnum } from 'zod'
+
+import { ID_MAX_LENGTH, STRING_MAX_LENGTH } from '@/shared/rules'
 
 import { DomainError } from '../shared/errors'
 import { isValidDate } from '../utils/date'
@@ -12,47 +15,6 @@ import type { DomainElement } from '../shared/domainElement'
  * Represents a Step in a Mission Phase, a single workflow dispatch to a specifc GitHub repository.
  */
 export class Step implements DomainElement {
-  /**
-   * The ID of this {@link Step}.
-   */
-  readonly id: string
-  /**
-   * The GitHub repository of this {@link Step}.
-   */
-  readonly repository: string
-  /**
-   * The GitHub Workflow ID of this {@link Step}.
-   */
-  readonly workflowId: string
-  /**
-   * The GitHub Workflow outcome of this {@link Step}.
-   */
-  readonly workflowOutcome: StepStatus
-  /**
-   * The exposed GitHub Workflow inputs of this {@link Step}.
-   */
-  readonly exposedWorkflowInputs: Record<string, string>
-  /**
-   * The GitHub Workflow inputs of this {@link Step}.
-   */
-  readonly workflowInputs: Record<string, string>
-  /**
-   * The moment this {@link Step} was created.
-   */
-  private _createdAt: Date
-  /**
-   * The moment this {@link Step} was last updated.
-   */
-  private _lastUpdatedAt: Date | null
-  /**
-   * The date this {@link Step} was started.
-   */
-  readonly startedAt: Date | null
-  /**
-   * The date this {@link Step} was completed.
-   */
-  readonly completedAt: Date | null
-
   /**
    * Restores a {@link Step}.
    * @param id - The ID of the {@link Phase} to create.
@@ -117,30 +79,75 @@ export class Step implements DomainElement {
   }
 
   /**
+   * Returns the schema for a valid {@link Phase}.
+   */
+  static get schema() {
+    return object({
+      id: string().max(ID_MAX_LENGTH),
+      repository: string().max(STRING_MAX_LENGTH),
+      workflowId: string().max(STRING_MAX_LENGTH),
+      workflowOutcome: zEnum(StepStatus),
+      exposedWorkflowInputs: object().nullable(),
+      workflowInputs: object().nullable(),
+      createdAt: date(),
+      lastUpdatedAt: date().nullable(),
+      startedAt: date().nullable(),
+      completedAt: date().nullable()
+    })
+  }
+
+  /**
    * Tests whether the provided value is a valid {@link Step}.
    * @param value - The value to test.
    */
   static isValid(value: unknown): value is Step {
-    if (typeof value !== 'object' || value === null) {
-      return false
-    }
+    const { error, success } = Step.schema.safeParse(value)
 
-    const candidate = value as Record<string, unknown>
+    console.warn('The provided value is not a valid Step!', error)
 
-    return (
-      typeof candidate.id === 'string' &&
-      typeof candidate.repository === 'string' &&
-      typeof candidate.workflowId === 'string' &&
-      isValidDate(candidate.createdAt) &&
-      (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
-      (!candidate.startedAt || isValidDate(candidate.startedAt)) &&
-      (!candidate.completedAt || isValidDate(candidate.completedAt)) &&
-      isStepStatus(candidate.workflowOutcome) &&
-      (typeof candidate.exposedWorkflowInputs === 'object' ||
-        candidate.exposedWorkflowInputs === null) &&
-      (typeof candidate.workflowInputs === 'object' || candidate.workflowInputs === null)
-    )
+    return success
   }
+
+  /**
+   * The ID of this {@link Step}.
+   */
+  readonly id: string
+  /**
+   * The GitHub repository of this {@link Step}.
+   */
+  readonly repository: string
+  /**
+   * The GitHub Workflow ID of this {@link Step}.
+   */
+  readonly workflowId: string
+  /**
+   * The GitHub Workflow outcome of this {@link Step}.
+   */
+  readonly workflowOutcome: StepStatus
+  /**
+   * The exposed GitHub Workflow inputs of this {@link Step}.
+   */
+  readonly exposedWorkflowInputs: Record<string, string>
+  /**
+   * The GitHub Workflow inputs of this {@link Step}.
+   */
+  readonly workflowInputs: Record<string, string>
+  /**
+   * The moment this {@link Step} was created.
+   */
+  private _createdAt: Date
+  /**
+   * The moment this {@link Step} was last updated.
+   */
+  private _lastUpdatedAt: Date | null
+  /**
+   * The date this {@link Step} was started.
+   */
+  readonly startedAt: Date | null
+  /**
+   * The date this {@link Step} was completed.
+   */
+  readonly completedAt: Date | null
 
   /**
    * Creates a new {@link Step}.

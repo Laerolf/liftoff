@@ -1,4 +1,7 @@
 import { v7 as uuidv7 } from 'uuid'
+import { object, string, date, array, enum as zEnum } from 'zod'
+
+import { ID_MAX_LENGTH } from '@/shared/rules'
 
 import { DomainElement } from '../shared/domainElement'
 import { DomainError } from '../shared/errors'
@@ -12,39 +15,6 @@ import { Step } from './step'
  * Represents a stage in a Mission.
  */
 export class Phase implements DomainElement {
-  /**
-   * The ID of this {@link Phase}.
-   */
-  readonly id: string
-  /**
-   * The status of this {@link Phase}.
-   */
-  private _status: PhaseStatus
-  /**
-   * The execution method of this {@link Phase}.
-   */
-  readonly execution: PhaseExecution
-  /**
-   * The steps of this {@link Phase}.
-   */
-  private _steps: Step[] | null
-  /**
-   * The moment this {@link Phase} was created.
-   */
-  private _createdAt: Date
-  /**
-   * The moment this {@link Phase} was last updated.
-   */
-  private _lastUpdatedAt: Date | null
-  /**
-   * The date this {@link Phase} was started.
-   */
-  readonly startedAt: Date | null
-  /**
-   * The date this {@link Phase} was completed.
-   */
-  readonly completedAt: Date | null
-
   /**
    * Restores a {@link Phase}.
    * @param id - The ID of the {@link Phase} to create.
@@ -80,28 +50,65 @@ export class Phase implements DomainElement {
   }
 
   /**
+   * Returns the schema for a valid {@link Phase}.
+   */
+  static get schema() {
+    return object({
+      id: string().max(ID_MAX_LENGTH),
+      status: zEnum(PhaseStatus),
+      execution: zEnum(PhaseExecution),
+      steps: array(Step.schema).nullable(),
+      createdAt: date(),
+      lastUpdatedAt: date().nullable(),
+      startedAt: date().nullable(),
+      completedAt: date().nullable()
+    })
+  }
+
+  /**
    * Tests whether the provided value is a valid {@link Phase}.
    * @param value - The value to test.
    */
   static isValid(value: unknown): value is Phase {
-    if (typeof value !== 'object' || value === null) {
-      return false
-    }
+    const { error, success } = Phase.schema.safeParse(value)
 
-    const candidate = value as Record<string, unknown>
+    console.warn('The provided value is not a valid Phase!', error)
 
-    return (
-      typeof candidate.id === 'string' &&
-      isPhaseStatus(candidate.status) &&
-      isPhaseExecution(candidate.execution) &&
-      (!candidate.steps ||
-        (Array.isArray(candidate.steps) && candidate.steps.every(Step.isValid))) &&
-      isValidDate(candidate.createdAt) &&
-      (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
-      (!candidate.startedAt || isValidDate(candidate.startedAt)) &&
-      (!candidate.completedAt || isValidDate(candidate.completedAt))
-    )
+    return success
   }
+
+  /**
+   * The ID of this {@link Phase}.
+   */
+  readonly id: string
+  /**
+   * The status of this {@link Phase}.
+   */
+  private _status: PhaseStatus
+  /**
+   * The execution method of this {@link Phase}.
+   */
+  readonly execution: PhaseExecution
+  /**
+   * The steps of this {@link Phase}.
+   */
+  private _steps: Step[] | null
+  /**
+   * The moment this {@link Phase} was created.
+   */
+  private _createdAt: Date
+  /**
+   * The moment this {@link Phase} was last updated.
+   */
+  private _lastUpdatedAt: Date | null
+  /**
+   * The date this {@link Phase} was started.
+   */
+  readonly startedAt: Date | null
+  /**
+   * The date this {@link Phase} was completed.
+   */
+  readonly completedAt: Date | null
 
   /**
    * Creates a new {@link Phase}.

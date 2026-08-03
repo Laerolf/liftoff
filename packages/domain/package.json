@@ -21,7 +21,8 @@
     "build": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
-    "uuid": "catalog:"
+    "uuid": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/bun": "catalog:",

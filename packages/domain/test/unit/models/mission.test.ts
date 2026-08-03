@@ -452,8 +452,9 @@ describe('Mission', () => {
         flightPlans: { name }
       } = EXAMPLE_VALUES
 
-      const flightPlan = FlightPlan.create(name, branchName, environmentName, serviceIds)
-      flightPlan.phases = [EXAMPLE_PHASE]
+      const flightPlan = FlightPlan.create(name, branchName, environmentName, serviceIds).prepare([
+        EXAMPLE_PHASE
+      ])
 
       // When
       const mission = Mission.from(flightPlan, directorName)
@@ -508,8 +509,9 @@ describe('Mission', () => {
         flightPlans: { name }
       } = EXAMPLE_VALUES
 
-      const flightPlan = FlightPlan.create(name, branchName, environmentName, serviceIds)
-      flightPlan.phases = [EXAMPLE_PHASE]
+      const flightPlan = FlightPlan.create(name, branchName, environmentName, serviceIds).prepare([
+        EXAMPLE_PHASE
+      ])
 
       const expectedError = new DomainError('The provided director is not valid!')
 

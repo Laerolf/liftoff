@@ -1,4 +1,7 @@
 import { v7 as uuidv7 } from 'uuid'
+import { object, string, date, array, enum as zEnum } from 'zod'
+
+import { ID_MAX_LENGTH, STRING_MAX_LENGTH } from '@/shared/rules'
 
 import { DomainElement } from '../shared/domainElement'
 import { DomainError } from '../shared/errors'
@@ -13,59 +16,6 @@ import { MissionStatus } from './status'
  * Represents a single execution of a {@link FlightPlan}.
  */
 export class Mission implements DomainElement {
-  /**
-   * The ID of this {@link Mission}.
-   */
-  readonly id: string
-  /**
-   * The correlation ID of this {@link Mission}, used for idempotency.
-   */
-  readonly correlationId: string
-  /**
-   * The ID of the Flight Plan that this {@link Mission} is based on.
-   */
-  readonly flightPlanId: string | null
-  /**
-   * The GitHub workflow branch name that this {@link Mission} targets.
-   */
-  readonly workflowBranch: string
-  /**
-   * The environmnent that this {@link Mission} targets.
-   */
-  readonly environment: string
-  /**
-   * The names of the services that this {@link Mission} targets.
-   */
-  readonly services: string[]
-  /**
-   * The person who launched this {@link Mission}.
-   */
-  readonly director: string
-  /**
-   *  The status of this {@link Mission}.
-   */
-  private _status: MissionStatus
-  /**
-   * The date of this {@link Mission}'s launch.
-   */
-  readonly launchedAt: Date | null
-  /**
-   * The phases of this {@link Mission}.
-   */
-  private _phases: Phase[] | null
-  /**
-   * The moment this {@link Mission} was created.
-   */
-  private _createdAt: Date
-  /**
-   * The moment this {@link Mission} was last updated.
-   */
-  private _lastUpdatedAt: Date | null
-  /**
-   * The date this {@link Mission} was completed.
-   */
-  readonly completedAt: Date | null
-
   /**
    * Restores a {@link Mission}.
    * @param id - The ID of the {@link Mission} to create.
@@ -179,35 +129,90 @@ export class Mission implements DomainElement {
   }
 
   /**
+   * Returns the schema for a valid {@link Mission}.
+   */
+  static get schema() {
+    return object({
+      id: string().max(ID_MAX_LENGTH),
+      correlationId: string().max(ID_MAX_LENGTH),
+      flightPlanId: string().max(ID_MAX_LENGTH).nullable(),
+      workflowBranch: string().max(STRING_MAX_LENGTH),
+      environment: string().max(STRING_MAX_LENGTH),
+      services: array(string().max(STRING_MAX_LENGTH)),
+      director: string().max(STRING_MAX_LENGTH),
+      status: zEnum(MissionStatus),
+      phases: array(Phase.schema).nullable(),
+      createdAt: date(),
+      lastUpdatedAt: date().nullable(),
+      launchedAt: date().nullable(),
+      completedAt: date().nullable()
+    })
+  }
+
+  /**
    * Tests whether the provided value is a valid {@link Mission}.
    * @param value - The value to test.
    */
   static isValid(value: unknown): value is Mission {
-    if (typeof value !== 'object' || value === null) {
-      return false
-    }
+    const { error, success } = Mission.schema.safeParse(value)
 
-    const candidate = value as Record<string, unknown>
+    console.warn('The provided value is not a valid Mission!', error)
 
-    return (
-      typeof candidate.id === 'string' &&
-      typeof candidate.correlationId === 'string' &&
-      (!candidate.flightPlanId || typeof candidate.flightPlanId === 'string') &&
-      typeof candidate.workflowBranch === 'string' &&
-      typeof candidate.environment === 'string' &&
-      Array.isArray(candidate.services) &&
-      !!candidate.services.length &&
-      candidate.services.every((service) => typeof service === 'string') &&
-      typeof candidate.director === 'string' &&
-      isMissionStatus(candidate.status) &&
-      (!candidate.launchedAt || isValidDate(candidate.launchedAt)) &&
-      (!candidate.phases ||
-        (Array.isArray(candidate.phases) && candidate.phases.every(Phase.isValid))) &&
-      isValidDate(candidate.createdAt) &&
-      (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
-      (!candidate.completedAt || isValidDate(candidate.completedAt))
-    )
+    return success
   }
+
+  /**
+   * The ID of this {@link Mission}.
+   */
+  readonly id: string
+  /**
+   * The correlation ID of this {@link Mission}, used for idempotency.
+   */
+  readonly correlationId: string
+  /**
+   * The ID of the Flight Plan that this {@link Mission} is based on.
+   */
+  readonly flightPlanId: string | null
+  /**
+   * The GitHub workflow branch name that this {@link Mission} targets.
+   */
+  readonly workflowBranch: string
+  /**
+   * The environmnent that this {@link Mission} targets.
+   */
+  readonly environment: string
+  /**
+   * The names of the services that this {@link Mission} targets.
+   */
+  readonly services: string[]
+  /**
+   * The person who launched this {@link Mission}.
+   */
+  readonly director: string
+  /**
+   *  The status of this {@link Mission}.
+   */
+  private _status: MissionStatus
+  /**
+   * The date of this {@link Mission}'s launch.
+   */
+  readonly launchedAt: Date | null
+  /**
+   * The phases of this {@link Mission}.
+   */
+  private _phases: Phase[] | null
+  /**
+   * The moment this {@link Mission} was created.
+   */
+  private _createdAt: Date
+  /**
+   * The moment this {@link Mission} was last updated.
+   */
+  private _lastUpdatedAt: Date | null
+  /**
+   * The date this {@link Mission} was completed.
+   */
+  readonly completedAt: Date | null
 
   /**
    * Creates a new {@link Mission}.

@@ -1,4 +1,7 @@
 import { v7 as uuidv7 } from 'uuid'
+import { object, string, date, array } from 'zod'
+
+import { ID_MAX_LENGTH, STRING_MAX_LENGTH } from '@/shared/rules'
 
 import { DomainElement } from '../shared/domainElement'
 import { DomainError } from '../shared/errors'
@@ -10,39 +13,6 @@ import { Phase } from './phase'
  * Represents a plan for {@link Mission}.
  */
 export class FlightPlan implements DomainElement {
-  /**
-   * The ID of this {@link FlightPlan}.
-   */
-  readonly id: string
-  /**
-   * The name of this {@link FlightPlan}.
-   */
-  readonly name: string
-  /**
-   * The GitHub workflow branch name that this {@link FlightPlan} targets.
-   */
-  readonly workflowBranch: string
-  /**
-   * The environmnent that this {@link FlightPlan} targets.
-   */
-  readonly environment: string
-  /**
-   * The names of the services that this {@link FlightPlan} targets.
-   */
-  readonly services: string[]
-  /**
-   * The phases of this {@link FlightPlan}.
-   */
-  private _phases: Phase[] | null
-  /**
-   * The moment this {@link FlightPlan} was created.
-   */
-  private _createdAt: Date
-  /**
-   * The moment this {@link FlightPlan} was last updated.
-   */
-  private _lastUpdatedAt: Date | null
-
   /**
    * Restores a {@link FlightPlan}.
    * @param id - The ID of the {@link FlightPlan} to create.
@@ -104,29 +74,65 @@ export class FlightPlan implements DomainElement {
   }
 
   /**
+   * Returns the schema for a valid {@link FlightPlan}.
+   */
+  static get schema() {
+    return object({
+      id: string().max(ID_MAX_LENGTH),
+      name: string().max(STRING_MAX_LENGTH),
+      workflowBranch: string().max(STRING_MAX_LENGTH),
+      environment: string().max(STRING_MAX_LENGTH),
+      services: array(string().max(STRING_MAX_LENGTH)),
+      phases: array(Phase.schema).nullable(),
+      createdAt: date(),
+      lastUpdatedAt: date().nullable()
+    })
+  }
+
+  /**
    * Tests whether the provided value is a valid {@link FlightPlan}.
    * @param value - The value to test.
    */
   static isValid(value: unknown): value is FlightPlan {
-    if (typeof value !== 'object' || value === null) {
-      return false
-    }
+    const { error, success } = FlightPlan.schema.safeParse(value)
 
-    const candidate = value as Record<string, unknown>
+    console.warn('The provided value is not a valid Flight Plan!', error)
 
-    return (
-      typeof candidate.id === 'string' &&
-      typeof candidate.name === 'string' &&
-      isValidDate(candidate.createdAt) &&
-      (!candidate.lastUpdatedAt || isValidDate(candidate.lastUpdatedAt)) &&
-      typeof candidate.workflowBranch === 'string' &&
-      typeof candidate.environment === 'string' &&
-      Array.isArray(candidate.services) &&
-      candidate.services.every((service) => typeof service === 'string') &&
-      (!candidate.phases ||
-        (Array.isArray(candidate.phases) && candidate.phases.every(Phase.isValid)))
-    )
+    return success
   }
+
+  /**
+   * The ID of this {@link FlightPlan}.
+   */
+  readonly id: string
+  /**
+   * The name of this {@link FlightPlan}.
+   */
+  readonly name: string
+  /**
+   * The GitHub workflow branch name that this {@link FlightPlan} targets.
+   */
+  readonly workflowBranch: string
+  /**
+   * The environmnent that this {@link FlightPlan} targets.
+   */
+  readonly environment: string
+  /**
+   * The names of the services that this {@link FlightPlan} targets.
+   */
+  readonly services: string[]
+  /**
+   * The phases of this {@link FlightPlan}.
+   */
+  private _phases: Phase[] | null
+  /**
+   * The moment this {@link FlightPlan} was created.
+   */
+  private _createdAt: Date
+  /**
+   * The moment this {@link FlightPlan} was last updated.
+   */
+  private _lastUpdatedAt: Date | null
 
   /**
    * Creates a new {@link FlightPlan}.
