@@ -1,4 +1,7 @@
+import { ID_MAX_LENGTH } from '@liftoff/domain'
 import { object, string } from 'zod'
+
+import { exampleValues } from '../shared/openapi'
 
 /**
  * Represents a form to create a new {@link Step}.
@@ -9,10 +12,22 @@ export class StepCreationForm {
    */
   static get schema() {
     return object({
-      repository: string(),
-      workflowId: string(),
-      exposedWorkflowInputs: object().optional(),
-      workflowInputs: object().optional()
+      repository: string().max(ID_MAX_LENGTH).openapi({
+        description: 'The targeted GitHub repository of the Step to create.',
+        example: exampleValues.repositoryName
+      }),
+      workflowId: string().max(ID_MAX_LENGTH).openapi({
+        description: 'The targeted GitHub workflow ID of the Step to create.',
+        example: exampleValues.workflowId
+      }),
+      exposedWorkflowInputs: object().nullable().optional().openapi({
+        description: 'The exposed inputs of the targeted GitHub workflow of the Step to create.',
+        example: exampleValues.step.exposedWorkflowInputs
+      }),
+      workflowInputs: object().nullable().optional().openapi({
+        description: 'All inputs of the targeted GitHub workflow of the Step to create.',
+        example: exampleValues.step.workflowInputs
+      })
     })
   }
 

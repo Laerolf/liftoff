@@ -2,7 +2,7 @@ import { createMiddleware } from 'hono/factory'
 
 import { RequestContext } from '.'
 
-type AppContextMiddlewareVariables = {
+export type AppContextMiddlewareVariables = {
   Variables: {
     /**
      * The context of this request.

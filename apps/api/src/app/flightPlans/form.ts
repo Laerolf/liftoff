@@ -1,6 +1,8 @@
+import { ID_MAX_LENGTH } from '@liftoff/domain'
 import { object, string, array } from 'zod'
 
 import { PhaseCreationForm } from '../phases/form'
+import { exampleValues } from '../shared/openapi'
 
 /**
  * Represents a form to create a new {@link FlightPlan}.
@@ -11,11 +13,31 @@ export class FlightPlanCreationForm {
    */
   static get schema() {
     return object({
-      name: string(),
-      workflowBranch: string(),
-      environment: string(),
-      services: array(string()),
-      phases: array(PhaseCreationForm.schema)
+      name: string()
+        .max(ID_MAX_LENGTH)
+        .openapi({
+          description: 'The name of the Flight Plan to create.',
+          example: exampleValues.flightPlan.name
+        }),
+      workflowBranch: string()
+        .max(ID_MAX_LENGTH)
+        .openapi({
+          description: 'The GitHub workflow branch of the Flight Plan to create.',
+          example: exampleValues.branchName
+        }),
+      environment: string()
+        .max(ID_MAX_LENGTH)
+        .openapi({
+          description: 'The targeted GitHub environment of the Flight Plan to create.',
+          example: exampleValues.environmentName
+        }),
+      services: array(string().max(ID_MAX_LENGTH)).openapi({
+        description: 'The targeted services of the Flight Plan to create.',
+        example: exampleValues.serviceIds
+      }),
+      phases: array(PhaseCreationForm.schema).openapi({
+        description: 'The Phases to create for the Flight Plan to create.'
+      })
     })
   }
 

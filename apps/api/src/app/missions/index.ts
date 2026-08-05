@@ -1,19 +1,37 @@
+import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { validator } from 'hono/validator'
 import status from 'http-status'
+import { array } from 'zod'
 
 import { dbConnection } from '@/db'
 
 import { PhaseCreationForm } from '../phases/form'
-import { setRequestContext } from '../shared/middleware'
+import { AppContextMiddlewareVariables, setRequestContext } from '../shared/middleware'
+import { tags } from '../shared/openapi'
+import { StepCreationForm } from '../steps/form'
 
 import { MissionDto } from './dto'
 import { MissionFromScratchCreationForm } from './form'
 
-const app = new Hono()
+const app = new OpenAPIHono<AppContextMiddlewareVariables>()
 
-app.get('/', setRequestContext, async (context) => {
+app.use(setRequestContext)
+
+const getAllOpenApiRoute = createRoute({
+  method: 'get',
+  path: '/',
+  responses: {
+    200: {
+      description: 'Return all existing Missions.',
+      content: { 'application/json': { schema: array(MissionDto.schema) } }
+    }
+  },
+  tags: [tags.missions.name]
+})
+
+app.openapi(getAllOpenApiRoute, async (context) => {
   try {
     const { missionQueryService } = context.get('context')
 
@@ -27,53 +45,64 @@ app.get('/', setRequestContext, async (context) => {
   }
 })
 
-app.post(
-  '/',
-  setRequestContext,
-  validator('json', (value, context) => {
-    const parsed = MissionFromScratchCreationForm.schema.safeParse(value)
-
-    if (!parsed.success) {
-      return context.json(
-        {
-          message: 'Invalid request body',
-          errors: parsed.error.issues.map((issue) => ({
-            field: issue.path.join('.'),
-            message: issue.message
-          }))
-        },
-        status.UNPROCESSABLE_ENTITY
-      )
+const createOpenApiRoute = createRoute({
+  method: 'post',
+  path: '/',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: MissionFromScratchCreationForm.schema
+        }
+      },
+      required: true
     }
+  },
+  responses: {
+    200: {
+      description: 'Return the newly created Mission.',
+      content: { 'application/json': { schema: MissionDto.schema } }
+    }
+  },
+  tags: [tags.missions.name]
+})
 
-    const { workflowBranch, environment, services, director, phases } = parsed.data
+app.openapi(createOpenApiRoute, async (context) => {
+  try {
+    const { missionCommandService } = context.get('context')
 
-    return new MissionFromScratchCreationForm(
+    const { workflowBranch, environment, services, director, phases } = context.req.valid('json')
+
+    const form = new MissionFromScratchCreationForm(
       workflowBranch,
       environment,
       services,
       director,
-      phases as PhaseCreationForm[]
+      phases.map(({ execution, steps }) => {
+        const stepCreationForms = steps.map(
+          ({ repository, workflowId, exposedWorkflowInputs, workflowInputs }) =>
+            new StepCreationForm(
+              repository,
+              workflowId,
+              exposedWorkflowInputs || undefined,
+              workflowInputs || undefined
+            )
+        )
+        return new PhaseCreationForm(execution, stepCreationForms)
+      })
     )
-  }),
-  async (context) => {
-    try {
-      const { missionCommandService } = context.get('context')
 
-      const form = context.req.valid('json')
+    const model = await dbConnection.transaction(async (tx) => {
+      return await missionCommandService.createFromScratch(form, tx)
+    })
 
-      const model = await dbConnection.transaction(async (tx) => {
-        return await missionCommandService.createFromScratch(form, tx)
-      })
-
-      return context.json(MissionDto.from(model))
-    } catch (error) {
-      console.error('Failed to create a new Mission.', { error })
-      throw new HTTPException(status.INTERNAL_SERVER_ERROR, {
-        message: 'Failed to create a new Mission.'
-      })
-    }
+    return context.json(MissionDto.from(model))
+  } catch (error) {
+    console.error('Failed to create a new Mission.', { error })
+    throw new HTTPException(status.INTERNAL_SERVER_ERROR, {
+      message: 'Failed to create a new Mission.'
+    })
   }
-)
+})
 
 export default app

@@ -1,5 +1,7 @@
 {
   "name": "@liftoff/api",
+  "version": "0.0.0",
+  "description": "The Liftoff API.",
   "type": "module",
   "scripts": {
     "dev": "bun --elide-lines=0 --hot src/index.ts",
@@ -16,7 +18,7 @@
     "drizzle-kit:migrate": "bun --bun .env.test drizzle-kit migrate"
   },
   "dependencies": {
-    "@hono/standard-validator": "^0.3.0",
+    "@hono/zod-openapi": "^1.5.1",
     "@liftoff/domain": "workspace:*",
     "@scalar/hono-api-reference": "^0.11.12",
     "drizzle-orm": "^1.0.0-rc.4",

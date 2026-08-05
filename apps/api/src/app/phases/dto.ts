@@ -1,44 +1,20 @@
-import { DomainError, Phase } from '@liftoff/domain'
+import {
+  DomainError,
+  ID_MAX_LENGTH,
+  Phase,
+  PhaseExecution,
+  PhaseStatus,
+  Step
+} from '@liftoff/domain'
+import { array, date, object, string, enum as zEnum } from 'zod'
 
+import { exampleValues } from '../shared/openapi'
 import { StepDto } from '../steps/dto'
 
 /**
  * Represents a Phase DTO.
  */
 export class PhaseDto {
-  /**
-   * The ID of this Phase.
-   */
-  readonly id: string
-  /**
-   * The status of this Phase.
-   */
-  readonly status: string
-  /**
-   * The execution method of this Phase.
-   */
-  readonly execution: string
-  /**
-   * The steps of this Phase.
-   */
-  readonly steps: StepDto[] | null
-  /**
-   * The moment this Phase was created.
-   */
-  readonly createdAt: Date
-  /**
-   * The moment this Phase was last updated.
-   */
-  readonly lastUpdatedAt: Date | null
-  /**
-   * The date this Phase was started.
-   */
-  readonly startedAt: Date | null
-  /**
-   * The date this Phase was completed.
-   */
-  readonly completedAt: Date | null
-
   /**
    * Creates a new {@link PhaseDto}.
    * @param model - The Phase to create this {@link PhaseDto} with.
@@ -68,6 +44,72 @@ export class PhaseDto {
   }
 
   /**
+   * Returns the schema for a valid {@link PhaseDto}.
+   */
+  static get schema() {
+    return object({
+      id: string()
+        .max(ID_MAX_LENGTH)
+        .openapi({ description: 'The ID of the Phase.', example: exampleValues.id }),
+      status: zEnum(PhaseStatus).openapi({
+        description: 'The status of the Phase.',
+        example: exampleValues.phase.status
+      }),
+      execution: zEnum(PhaseExecution).openapi({
+        description: 'The execution method of the Phase.',
+        example: exampleValues.phase.executionMethod
+      }),
+      steps: array(Step.schema).nullable().openapi({ description: 'The Steps of the Phase.' }),
+      createdAt: date().openapi({
+        description: 'The creation date of the Phase.',
+        example: exampleValues.date
+      }),
+      lastUpdatedAt: date()
+        .nullable()
+        .openapi({ description: 'The date of the last update of the Phase.', example: null }),
+      startedAt: date()
+        .nullable()
+        .openapi({ description: 'The start date of the Phase.', example: null }),
+      completedAt: date()
+        .nullable()
+        .openapi({ description: 'The date of completion of the Phase.', example: null })
+    })
+  }
+
+  /**
+   * The ID of this Phase.
+   */
+  readonly id: string
+  /**
+   * The status of this Phase.
+   */
+  readonly status: PhaseStatus
+  /**
+   * The execution method of this Phase.
+   */
+  readonly execution: PhaseExecution
+  /**
+   * The steps of this Phase.
+   */
+  readonly steps: StepDto[] | null
+  /**
+   * The moment this Phase was created.
+   */
+  readonly createdAt: Date
+  /**
+   * The moment this Phase was last updated.
+   */
+  readonly lastUpdatedAt: Date | null
+  /**
+   * The date this Phase was started.
+   */
+  readonly startedAt: Date | null
+  /**
+   * The date this Phase was completed.
+   */
+  readonly completedAt: Date | null
+
+  /**
    * Creates a new Phase DTO.
    * @param id - The ID of the Phase to create.
    * @param status - The status of the Phase to create.
@@ -81,8 +123,8 @@ export class PhaseDto {
    */
   private constructor(
     id: string,
-    status: string,
-    execution: string,
+    status: PhaseStatus,
+    execution: PhaseExecution,
     steps: StepDto[] | null,
     createdAt: Date,
     lastUpdatedAt: Date | null,

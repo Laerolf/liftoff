@@ -1,24 +1,40 @@
-import { Hono } from 'hono'
+import { createRoute, OpenAPIHono } from '@hono/zod-openapi'
 import { HTTPException } from 'hono/http-exception'
-import { validator } from 'hono/validator'
 import status from 'http-status'
+import { array } from 'zod'
 
 import { dbConnection } from '@/db'
 
 import { PhaseCreationForm } from '../phases/form'
-import { setRequestContext } from '../shared/middleware'
+import { AppContextMiddlewareVariables, setRequestContext } from '../shared/middleware'
+import { tags } from '../shared/openapi'
+import { StepCreationForm } from '../steps/form'
 
 import { FlightPlanDto } from './dto'
 import { FlightPlanCreationForm } from './form'
 
-const app = new Hono()
+const app = new OpenAPIHono<AppContextMiddlewareVariables>()
 
-app.get('/', setRequestContext, async (context) => {
+app.use(setRequestContext)
+
+const getAllOpenApiRoute = createRoute({
+  method: 'get',
+  path: '/',
+  responses: {
+    [status.OK]: {
+      description: 'Return all existing Flight Plans.',
+      content: { 'application/json': { schema: array(FlightPlanDto.schema) } }
+    }
+  },
+  tags: [tags.flightPlans.name]
+})
+
+app.openapi(getAllOpenApiRoute, async (context) => {
   try {
     const { flightPlanQueryService } = context.get('context')
 
     const flightPlans = (await flightPlanQueryService.getAll(dbConnection)).map(FlightPlanDto.from)
-    return context.json(flightPlans)
+    return context.json(flightPlans, status.OK)
   } catch (error) {
     console.error('Failed to get all Flight Plans.', { error })
     throw new HTTPException(status.INTERNAL_SERVER_ERROR, {
@@ -27,53 +43,64 @@ app.get('/', setRequestContext, async (context) => {
   }
 })
 
-app.post(
-  '/',
-  setRequestContext,
-  validator('json', (value, context) => {
-    const parsed = FlightPlanCreationForm.schema.safeParse(value)
-
-    if (!parsed.success) {
-      return context.json(
-        {
-          message: 'Invalid request body',
-          errors: parsed.error.issues.map((issue) => ({
-            field: issue.path.join('.'),
-            message: issue.message
-          }))
-        },
-        status.UNPROCESSABLE_ENTITY
-      )
+const createOpenApiRoute = createRoute({
+  method: 'post',
+  path: '/',
+  request: {
+    body: {
+      content: {
+        'application/json': {
+          schema: FlightPlanCreationForm.schema
+        }
+      },
+      required: true
     }
+  },
+  responses: {
+    [status.OK]: {
+      description: 'Return the newly created Flight Plan.',
+      content: { 'application/json': { schema: FlightPlanDto.schema } }
+    }
+  },
+  tags: [tags.flightPlans.name]
+})
 
-    const { name, workflowBranch, environment, services, phases } = parsed.data
+app.openapi(createOpenApiRoute, async (context) => {
+  try {
+    const { flightPlanCommandService } = context.get('context')
 
-    return new FlightPlanCreationForm(
+    const { name, workflowBranch, environment, services, phases } = context.req.valid('json')
+
+    const form = new FlightPlanCreationForm(
       name,
       workflowBranch,
       environment,
       services,
-      phases as PhaseCreationForm[]
+      phases.map(({ execution, steps }) => {
+        const stepCreationForms = steps.map(
+          ({ repository, workflowId, exposedWorkflowInputs, workflowInputs }) =>
+            new StepCreationForm(
+              repository,
+              workflowId,
+              exposedWorkflowInputs || undefined,
+              workflowInputs || undefined
+            )
+        )
+        return new PhaseCreationForm(execution, stepCreationForms)
+      })
     )
-  }),
-  async (context) => {
-    try {
-      const { flightPlanCommandService } = context.get('context')
 
-      const form = context.req.valid('json')
+    const model = await dbConnection.transaction(async (tx) => {
+      return await flightPlanCommandService.create(form, tx)
+    })
 
-      const model = await dbConnection.transaction(async (tx) => {
-        return await flightPlanCommandService.create(form, tx)
-      })
-
-      return context.json(FlightPlanDto.from(model))
-    } catch (error) {
-      console.error('Failed to create a new Flight Plan.', { error })
-      throw new HTTPException(status.INTERNAL_SERVER_ERROR, {
-        message: 'Failed to create a new Flight Plan.'
-      })
-    }
+    return context.json(FlightPlanDto.from(model), status.OK)
+  } catch (error) {
+    console.error('Failed to create a new Flight Plan.', { error })
+    throw new HTTPException(status.INTERNAL_SERVER_ERROR, {
+      message: 'Failed to create a new Flight Plan.'
+    })
   }
-)
+})
 
 export default app
