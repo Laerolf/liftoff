@@ -1,4 +1,4 @@
-import { InferSelectModel, InferInsertModel } from 'drizzle-orm'
+import { InferSelectModel, InferInsertModel, eq } from 'drizzle-orm'
 
 import { DatabaseConnection } from '@/db'
 import { phasesTable, phaseStepsTable } from '@/db/schema'
@@ -92,6 +92,7 @@ export class PhaseRepository {
           dbConnection
             .update(phasesTable)
             .set(model)
+            .where(eq(phasesTable.id, model.id))
             .returning()
             .then((result) => result[0])
         )

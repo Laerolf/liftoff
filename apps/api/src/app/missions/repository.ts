@@ -1,4 +1,4 @@
-import { InferSelectModel, InferInsertModel } from 'drizzle-orm'
+import { InferSelectModel, InferInsertModel, eq } from 'drizzle-orm'
 
 import { DatabaseConnection } from '@/db'
 import { missionPhasesTable, missionsTable } from '@/db/schema'
@@ -95,7 +95,13 @@ export class MissionRepository {
     dbConnection: DatabaseConnection
   ): Promise<MissionInsertEntity> {
     try {
-      return (await dbConnection.update(missionsTable).set(model).returning())[0]
+      return (
+        await dbConnection
+          .update(missionsTable)
+          .set(model)
+          .where(eq(missionsTable.id, model.id))
+          .returning()
+      )[0]
     } catch (error) {
       console.error('Failed to update a Mission entity in the database.', error)
       throw new Error('Failed to update a Mission entity in the database.', {

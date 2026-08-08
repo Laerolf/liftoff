@@ -1,4 +1,4 @@
-import { InferSelectModel, InferInsertModel } from 'drizzle-orm'
+import { InferSelectModel, InferInsertModel, eq } from 'drizzle-orm'
 
 import { DatabaseConnection } from '@/db'
 import { flightPlansTable, flightPlanPhasesTable } from '@/db/schema'
@@ -91,7 +91,13 @@ export class FlightPlanRepository {
     dbConnection: DatabaseConnection
   ): Promise<FlightPlanInsertEntity> {
     try {
-      return (await dbConnection.update(flightPlansTable).set(model).returning())[0]
+      return (
+        await dbConnection
+          .update(flightPlansTable)
+          .set(model)
+          .where(eq(flightPlansTable.id, model.id))
+          .returning()
+      )[0]
     } catch (error) {
       console.error('Failed to update a Flight Plan entity in the database.', error)
       throw new Error('Failed to update a Flight Plan entity in the database.', {
