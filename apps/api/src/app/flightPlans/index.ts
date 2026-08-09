@@ -13,7 +13,22 @@ import { StepCreationForm } from '../steps/form'
 import { FlightPlanDto } from './dto'
 import { FlightPlanCreationForm } from './form'
 
-const app = new OpenAPIHono<AppContextMiddlewareVariables>()
+const app = new OpenAPIHono<AppContextMiddlewareVariables>({
+  defaultHook: (result, context) => {
+    if (!result.success) {
+      return context.json(
+        {
+          message: 'Invalid request body',
+          errors: result.error.issues.map((issue) => ({
+            field: issue.path.join('.'),
+            message: issue.message
+          }))
+        },
+        status.UNPROCESSABLE_ENTITY
+      )
+    }
+  }
+})
 
 app.use(setRequestContext)
 

@@ -12,6 +12,7 @@
     "lint": "bun --filter='*' run lint",
     "format": "bun --filter='*' run format",
     "test": "bun --filter='*' run test",
+    "test:ui": "bun --filter='*' run test:ui",
     "test:unit": "bun --filter='*' run test:unit",
     "test:integration": "bun --filter='*' run test:integration",
     "test:ci": "bun --elide-lines=0 --filter='*' run test:ci",
@@ -26,6 +27,7 @@
   },
   "catalog": {
     "@types/bun": "^1.0.0",
+    "bun-test-ui": "^0.3.0",
     "oxfmt": "^0.59.0",
     "oxlint": "^1.0.0",
     "oxlint-tsgolint": "^0.25.0",

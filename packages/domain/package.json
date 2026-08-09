@@ -15,6 +15,7 @@
     "lint": "oxlint --fix",
     "format": "oxfmt",
     "test": "bun test --watch --only-failures",
+    "test:ui": "bunx bun-test-ui",
     "test:unit": "bun test --filter test/unit --only-failures",
     "test:ci": "bun test --only-failures",
     "typecheck": "tsc --noEmit",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@types/bun": "catalog:",
+    "bun-test-ui": "catalog:",
     "typescript": "catalog:"
   }
 }
