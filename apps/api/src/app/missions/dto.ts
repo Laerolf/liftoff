@@ -97,7 +97,7 @@ export class MissionDto {
       completedAt: date()
         .nullable()
         .openapi({ description: 'The date of completion of the Mission.', example: null })
-    })
+    }).openapi('MissionDto')
   }
 
   /**

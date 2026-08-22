@@ -20,7 +20,7 @@ export class PhaseCreationForm {
       steps: array(StepCreationForm.schema).openapi({
         description: 'The Steps to create for the Phase to create.'
       })
-    })
+    }).openapi('PhaseCreationForm')
   }
 
   execution: PhaseExecution

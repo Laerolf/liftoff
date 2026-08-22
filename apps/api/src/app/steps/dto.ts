@@ -45,34 +45,26 @@ export class StepDto {
       id: string()
         .max(ID_MAX_LENGTH)
         .openapi({ description: 'The ID of the Step.', example: exampleValues.id }),
-      repository: string()
-        .max(STRING_MAX_LENGTH)
-        .openapi({
-          description: 'The targeted GitHub repository of the Step.',
-          example: exampleValues.repositoryName
-        }),
-      workflowId: string()
-        .max(STRING_MAX_LENGTH)
-        .openapi({
-          description: 'The targeted GitHub workflow of the Step.',
-          example: exampleValues.workflowId
-        }),
+      repository: string().max(STRING_MAX_LENGTH).openapi({
+        description: 'The targeted GitHub repository of the Step.',
+        example: exampleValues.repositoryName
+      }),
+      workflowId: string().max(STRING_MAX_LENGTH).openapi({
+        description: 'The targeted GitHub workflow of the Step.',
+        example: exampleValues.workflowId
+      }),
       workflowOutcome: zEnum(StepStatus).openapi({
         description: 'The GitHub workflow outcome of the Step.',
         example: exampleValues.step.workflowOutcome
       }),
-      exposedWorkflowInputs: object()
-        .nullable()
-        .openapi({
-          description: 'The exposed GitHub workflow inputs of the Step.',
-          example: exampleValues.step.exposedWorkflowInputs
-        }),
-      workflowInputs: object()
-        .nullable()
-        .openapi({
-          description: 'All GitHub workflow inputs of the Step.',
-          example: exampleValues.step.workflowInputs
-        }),
+      exposedWorkflowInputs: object().nullable().openapi({
+        description: 'The exposed GitHub workflow inputs of the Step.',
+        example: exampleValues.step.exposedWorkflowInputs
+      }),
+      workflowInputs: object().nullable().openapi({
+        description: 'All GitHub workflow inputs of the Step.',
+        example: exampleValues.step.workflowInputs
+      }),
       createdAt: date().openapi({
         description: 'The creation date of the Step.',
         example: exampleValues.date
@@ -86,7 +78,7 @@ export class StepDto {
       completedAt: date()
         .nullable()
         .openapi({ description: 'The completion date of the Step.', example: null })
-    })
+    }).openapi('StepDto')
   }
 
   /**

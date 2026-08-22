@@ -71,7 +71,7 @@ export class FlightPlanDto {
         description: 'The date of the last update of the Flight Plan.',
         example: null
       })
-    })
+    }).openapi('FlightPlanDto')
   }
 
   /**1

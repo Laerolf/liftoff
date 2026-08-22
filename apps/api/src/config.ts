@@ -1,4 +1,11 @@
 /**
+ * The expected CORS configuration.
+ */
+type CorsConfig = {
+  origin: string[]
+}
+
+/**
  * The expected environment configuration.
  */
 type EnvironmentConfig = {
@@ -14,15 +21,20 @@ type EnvironmentConfig = {
    * Use TLS?
    */
   useTls: boolean
+  /**
+   * The CORS configuration.
+   */
+  cors: CorsConfig
 }
 
 const DEFAULT_PORT = 3000
 
 /**
- * Verifies if an environment string variable exists and parses it to a string.
- * @param key - The key of the environment variable.
+ * Parses a required environment variable to a string.
+ * @param key - The key of the environment variable to parse.
+ * @throws {Error} - When the expected environment variable doesn't exist.
  */
-function verifyRequiredEnvironmentConfigStringEntry(key: string): string {
+function parseRequiredEnvironmentConfigString(key: string): string {
   const value = process.env[key]
 
   if (!value) {
@@ -33,10 +45,32 @@ function verifyRequiredEnvironmentConfigStringEntry(key: string): string {
 }
 
 /**
- * Verifies if an environment boolean variable exists and parses it to a number.
- * @param key - The key of the environment variable.
+ * Parses a required environment variable to a string array.
+ * @param key - The key of the environment variable to parse.
+ * @throws {Error} - When the expected environment variable doesn't exist.
  */
-function verifyEnvironmentConfigNumberEntry(key: string): number | undefined {
+function parseRequiredEnvironmentConfigStringArray(key: string): string[] {
+  try {
+    const value = process.env[key]
+
+    if (!value) {
+      throw new Error(`Failed to find a required string environment variable: '${key}'`)
+    }
+
+    return JSON.parse(value)
+  } catch (error) {
+    throw new Error(
+      `Failed to parse the environment key '${key}' to a string array: ${(error as Error).message}`,
+      { cause: error }
+    )
+  }
+}
+
+/**
+ * Parses an environment variable to a number.
+ * @param key - The key of the environment variable to parse.
+ */
+function parseEnvironmentConfigNumber(key: string): number | undefined {
   const value = process.env[key]
 
   if (!value) {
@@ -48,10 +82,10 @@ function verifyEnvironmentConfigNumberEntry(key: string): number | undefined {
 }
 
 /**
- * Verifies if an environment boolean variable exists and parses it to a boolean.
- * @param key - The key of the environment variable.
+ * Parses an environment variable to a boolean.
+ * @param key - The key of the environment variable to parse.
  */
-function verifyEnvironmentConfigBooleanEntry(key: string): boolean {
+function parseEnvironmentConfigBoolean(key: string): boolean {
   return process.env[key] == 'true'
 }
 
@@ -61,9 +95,12 @@ function verifyEnvironmentConfigBooleanEntry(key: string): boolean {
 export function useEnvConfig(): EnvironmentConfig {
   try {
     return {
-      port: verifyEnvironmentConfigNumberEntry('PORT') ?? DEFAULT_PORT,
-      dbUrl: verifyRequiredEnvironmentConfigStringEntry('DATABASE_URL'),
-      useTls: verifyEnvironmentConfigBooleanEntry('USE_TLS')
+      port: parseEnvironmentConfigNumber('PORT') ?? DEFAULT_PORT,
+      dbUrl: parseRequiredEnvironmentConfigString('DATABASE_URL'),
+      useTls: parseEnvironmentConfigBoolean('USE_TLS'),
+      cors: {
+        origin: parseRequiredEnvironmentConfigStringArray('CORS_ORIGIN')
+      }
     }
   } catch (error) {
     console.error('Failed to parse environment configuration.', { cause: error })

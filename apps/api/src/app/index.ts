@@ -1,8 +1,10 @@
 import { OpenAPIHono } from '@hono/zod-openapi'
 import { Scalar } from '@scalar/hono-api-reference'
+import { cors } from 'hono/cors'
 
 import FlightPlans from '@/app/flightPlans'
 import Missions from '@/app/missions'
+import { useEnvConfig } from '@/config'
 
 import { name, description, version } from '../../package.json'
 
@@ -10,8 +12,19 @@ import { tags } from './shared/openapi'
 
 const app = new OpenAPIHono()
 
-app.route('/api/flight-plans', FlightPlans)
-app.route('/api/missions', Missions)
+const config = useEnvConfig()
+
+app.use(
+  '/api/*',
+  cors({
+    origin: config.cors.origin,
+    allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+  })
+)
+
+app.route('/api/flight-plans', FlightPlans).route('/api/missions', Missions)
 
 app.doc('/openapi.json', {
   openapi: '3.1.0',

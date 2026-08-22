@@ -1,4 +1,4 @@
-import { ID_MAX_LENGTH } from '@liftoff/domain'
+import { STRING_MAX_LENGTH } from '@liftoff/domain'
 import { object, string, array } from 'zod'
 
 import { PhaseCreationForm } from '../phases/form'
@@ -13,32 +13,26 @@ export class FlightPlanCreationForm {
    */
   static get schema() {
     return object({
-      name: string()
-        .max(ID_MAX_LENGTH)
-        .openapi({
-          description: 'The name of the Flight Plan to create.',
-          example: exampleValues.flightPlan.name
-        }),
-      workflowBranch: string()
-        .max(ID_MAX_LENGTH)
-        .openapi({
-          description: 'The GitHub workflow branch of the Flight Plan to create.',
-          example: exampleValues.branchName
-        }),
-      environment: string()
-        .max(ID_MAX_LENGTH)
-        .openapi({
-          description: 'The targeted GitHub environment of the Flight Plan to create.',
-          example: exampleValues.environmentName
-        }),
-      services: array(string().max(ID_MAX_LENGTH)).openapi({
+      name: string().max(STRING_MAX_LENGTH).openapi({
+        description: 'The name of the Flight Plan to create.',
+        example: exampleValues.flightPlan.name
+      }),
+      workflowBranch: string().max(STRING_MAX_LENGTH).openapi({
+        description: 'The GitHub workflow branch of the Flight Plan to create.',
+        example: exampleValues.branchName
+      }),
+      environment: string().max(STRING_MAX_LENGTH).openapi({
+        description: 'The targeted GitHub environment of the Flight Plan to create.',
+        example: exampleValues.environmentName
+      }),
+      services: array(string().max(STRING_MAX_LENGTH)).openapi({
         description: 'The targeted services of the Flight Plan to create.',
         example: exampleValues.serviceIds
       }),
       phases: array(PhaseCreationForm.schema).openapi({
         description: 'The Phases to create for the Flight Plan to create.'
       })
-    })
+    }).openapi('FlightPlanCreationForm')
   }
 
   readonly name: string

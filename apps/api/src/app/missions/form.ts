@@ -1,4 +1,4 @@
-import { ID_MAX_LENGTH } from '@liftoff/domain'
+import { STRING_MAX_LENGTH } from '@liftoff/domain'
 import { object, string, array } from 'zod'
 
 import { PhaseCreationForm } from '../phases/form'
@@ -13,26 +13,26 @@ export class MissionFromScratchCreationForm {
    */
   static get schema() {
     return object({
-      workflowBranch: string().max(ID_MAX_LENGTH).openapi({
+      workflowBranch: string().max(STRING_MAX_LENGTH).openapi({
         description: 'The targeted GitHub workflow branch of the Mission to create.',
         example: exampleValues.branchName
       }),
-      environment: string().max(ID_MAX_LENGTH).openapi({
+      environment: string().max(STRING_MAX_LENGTH).openapi({
         description: 'The targeted GitHub environment of the Mission to create.',
         example: exampleValues.environmentName
       }),
-      services: array(string().max(ID_MAX_LENGTH)).openapi({
+      services: array(string().max(STRING_MAX_LENGTH)).openapi({
         description: 'The targeted services of the Mission to create.',
         example: exampleValues.serviceIds
       }),
-      director: string().max(ID_MAX_LENGTH).openapi({
+      director: string().max(STRING_MAX_LENGTH).openapi({
         description: 'The name of the director of the Mission to create.',
         example: exampleValues.director.name
       }),
       phases: array(PhaseCreationForm.schema).openapi({
         description: 'The Phases to create for the Flight Plan to create.'
       })
-    })
+    }).openapi('MissionFromScratchCreationForm')
   }
 
   readonly workflowBranch: string

@@ -1,4 +1,4 @@
-import { ID_MAX_LENGTH } from '@liftoff/domain'
+import { STRING_MAX_LENGTH } from '@liftoff/domain'
 import { object, string } from 'zod'
 
 import { exampleValues } from '../shared/openapi'
@@ -12,11 +12,11 @@ export class StepCreationForm {
    */
   static get schema() {
     return object({
-      repository: string().max(ID_MAX_LENGTH).openapi({
+      repository: string().max(STRING_MAX_LENGTH).openapi({
         description: 'The targeted GitHub repository of the Step to create.',
         example: exampleValues.repositoryName
       }),
-      workflowId: string().max(ID_MAX_LENGTH).openapi({
+      workflowId: string().max(STRING_MAX_LENGTH).openapi({
         description: 'The targeted GitHub workflow ID of the Step to create.',
         example: exampleValues.workflowId
       }),
@@ -28,7 +28,7 @@ export class StepCreationForm {
         description: 'All inputs of the targeted GitHub workflow of the Step to create.',
         example: exampleValues.step.workflowInputs
       })
-    })
+    }).openapi('StepCreationForm')
   }
 
   repository: string

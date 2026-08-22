@@ -73,7 +73,7 @@ export class PhaseDto {
       completedAt: date()
         .nullable()
         .openapi({ description: 'The date of completion of the Phase.', example: null })
-    })
+    }).openapi('PhaseDto')
   }
 
   /**
